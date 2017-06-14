@@ -2,8 +2,8 @@
 // Created on 24 May.
 // ===========================================
 
-#ifndef CROSSAUDIOSTREAMMANAGER_CASM_HPP
-#define CROSSAUDIOSTREAMMANAGER_CASM_HPP
+#ifndef CASM_CASM_HPP
+#define CASM_CASM_HPP
 
 #include "CASMconfig.hpp"
 
@@ -45,4 +45,4 @@ typedef struct {
 
 } // end of namespace CASM
 
-#endif //CROSSAUDIOSTREAMMANAGER_CASM_HPP
+#endif //CASM_CASM_HPP

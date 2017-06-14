@@ -2,21 +2,20 @@
 // Created on 22 May.
 // ===========================================
 
-#ifndef CROSSAUDIOSTREAMMANAGER_DEVICEMANAGER_HPP
-#define CROSSAUDIOSTREAMMANAGER_DEVICEMANAGER_HPP
+#ifndef CASM_DEVICEMANAGER_HPP
+#define CASM_DEVICEMANAGER_HPP
 
-//WIN MM
-#include "device_manager_windows_wasapi.hpp"
-typedef DeviceManagerWindowsMMD DeviceManagerAbstract;
-//
+#include "device_manager_base.hpp"
 
 class DeviceManager {
 public:
-    DeviceManager() {
-        deviceManager = new DeviceManagerAbstract;
-    }
+    DeviceManager();
+    int update();
+    uint_fast32_t getDeviceCount();
+    Device getDevice(uint_fast32_t index);
+
 private:
-    DeviceManagerBase* deviceManager;
+    std::shared_ptr<DeviceManagerBase> deviceManager;
 };
 
-#endif //CROSSAUDIOSTREAMMANAGER_DEVICEMANAGER_HPP
+#endif //CASM_DEVICEMANAGER_HPP

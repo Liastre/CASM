@@ -8,6 +8,7 @@
 #include "device_base.hpp"
 #include <cassert>
 
+typedef IMMDevice DeviceHandler;
 
 class DeviceWindowsWASAPI : public DeviceTemplate<IMMDevice, IAudioClient*> {
 public:

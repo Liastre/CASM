@@ -42,7 +42,7 @@ int DeviceManagerWindowsWASAPI::update() {
     for (uint32_t deviceIndex=0; deviceIndex<deviceCount; deviceIndex++)
     {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList[deviceIndex] = DeviceWindowsWASAPI(device, CASM::CAPTURE);
+        deviceList[deviceIndex] = Device(device, CASM::CAPTURE);
     }
 
     deviceEnumerator->Release();

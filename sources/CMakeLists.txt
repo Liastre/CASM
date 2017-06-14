@@ -7,17 +7,24 @@ set(CMAKE_DEBUG_POSTFIX d)
 #======== LIBRARY SOURCES ==========
 #===================================
 file(GLOB library_sources
+    buffer.cpp
+    device.cpp
     wave_properties.cpp
+    device_manager.cpp
+    device_manager_base.cpp
+    file.cpp
+
+    device_windows_wasapi.cpp
     device_manager_windows_wasapi.cpp
     )
 
 #===================================
 #============== BUILD ==============
 #===================================
-if(ANTTWEAKBAR_SHARED)
-    set(ANTTWEAKBAR_BUILD_FLAG SHARED)
+if(CASM_STATIC)
+    set(CASM_BUILD_FLAG STATIC)
 else()
-    set(ANTTWEAKBAR_BUILD_FLAG STATIC)
+    set(CASM_BUILD_FLAG SHARED)
 endif()
 
-add_library(${ANTTWEAKBAR_LIBRARY} ${ANTTWEAKBAR_BUILD_FLAG} ${library_sources})
+add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${library_sources})

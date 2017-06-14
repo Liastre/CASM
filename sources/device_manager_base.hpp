@@ -6,31 +6,24 @@
 #define CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
 
 #include "wave_properties.hpp"
-#include "device_base.hpp"
+#include "device.hpp"
 #include <CASM/CASM.hpp>
 #include <vector>
 #include <string>
 
 
-template <class TDeviceBaseDerived>
 class DeviceManagerBase {
 public:
-    DeviceManagerBase() {};
-    virtual ~DeviceManagerBase() {};
+    DeviceManagerBase();
+    virtual ~DeviceManagerBase();
+
+    Device getDevice(uint_fast32_t index);
+    uint_fast32_t getDeviceCount();
+
     virtual int update() = 0;
-    // TODO: copy constructor
-    TDeviceBaseDerived getDevice(uint_fast32_t index) {
-        if (index<deviceCount) {
-            return deviceList[index];
-        }
-        return TDeviceBaseDerived();
-    };
-    uint_fast32_t getDeviceCount() {
-        return deviceCount;
-    }
 
 protected:
-    std::vector<TDeviceBaseDerived> deviceList;
+    std::vector<Device> deviceList;
     uint_fast32_t deviceCount;
 };
 

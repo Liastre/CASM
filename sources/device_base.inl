@@ -6,16 +6,11 @@ DeviceTemplate<TDeviceHandler, TAudioStream>::DeviceTemplate() {
 }
 
 template <class TDeviceHandler, class TAudioStream>
-DeviceTemplate<TDeviceHandler, TAudioStream>::DeviceTemplate(DeviceHandler *deviceHandler, CASM::DeviceType deviceType) : DeviceTemplate(){
+DeviceTemplate<TDeviceHandler, TAudioStream>::DeviceTemplate(TDeviceHandler *deviceHandler, CASM::DeviceType deviceType) : DeviceTemplate(){
     handler = deviceHandler;
     type = deviceType;
 }
 
 template <class TDeviceHandler, class TAudioStream>
 DeviceTemplate<TDeviceHandler, TAudioStream>::~DeviceTemplate() {
-}
-
-template <class TDeviceHandler, class TAudioStream>
-std::wstring DeviceTemplate<TDeviceHandler, TAudioStream>::getDescpiption() {
-    return description;
 }

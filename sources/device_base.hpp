@@ -20,6 +20,9 @@ public:
     WaveProperties getDeviceWaveProperties() {
         return waveProperties;
     };
+    std::wstring getDescpiption() {
+        return description;
+    };
 
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
@@ -39,13 +42,11 @@ protected:
 template <class TDeviceHandler, class TAudioStream>
 class DeviceTemplate : public DeviceBase {
 public:
-    typedef TDeviceHandler DeviceHandler;
     typedef TAudioStream AudioStream;
 
     DeviceTemplate();
-    DeviceTemplate(DeviceHandler *handler, CASM::DeviceType deviceType);
+    DeviceTemplate(TDeviceHandler *handler, CASM::DeviceType deviceType);
     virtual ~DeviceTemplate();
-    std::wstring getDescpiption();
 
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
@@ -53,7 +54,7 @@ public:
     virtual int write(Buffer data)=0;
 
 protected:
-    DeviceHandler *handler;
+    TDeviceHandler *handler;
     AudioStream stream;
 };
 

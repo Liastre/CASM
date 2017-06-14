@@ -1,9 +1,9 @@
 // =============== DESCRIPTION ===============
-// Created on 22 May.
 // ===========================================
 
 #include <cassert>
 #include "buffer.hpp"
+
 
 Buffer::Buffer() {
 }
