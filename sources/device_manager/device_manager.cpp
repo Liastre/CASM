@@ -1,8 +1,8 @@
 // =============== DESCRIPTION ===============
 // ===========================================
 
-#include "device_manager.hpp"
-#include "device_manager_windows_wasapi.hpp"
+#include <CASM/device_manager.hpp>
+#include "windows/device_manager_windows_wasapi.hpp"
 
 DeviceManager::DeviceManager() {
     deviceManager = std::make_shared<DeviceManagerWindowsWASAPI>();

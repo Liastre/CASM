@@ -2,7 +2,7 @@
 // Created on 22 May.
 // ===========================================
 
-#include "wave_properties.hpp"
+#include <CASM/core/wave_properties.hpp>
 
 WaveProperties::WaveProperties() {
     channelsCount = 0;

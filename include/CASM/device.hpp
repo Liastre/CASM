@@ -7,13 +7,13 @@
 #ifndef CROSSAUDIOSTREAMMANAGER_DEVICE_HPP
 #define CROSSAUDIOSTREAMMANAGER_DEVICE_HPP
 
-#include "device_windows_wasapi.hpp"
+#include "CASM/device_manager/device_base.hpp"
 
 
 class Device {
 public:
     Device();
-    Device(DeviceHandler *deviceHandler, CASM::DeviceType deviceType);
+    Device(void* deviceHandler, CASM::DeviceType deviceType);
     ~Device();
 
     int open(CASM::Access access, std::chrono::duration<double> fragmentDuration);

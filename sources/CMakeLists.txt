@@ -7,15 +7,15 @@ set(CMAKE_DEBUG_POSTFIX d)
 #======== LIBRARY SOURCES ==========
 #===================================
 file(GLOB library_sources
-    buffer.cpp
-    device.cpp
-    wave_properties.cpp
-    device_manager.cpp
-    device_manager_base.cpp
+    core/buffer.cpp
+    device_manager/device.cpp
+    core/wave_properties.cpp
+    device_manager/device_manager.cpp
+    device_manager/device_manager_base.cpp
     file.cpp
 
-    device_windows_wasapi.cpp
-    device_manager_windows_wasapi.cpp
+    device_manager/windows/device_windows_wasapi.cpp
+    device_manager/windows/device_manager_windows_wasapi.cpp
     )
 
 #===================================

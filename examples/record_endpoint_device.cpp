@@ -1,7 +1,6 @@
 #include <CASM/CASM.hpp>
-#include "sources/device.hpp"
-#include "sources/device_manager.hpp"
-#include "sources/file.hpp"
+#include <CASM/device_manager.hpp>
+#include <CASM/file.hpp>
 #include <iostream>
 
 

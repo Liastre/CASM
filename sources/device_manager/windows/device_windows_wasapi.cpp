@@ -11,7 +11,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
     assert(hr==S_OK);*/
 }
 
-DeviceWindowsWASAPI::DeviceWindowsWASAPI(DeviceHandler *device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice, IAudioClient*>::DeviceTemplate(device, deviceType){
+DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice>::DeviceTemplate(device, deviceType){
     HRESULT hr;
     LPWSTR deviceId;
     IPropertyStore* devicePropertyStore;
@@ -22,7 +22,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(DeviceHandler *device, CASM::DeviceType
     PropVariantInit(&deviceProperty);
 
     // read device properties
-    hr = device->OpenPropertyStore(STGM_READ, &devicePropertyStore);
+    hr = handler->OpenPropertyStore(STGM_READ, &devicePropertyStore);
     assert(hr==S_OK);
     hr = devicePropertyStore->GetValue(PKEY_AudioEngine_DeviceFormat, &deviceProperty);
     assert(hr==S_OK);
@@ -31,13 +31,13 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(DeviceHandler *device, CASM::DeviceType
     devicePropertyStore->GetValue(PKEY_Device_DeviceDesc, &deviceProperty);
     name = deviceProperty.pwszVal;
 
-    hr = device->OpenPropertyStore(STGM_READ, &devicePropertyStore);
+    hr = handler->OpenPropertyStore(STGM_READ, &devicePropertyStore);
     assert(hr==S_OK);
     hr = devicePropertyStore->GetValue(PKEY_Device_FriendlyName, &deviceProperty);
     assert(hr==S_OK);
     description = std::wstring(deviceProperty.pwszVal);
 
-    hr = device->GetId(&deviceId);
+    hr = handler->GetId(&deviceId);
     assert(hr==S_OK);
 
     // clear
@@ -54,32 +54,42 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     // checks
     if (active) {
         throw std::logic_error("Device already in use");
-        return 1;
     }
     if (handler==nullptr) {
         throw std::logic_error("Device handler is nullptr");
-        return 1;
     }
 
-    fragmentDurationRequested = (uint64_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(fragmentDuration).count()/100);
+    // variables
     HRESULT hr;
-    WAVEFORMATEX *deviceMixFormat = NULL;
-    // REFTIMES per second
+    WAVEFORMATEX *deviceMixFormat = nullptr;
+    DWORD streamFlags;
     uint64_t fragmentDurationActual;
     uint32_t fragmentFrameCount;
+
+    fragmentDurationRequested = (uint64_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(fragmentDuration).count()/100);
+    switch(type) {
+    case CASM::RENDER:
+        streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
+        break;
+    case CASM::CAPTURE:
+        streamFlags = 0;
+        break;
+    default:
+        throw std::logic_error("Unknown device type");
+    }
 
     // creates COM object
     hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&stream);
     assert(hr==S_OK);
 
     hr = stream->GetMixFormat(&deviceMixFormat);
-    WaveProperties mixWaveProperties (deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    WaveProperties mixWaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
     assert(hr==S_OK);
     switch (access) {
     case CASM::READ:
         hr = stream->Initialize(
                 AUDCLNT_SHAREMODE_SHARED,
-                0,//AUDCLNT_STREAMFLAGS_LOOPBACK,
+                streamFlags,
                 fragmentDurationRequested,
                 0,
                 deviceMixFormat,

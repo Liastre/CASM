@@ -6,7 +6,7 @@
 #define CROSSAUDIOSTREAMMANAGER_DEVICE_BASE_HPP
 
 #include <CASM/CASM.hpp>
-#include "buffer.hpp"
+#include <CASM/core/buffer.hpp>
 #include <string>
 
 class DeviceBase {
@@ -39,13 +39,11 @@ protected:
     CASM::DeviceType type;
 };
 
-template <class TDeviceHandler, class TAudioStream>
+template <class TDeviceHandler>
 class DeviceTemplate : public DeviceBase {
 public:
-    typedef TAudioStream AudioStream;
-
     DeviceTemplate();
-    DeviceTemplate(TDeviceHandler *handler, CASM::DeviceType deviceType);
+    DeviceTemplate(void* handler, CASM::DeviceType deviceType);
     virtual ~DeviceTemplate();
 
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
@@ -55,7 +53,6 @@ public:
 
 protected:
     TDeviceHandler *handler;
-    AudioStream stream;
 };
 
 #include "device_base.inl"

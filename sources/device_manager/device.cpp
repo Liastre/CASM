@@ -1,9 +1,11 @@
-#include "device.hpp"
+#include "CASM/device.hpp"
+#include "windows/device_windows_wasapi.hpp"
+
 
 Device::Device(){
 }
 
-Device::Device(DeviceHandler *deviceHandler, CASM::DeviceType deviceType){
+Device::Device(void* deviceHandler, CASM::DeviceType deviceType){
 device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
 }
 

@@ -1,6 +1,7 @@
-#include "device_manager_base.hpp"
+#include "CASM/device_manager/device_manager_base.hpp"
 
 DeviceManagerBase::DeviceManagerBase() {
+    deviceCount = 0;
 };
 
 DeviceManagerBase::~DeviceManagerBase() {
@@ -10,7 +11,7 @@ Device DeviceManagerBase::getDevice(uint_fast32_t index) {
     if (index<deviceCount) {
         return deviceList[index];
     }
-    return Device();
+    throw std::logic_error("Device index requested out of range");
 };
 
 uint_fast32_t DeviceManagerBase::getDeviceCount() {

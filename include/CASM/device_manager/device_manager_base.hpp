@@ -5,9 +5,8 @@
 #ifndef CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
 #define CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
 
-#include "wave_properties.hpp"
-#include "device.hpp"
-#include <CASM/CASM.hpp>
+#include <CASM/device.hpp>
+#include "CASM/core/wave_properties.hpp"
 #include <vector>
 #include <string>
 

@@ -5,9 +5,7 @@
 #ifndef CASM_DEVICE_MANAGER_WINDOWS_WASAPI_HPP
 #define CASM_DEVICE_MANAGER_WINDOWS_WASAPI_HPP
 
-#include "windows_wasapi.hpp"
-#include "device_manager_base.hpp"
-#include "device.hpp"
+#include <CASM/device_manager/device_manager_base.hpp>
 
 
 class DeviceManagerWindowsWASAPI : public DeviceManagerBase {

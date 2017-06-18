@@ -1,9 +1,8 @@
 // =============== DESCRIPTION ===============
 // ===========================================
 
+#include <CASM/core/buffer.hpp>
 #include <cassert>
-#include "buffer.hpp"
-
 
 Buffer::Buffer() {
 }

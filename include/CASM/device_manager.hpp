@@ -5,7 +5,7 @@
 #ifndef CASM_DEVICEMANAGER_HPP
 #define CASM_DEVICEMANAGER_HPP
 
-#include "device_manager_base.hpp"
+#include <CASM/device_manager/device_manager_base.hpp>
 
 class DeviceManager {
 public:

@@ -6,8 +6,8 @@
 #define CROSSAUDIOSTREAMMANAGER_FILE_HPP
 
 #include <CASM/CASM.hpp>
-#include "buffer.hpp"
-#include "wave_properties.hpp"
+#include "CASM/core/buffer.hpp"
+#include "CASM/core/wave_properties.hpp"
 
 #include <string>
 #include <fstream>
