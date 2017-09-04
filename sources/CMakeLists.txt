@@ -6,10 +6,15 @@ set(CMAKE_DEBUG_POSTFIX d)
 #===================================
 #======== LIBRARY SOURCES ==========
 #===================================
+file(GLOB library_headers
+    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
+    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.inl
+    ${PROJECT_SOURCE_DIR}/include/CASM/*.hpp
+    )
+
 file(GLOB library_sources
-    core/buffer.cpp
+    core/*.cpp
     device_manager/device.cpp
-    core/wave_properties.cpp
     device_manager/device_manager.cpp
     device_manager/device_manager_base.cpp
     file.cpp
@@ -27,4 +32,4 @@ else()
     set(CASM_BUILD_FLAG SHARED)
 endif()
 
-add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${library_sources})
+add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${library_sources} ${library_headers})

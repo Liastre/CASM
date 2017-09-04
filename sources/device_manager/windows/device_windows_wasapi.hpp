@@ -22,6 +22,7 @@ public:
 
 private:
     IAudioClient* stream;
+    HANDLE hEvent;
     IAudioCaptureClient *captureClient;
     IAudioRenderClient *renderClient;
 };

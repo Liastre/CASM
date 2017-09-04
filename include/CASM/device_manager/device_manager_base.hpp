@@ -2,8 +2,8 @@
 // Created on 22 May.
 // ===========================================
 
-#ifndef CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
-#define CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
+#ifndef CASM_BASEDEVICEMANAGER_HPP
+#define CASM_BASEDEVICEMANAGER_HPP
 
 #include <CASM/device.hpp>
 #include "CASM/core/wave_properties.hpp"
@@ -26,4 +26,4 @@ protected:
     uint_fast32_t deviceCount;
 };
 
-#endif //CROSSAUDIOSTREAMMANAGER_BASEDEVICEMANAGER_HPP
+#endif //CASM_BASEDEVICEMANAGER_HPP

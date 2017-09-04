@@ -63,7 +63,6 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     HRESULT hr;
     WAVEFORMATEX *deviceMixFormat = nullptr;
     DWORD streamFlags;
-    uint64_t fragmentDurationActual;
     uint32_t fragmentFrameCount;
 
     fragmentDurationRequested = (uint64_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(fragmentDuration).count()/100);
@@ -90,14 +89,16 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
         hr = stream->Initialize(
                 AUDCLNT_SHAREMODE_SHARED,
                 streamFlags,
+                //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
                 fragmentDurationRequested,
-                0,
+                0,//0,
                 deviceMixFormat,
-                NULL);
+                nullptr);
         assert(hr==S_OK);
 
         hr = stream->GetService(IID_IAudioCaptureClient, (void**)&captureClient);
         assert(hr==S_OK);
+        if (hr!=S_OK) throw std::runtime_error("Unable to GetService");
         break;
     case CASM::WRITE:
         hr = stream->Initialize(
@@ -106,23 +107,30 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
                 fragmentDurationRequested,
                 0,
                 deviceMixFormat,
-                NULL);
+                nullptr);
         assert(hr==S_OK);
 
         hr = stream->GetService(IID_IAudioRenderClient, (void**)&renderClient);
         assert(hr==S_OK);
         break;
     default:
-        assert(false);
+        throw std::runtime_error("Unknown device access");
     }
+
+    /*hEvent = CreateEvent(nullptr, false, false, nullptr);
+    //hEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    if (hEvent == NULL)
+    {
+        throw std::runtime_error("Unable to create samples ready event: " + GetLastError());
+    }
+    hr = stream->SetEventHandle(hEvent);
+    assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
     hr = stream->GetBufferSize(&fragmentFrameCount);
     assert(hr==S_OK);
-    // calculate the actual duration of the allocated buffer
-    fragmentDurationActual = (double)fragmentDurationRequested * fragmentFrameCount / deviceMixFormat->nSamplesPerSec;
     // create buffer
-    buffer = Buffer(mixWaveProperties, fragmentDuration);
+    buffer = Buffer(mixWaveProperties, fragmentFrameCount);
 
     /*=======
     // Grab the entire buffer for the initial fill operation.
@@ -167,6 +175,7 @@ Buffer DeviceWindowsWASAPI::read() {
     // Each loop fills about half of the shared buffer.
     if(flags != AUDCLNT_BUFFERFLAGS_SILENT) {
         std::this_thread::sleep_for(buffer.getDuration()/2);
+        //hrs = WaitForSingleObject(hEvent, INFINITE);
 
         hr = captureClient->GetNextPacketSize(&packetLength);
         assert(hr==S_OK);

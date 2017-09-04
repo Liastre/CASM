@@ -11,25 +11,28 @@ Buffer::~Buffer() {
     buffer.reset();
 }
 
-Buffer::Buffer(WaveProperties paramWaveProperties, std::chrono::duration<double> paramDuration) {
-    duration = std::chrono::duration_cast<std::chrono::seconds>(paramDuration);
-    waveProperties = paramWaveProperties;
+Buffer::Buffer(WaveProperties waveProperties, uint32_t framesCount) {
+    init(waveProperties, framesCount);
+}
+
+Buffer::Buffer(WaveProperties waveProperties, std::chrono::duration<double> duration) {
+    uint32_t compFramesCount = (uint32_t)(waveProperties.getSamplesPerSecond()*duration.count());
+    init(waveProperties, compFramesCount);
+}
+
+void Buffer::init(WaveProperties waveProperties, uint32_t framesCount)
+{
+    Buffer::waveProperties = waveProperties;
+    Buffer::framesCount = framesCount;
+    // compute actual buffer duration
+    duration = std::chrono::duration<double>((double)Buffer::framesCount/(double)waveProperties.getSamplesPerSecond());
     blockAlign = (uint8_t)waveProperties.getBlockAlign();
-    framesCount = (uint32_t)(paramWaveProperties.getSamplesPerSecond()*duration.count());
-    BitsType bitsType = paramWaveProperties.getBitsType();
-    switch(bitsType) {
-    case PCM_16BIT_SIGNED:
-    case PCM_32BIT_SIGNED:
-        buffer = std::make_shared< BufferTemplate<int8_t> >(framesCount*blockAlign);
-        break;
-    case PCM_16BIT_UNSIGNED:
-    case PCM_32BIT_UNSIGNED:
-        buffer = std::make_shared< BufferTemplate<uint8_t> >(framesCount*blockAlign);
-        break;
-    default:
-        assert(false);
-        break;
-    }
+    BitsType bitsType = waveProperties.getBitsType();
+    buffer = std::make_shared< BufferBase >(Buffer::framesCount*blockAlign);
+}
+
+void Buffer::write(void* arrayPtr, const uint32_t arraySize, const uint8_t sizeOfTypeInBytes) {
+    buffer->writeArray(arrayPtr, (uint32_t) (arraySize*sizeOfTypeInBytes));
 }
 
 void Buffer::read(std::vector<int16_t> &paramVec) {
@@ -38,14 +41,6 @@ void Buffer::read(std::vector<int16_t> &paramVec) {
 
 void Buffer::read(std::ofstream &stream) {
     buffer->read(stream);
-}
-
-bool Buffer::write(std::vector<int16_t> paramVec) {
-    return(buffer->writeVector(&paramVec, (uint32_t)paramVec.size()));
-}
-
-bool Buffer::write(std::vector<uint16_t> paramVec) {
-    return(buffer->writeVector(&paramVec, (uint32_t)paramVec.size()));
 }
 
 std::chrono::duration<double> Buffer::getDuration() {
