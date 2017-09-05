@@ -24,7 +24,7 @@ public:
     Buffer read();
     int write(Buffer data);
 
-    WaveProperties getBufferWaveProperties();
+    WaveProperties getStreamWaveProperties();
     std::wstring getDescpiption();
 
 private:

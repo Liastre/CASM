@@ -22,12 +22,10 @@ Buffer::Buffer(WaveProperties waveProperties, std::chrono::duration<double> dura
 
 void Buffer::init(WaveProperties waveProperties, uint32_t framesCount)
 {
-    Buffer::waveProperties = waveProperties;
     Buffer::framesCount = framesCount;
     // compute actual buffer duration
     duration = std::chrono::duration<double>((double)Buffer::framesCount/(double)waveProperties.getSamplesPerSecond());
     blockAlign = (uint8_t)waveProperties.getBlockAlign();
-    BitsType bitsType = waveProperties.getBitsType();
     buffer = std::make_shared< BufferBase >(Buffer::framesCount*blockAlign);
 }
 
@@ -45,8 +43,4 @@ void Buffer::read(std::ofstream &stream) {
 
 std::chrono::duration<double> Buffer::getDuration() {
     return duration;
-}
-
-WaveProperties Buffer::getWaveProperties() {
-    return waveProperties;
 }

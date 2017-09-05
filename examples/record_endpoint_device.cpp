@@ -20,10 +20,10 @@ int main()
     Device endPoint = deviceManager.getDevice(deviceIndex);
 
     endPoint.open(CASM::READ, std::chrono::seconds(1));
-    File file("endPointDevice.wav", CASM::WRITE, endPoint.getBufferWaveProperties());
+    File file("endPointDevice.wav", CASM::WRITE, endPoint.getStreamWaveProperties());
 
     // write data
-    for (int i=0; i<16; i++) {
+    for (int i=0; i<8; i++) {
         file.write(endPoint.read());
     }
     file.finalize();

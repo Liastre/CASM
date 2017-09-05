@@ -28,8 +28,8 @@ int Device::write(Buffer data){
     return device->write(data);
 }
 
-WaveProperties Device::getBufferWaveProperties(){
-    return device->getBufferWaveProperties();
+WaveProperties Device::getStreamWaveProperties(){
+    return device->getStreamWaveProperties();
 }
 
 std::wstring Device::getDescpiption() {

@@ -39,15 +39,13 @@ public:
     }
 
     std::chrono::duration<double> getDuration();
-    WaveProperties getWaveProperties();
 
 private:
     void init(WaveProperties waveProperties, uint32_t framesCount);
 
     std::shared_ptr<BufferBase> buffer;
-    std::chrono::duration<double> duration;
-    WaveProperties waveProperties;
-    uint32_t framesCount;
+    std::chrono::duration<double> duration; ///< approximate duration in time
+    uint32_t framesCount; ///< frames needed for requested duration
     uint8_t blockAlign;
 };
 

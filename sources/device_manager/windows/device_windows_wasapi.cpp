@@ -6,17 +6,25 @@
 
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
+    stream = nullptr;
+    captureClient = nullptr;
+    renderClient = nullptr;
     /*HRESULT hr;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     assert(hr==S_OK);*/
+}
+
+DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
+    /*captureClient->Release();
+    renderClient->Release();*/
 }
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice>::DeviceTemplate(device, deviceType){
     HRESULT hr;
     LPWSTR deviceId;
     IPropertyStore* propertyStore;
-    PROPVARIANT deviceProperty;
-    WAVEFORMATEX deviceWaveProperties;
+    PROPVARIANT deviceProperty{};
+    WAVEFORMATEX deviceWaveProperties{};
 
     // active
     PropVariantInit(&deviceProperty);
@@ -44,10 +52,6 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
     PropVariantClear(&deviceProperty);
     CoTaskMemFree(deviceId);
     propertyStore->Release();
-}
-
-DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
-
 }
 
 int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double> fragmentDuration) {
@@ -82,7 +86,7 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     assert(hr==S_OK);
 
     hr = stream->GetMixFormat(&deviceMixFormat);
-    WaveProperties mixWaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
     assert(hr==S_OK);
     switch (access) {
     case CASM::READ:
@@ -130,7 +134,7 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     hr = stream->GetBufferSize(&fragmentFrameCount);
     assert(hr==S_OK);
     // create buffer
-    buffer = Buffer(mixWaveProperties, fragmentFrameCount);
+    buffer = Buffer(streamWaveProperties, fragmentFrameCount);
 
     /*=======
     // Grab the entire buffer for the initial fill operation.
@@ -173,34 +177,32 @@ Buffer DeviceWindowsWASAPI::read() {
     std::vector<uint8_t> arr;
 
     // Each loop fills about half of the shared buffer.
-    if(flags != AUDCLNT_BUFFERFLAGS_SILENT) {
-        std::this_thread::sleep_for(buffer.getDuration()/2);
-        //hrs = WaitForSingleObject(hEvent, INFINITE);
+    std::this_thread::sleep_for(buffer.getDuration()/2);
+    //hrs = WaitForSingleObject(hEvent, INFINITE);
 
-        hr = captureClient->GetNextPacketSize(&packetLength);
+    hr = captureClient->GetNextPacketSize(&packetLength);
+    assert(hr==S_OK);
+
+    while (packetLength!=0) {
+        // get the available data in the shared buffer.
+        hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
         assert(hr==S_OK);
 
-        while (packetLength!=0) {
-            // get the available data in the shared buffer.
-            hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
-            assert(hr==S_OK);
-
-            if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
-                pData = nullptr;  // Tell CopyData to write silence.
-            }
-
-            // each frame contains number of bytes equal to block align
-            // TODO: move to stream class? is buffer should be assigned to stream?
-            buffer.write<uint8_t>(pData, numFramesAvailable*buffer.getWaveProperties().getBlockAlign());
-
-            // release data
-            hr = captureClient->ReleaseBuffer(numFramesAvailable);
-            assert(hr==S_OK);
-
-            // start next capture
-            hr = captureClient->GetNextPacketSize(&packetLength);
-            assert(hr==S_OK);
+        if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
+            pData = nullptr;  // Tell CopyData to write silence.
         }
+
+        // each frame contains number of bytes equal to block align
+        // TODO: move to stream class? is buffer should be assigned to stream?
+        buffer.write<uint8_t>(pData, numFramesAvailable*streamWaveProperties.getBlockAlign());
+
+        // release data
+        hr = captureClient->ReleaseBuffer(numFramesAvailable);
+        assert(hr==S_OK);
+
+        // start next capture
+        hr = captureClient->GetNextPacketSize(&packetLength);
+        assert(hr==S_OK);
     }
 
     return buffer;
@@ -208,9 +210,9 @@ Buffer DeviceWindowsWASAPI::read() {
 
 int DeviceWindowsWASAPI::write(Buffer data) {
     HRESULT hr;
-    DWORD flags = 0;
-    uint32_t numFramesPadding;
-    uint32_t numFramesAvailable;
+    DWORD flags(0);
+    uint32_t numFramesPadding(0);
+    uint32_t numFramesAvailable(0);
     uint8_t *pData;
 
     if (flags != AUDCLNT_BUFFERFLAGS_SILENT)

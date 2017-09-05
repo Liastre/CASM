@@ -16,9 +16,6 @@ public:
     DeviceBase() = default;
     virtual ~DeviceBase() = default;
 
-    WaveProperties getBufferWaveProperties() {
-        return buffer.getWaveProperties();
-    }
     WaveProperties getStreamWaveProperties() {
         return  streamWaveProperties;
     }
