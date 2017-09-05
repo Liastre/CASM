@@ -14,7 +14,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
 DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice>::DeviceTemplate(device, deviceType){
     HRESULT hr;
     LPWSTR deviceId;
-    IPropertyStore* devicePropertyStore;
+    IPropertyStore* propertyStore;
     PROPVARIANT deviceProperty;
     WAVEFORMATEX deviceWaveProperties;
 
@@ -22,18 +22,18 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
     PropVariantInit(&deviceProperty);
 
     // read device properties
-    hr = handler->OpenPropertyStore(STGM_READ, &devicePropertyStore);
+    hr = handler->OpenPropertyStore(STGM_READ, &propertyStore);
     assert(hr==S_OK);
-    hr = devicePropertyStore->GetValue(PKEY_AudioEngine_DeviceFormat, &deviceProperty);
+    hr = propertyStore->GetValue(PKEY_AudioEngine_DeviceFormat, &deviceProperty);
     assert(hr==S_OK);
     deviceWaveProperties = *((WAVEFORMATEX*)deviceProperty.blob.pBlobData);
-    waveProperties = WaveProperties(deviceWaveProperties.nChannels, deviceWaveProperties.nSamplesPerSec, deviceWaveProperties.wBitsPerSample);
-    devicePropertyStore->GetValue(PKEY_Device_DeviceDesc, &deviceProperty);
+    DeviceWindowsWASAPI::deviceWaveProperties = WaveProperties(deviceWaveProperties.nChannels, deviceWaveProperties.nSamplesPerSec, deviceWaveProperties.wBitsPerSample);
+    propertyStore->GetValue(PKEY_Device_DeviceDesc, &deviceProperty);
     name = deviceProperty.pwszVal;
 
-    hr = handler->OpenPropertyStore(STGM_READ, &devicePropertyStore);
+    hr = handler->OpenPropertyStore(STGM_READ, &propertyStore);
     assert(hr==S_OK);
-    hr = devicePropertyStore->GetValue(PKEY_Device_FriendlyName, &deviceProperty);
+    hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &deviceProperty);
     assert(hr==S_OK);
     description = std::wstring(deviceProperty.pwszVal);
 
@@ -43,7 +43,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
     // clear
     PropVariantClear(&deviceProperty);
     CoTaskMemFree(deviceId);
-    devicePropertyStore->Release();
+    propertyStore->Release();
 }
 
 DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
@@ -78,7 +78,7 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     }
 
     // creates COM object
-    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&stream);
+    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&stream);
     assert(hr==S_OK);
 
     hr = stream->GetMixFormat(&deviceMixFormat);
@@ -182,14 +182,16 @@ Buffer DeviceWindowsWASAPI::read() {
 
         while (packetLength!=0) {
             // get the available data in the shared buffer.
-            hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, NULL, NULL);
+            hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
             assert(hr==S_OK);
 
             if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
                 pData = nullptr;  // Tell CopyData to write silence.
             }
 
-            buffer.write<uint8_t>(pData, numFramesAvailable);
+            // each frame contains number of bytes equal to block align
+            // TODO: move to stream class? is buffer should be assigned to stream?
+            buffer.write<uint8_t>(pData, numFramesAvailable*buffer.getWaveProperties().getBlockAlign());
 
             // release data
             hr = captureClient->ReleaseBuffer(numFramesAvailable);

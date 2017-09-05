@@ -2,27 +2,32 @@
 // Created on 26 May.
 // ===========================================
 
-#ifndef CROSSAUDIOSTREAMMANAGER_DEVICE_BASE_HPP
-#define CROSSAUDIOSTREAMMANAGER_DEVICE_BASE_HPP
+#ifndef CASM_DEVICE_BASE_HPP
+#define CASM_DEVICE_BASE_HPP
 
 #include <CASM/CASM.hpp>
 #include <CASM/core/buffer.hpp>
 #include <string>
 
+
+/// DeviceBase - base class for Device object.
 class DeviceBase {
 public:
-    DeviceBase(){};
-    virtual ~DeviceBase() {};
+    DeviceBase() = default;
+    virtual ~DeviceBase() = default;
 
     WaveProperties getBufferWaveProperties() {
         return buffer.getWaveProperties();
-    };
+    }
+    WaveProperties getStreamWaveProperties() {
+        return  streamWaveProperties;
+    }
     WaveProperties getDeviceWaveProperties() {
-        return waveProperties;
-    };
+        return deviceWaveProperties;
+    }
     std::wstring getDescpiption() {
         return description;
-    };
+    }
 
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
@@ -32,7 +37,8 @@ public:
 protected:
     std::wstring name;
     std::wstring description;
-    WaveProperties waveProperties;
+    WaveProperties deviceWaveProperties;    ///< actual device wave properties
+    WaveProperties streamWaveProperties;    ///< output stream properties
     uint64_t fragmentDurationRequested;
     Buffer buffer;
     bool active;
@@ -57,4 +63,4 @@ protected:
 
 #include "device_base.inl"
 
-#endif //CROSSAUDIOSTREAMMANAGER_DEVICE_BASE_HPP
+#endif //CASM_DEVICE_BASE_HPP

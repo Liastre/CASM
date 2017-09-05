@@ -31,7 +31,7 @@ void Buffer::init(WaveProperties waveProperties, uint32_t framesCount)
     buffer = std::make_shared< BufferBase >(Buffer::framesCount*blockAlign);
 }
 
-void Buffer::write(void* arrayPtr, const uint32_t arraySize, const uint8_t sizeOfTypeInBytes) {
+void Buffer::write(void* arrayPtr, uint32_t arraySize, uint8_t sizeOfTypeInBytes) {
     buffer->writeArray(arrayPtr, (uint32_t) (arraySize*sizeOfTypeInBytes));
 }
 

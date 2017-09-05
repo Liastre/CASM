@@ -10,15 +10,15 @@
 
 typedef IMMDevice DeviceHandler;
 
-class DeviceWindowsWASAPI : public DeviceTemplate<IMMDevice> {
+class DeviceWindowsWASAPI final : public DeviceTemplate<IMMDevice> {
 public:
     DeviceWindowsWASAPI();
     DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);
-    ~DeviceWindowsWASAPI();
-    int open(CASM::Access, std::chrono::duration<double> fragmentDuration);
-    int close();
-    Buffer read();
-    int write(Buffer data);
+    ~DeviceWindowsWASAPI() final;
+    int open(CASM::Access, std::chrono::duration<double> fragmentDuration) final;
+    int close() override;
+    Buffer read() override;
+    int write(Buffer data) override;
 
 private:
     IAudioClient* stream;

@@ -35,7 +35,7 @@ public:
         // static checks
         static_assert(std::is_integral<PassedType>::value, "Only integer types are allowed");
 
-        write(arrayPtr, (uint32_t)(arraySize*blockAlign), sizeof(PassedType));
+        write(arrayPtr, arraySize, sizeof(PassedType));
     }
 
     std::chrono::duration<double> getDuration();
