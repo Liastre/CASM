@@ -2,14 +2,14 @@
 #include "windows/device_windows_wasapi.hpp"
 
 
-Device::Device(){
+Device::Device() {
 }
 
 Device::Device(void* deviceHandler, CASM::DeviceType deviceType){
 device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
 }
 
-Device::~Device(){
+Device::~Device() {
 };
 
 int Device::open(CASM::Access access, std::chrono::duration<double> bufferDuration) {
@@ -24,14 +24,18 @@ Buffer Device::read() {
     return device->read();
 }
 
-int Device::write(Buffer data){
-    return device->write(data);
+void Device::write(Buffer data) {
+    device->write(data);
 }
 
-WaveProperties Device::getStreamWaveProperties(){
+WaveProperties Device::getStreamWaveProperties() {
     return device->getStreamWaveProperties();
 }
 
 std::wstring Device::getDescpiption() {
     return device->getDescpiption();
+}
+
+bool Device::isAvailable() {
+    return true;
 }
