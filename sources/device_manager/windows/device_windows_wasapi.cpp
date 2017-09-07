@@ -168,6 +168,47 @@ int DeviceWindowsWASAPI::close() {
     return 0;
 }
 
+bool DeviceWindowsWASAPI::read(Buffer& buffer)
+{
+    HRESULT hr;
+    DWORD flags = 0;
+    uint32_t packetLength;
+    uint32_t numFramesAvailable;
+    BYTE *pData;
+    std::vector<uint8_t> arr;
+
+    // Each loop fills about half of the shared buffer.
+    std::this_thread::sleep_for(buffer.getDuration()/2);
+    //hrs = WaitForSingleObject(hEvent, INFINITE);
+
+    hr = captureClient->GetNextPacketSize(&packetLength);
+    assert(hr==S_OK);
+
+    while (packetLength!=0) {
+        // get the available data in the shared buffer.
+        hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
+        assert(hr==S_OK);
+
+        if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
+            pData = nullptr;  // Tell CopyData to write silence.
+        }
+
+        // each frame contains number of bytes equal to block align
+        // TODO: return true or false?
+        buffer.write<uint8_t>(pData, numFramesAvailable*streamWaveProperties.getBlockAlign());
+
+        // release data
+        hr = captureClient->ReleaseBuffer(numFramesAvailable);
+        assert(hr==S_OK);
+
+        // start next capture
+        hr = captureClient->GetNextPacketSize(&packetLength);
+        assert(hr==S_OK);
+    }
+
+    return true;
+}
+
 Buffer DeviceWindowsWASAPI::read() {
     HRESULT hr;
     DWORD flags = 0;
@@ -208,7 +249,7 @@ Buffer DeviceWindowsWASAPI::read() {
     return buffer;
 }
 
-int DeviceWindowsWASAPI::write(Buffer data) {
+bool DeviceWindowsWASAPI::write(Buffer buffer) {
     HRESULT hr;
     DWORD flags(0);
     uint32_t numFramesPadding(0);

@@ -20,16 +20,21 @@ int Device::close() {
     return device->close();
 }
 
-Buffer Device::read() {
-    return device->read();
+bool Device::read(Buffer& buffer) {
+    return device->read(buffer);
 }
 
-void Device::write(Buffer data) {
-    device->write(data);
+bool Device::write(Buffer buffer) {
+    device->write(buffer);
 }
 
 WaveProperties Device::getStreamWaveProperties() {
     return device->getStreamWaveProperties();
+}
+
+WaveProperties Device::getDeviceWaveProperties()
+{
+    return device->getDeviceWaveProperties();
 }
 
 std::wstring Device::getDescpiption() {
@@ -39,3 +44,4 @@ std::wstring Device::getDescpiption() {
 bool Device::isAvailable() {
     return true;
 }
+

@@ -29,7 +29,9 @@ public:
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
     virtual Buffer read()=0;
-    virtual int write(Buffer data)=0;
+
+    virtual bool read(Buffer& buffer)=0;
+    virtual bool write(Buffer data)=0;
 
 protected:
     std::wstring name;
@@ -52,7 +54,9 @@ public:
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
     virtual Buffer read()=0;
-    virtual int write(Buffer data)=0;
+
+    virtual bool read(Buffer& buffer)=0;
+    virtual bool write(Buffer data)=0;
 
 protected:
     TDeviceHandler *handler;

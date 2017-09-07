@@ -13,12 +13,12 @@ file(GLOB library_headers
     )
 
 file(GLOB library_sources
+    file.cpp
+    stream.cpp
     core/*.cpp
     device_manager/device.cpp
     device_manager/device_manager.cpp
     device_manager/device_manager_base.cpp
-    file.cpp
-
     device_manager/windows/device_windows_wasapi.cpp
     device_manager/windows/device_manager_windows_wasapi.cpp
     )

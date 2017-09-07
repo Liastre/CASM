@@ -16,9 +16,12 @@ public:
     DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);
     ~DeviceWindowsWASAPI() final;
     int open(CASM::Access, std::chrono::duration<double> fragmentDuration) final;
-    int close() override;
-    Buffer read() override;
-    int write(Buffer data) override;
+    int close() final;
+    Buffer read() final;
+
+    /// EndPointIntereface
+    bool read(Buffer& buffer);
+    bool write(Buffer buffer) final;
 
 private:
     IAudioClient* stream;

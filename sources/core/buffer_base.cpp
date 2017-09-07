@@ -17,10 +17,6 @@ BufferBase::BufferBase(uint32_t size) : BufferBase() {
     buffer.reserve(size);
 }
 
-void* BufferBase::read() {
-    return &buffer[0];
-}
-
 void BufferBase::read(std::ofstream& stream) {
     bitsRep val;
     for(uint32_t i = 0; i<filled; i+=2) {
@@ -35,7 +31,18 @@ void BufferBase::read(std::ofstream& stream) {
     clear();
 }
 
-void BufferBase::writeArray(void* arrayPtr, const uint32_t sizeInBytes) {
+void BufferBase::write(BufferBase* data) {
+    uint32_t dataSize = data->getSize();
+    if (dataSize > (size-filled)) {
+        return;
+    }
+    for (int i=0; i<dataSize; i++) {
+        buffer.emplace_back(data->buffer[i]);
+    }
+    filled += data->filled;
+}
+
+void BufferBase::write(void* arrayPtr, const uint32_t sizeInBytes) {
     if (filled+sizeInBytes>size) {
         // buffer overflow
         return;
@@ -55,6 +62,18 @@ void BufferBase::writeArray(void* arrayPtr, const uint32_t sizeInBytes) {
     filled += sizeInBytes;
 }
 
+void BufferBase::copy(BufferBase* data) {
+    if (data->getSize() != size) {
+        buffer.reserve(data->getSize());
+        size = data->getSize();
+    }
+    clear();
+    for (int i=0; i<size; i++) {
+        buffer.emplace_back(data->buffer[i]);
+    }
+    filled = data->filled;
+}
+
 void BufferBase::clear() {
     buffer.clear();
     filled = 0;
@@ -63,5 +82,6 @@ void BufferBase::clear() {
 uint32_t BufferBase::getSize() {
     return size;
 }
+
 
 #endif //CASM_BUFFER_BASE_INL

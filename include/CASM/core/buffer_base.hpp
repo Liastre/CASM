@@ -5,7 +5,6 @@
 #ifndef CASM_BUFFER_BASE_HPP
 #define CASM_BUFFER_BASE_HPP
 
-#include "wave_properties.hpp"
 #include <chrono>
 #include <vector>
 #include <fstream>
@@ -22,9 +21,10 @@ public:
     BufferBase(uint32_t size);
     ~BufferBase() = default;
 
-    void* read();
     void read(std::ofstream& stream);
-    void writeArray(void* arrayPtr, const uint32_t sizeInBytes);
+    void write(BufferBase* data);
+    void write(void* arrayPtr, const uint32_t sizeInBytes);
+    void copy(BufferBase* data);
     void clear();
     uint32_t getSize();
 

@@ -6,22 +6,27 @@
 #define CROSSAUDIOSTREAMMANAGER_FILE_HPP
 
 #include <CASM/CASM.hpp>
+#include <CASM/core/end_point.hpp>
 #include "CASM/core/buffer.hpp"
 #include "CASM/core/wave_properties.hpp"
 
 #include <string>
 #include <fstream>
 
-
 enum FileType{
     WAV
 };
 
-class File {
+class File final : public EndPointInterface {
 public:
     File(std::string fileName, CASM::Access access, WaveProperties paramWaveProperties = WaveProperties());
     ~File();
-    int write(Buffer buffer);
+
+    // interface
+    bool read(Buffer& buffer) final;
+    bool write(Buffer buffer) final;
+    bool isAvailable() final;
+
     int write(uint16_t value);
     bool write(std::vector<uint8_t> arr);
 

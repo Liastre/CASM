@@ -10,23 +10,28 @@
 #include "CASM/device_manager/device_base.hpp"
 #include <CASM/core/end_point.hpp>
 
-
-class Device final : public EndPoint {
+/// @class Device
+/// @brief wrapper under Device fabric
+class Device final : public EndPointInterface {
 public:
     Device();
     Device(void* deviceHandler, CASM::DeviceType deviceType);
     ~Device();
 
-    Buffer read() final;
-    void write(Buffer data) final;
+    /// EndPointInterface interface
+    bool read(Buffer& buffer) final;
+    bool write(Buffer buffer) final;
     bool isAvailable() final;
 
-    /// open - open device and initialize the buffer
+    /// Device interface
+    /// @brief open device and initialize the buffer
     /// @param [in] access - requested access to device
     /// @param [in] bufferDuration - size of device buffer (since you need wait until buffer are filled, output delay will be the same)
     int open(CASM::Access access, std::chrono::duration<double> bufferDuration);
+    /// @brief close device and destroy the buffer
     int close();
 
+    WaveProperties getDeviceWaveProperties();
     WaveProperties getStreamWaveProperties();
     std::wstring getDescpiption();
 

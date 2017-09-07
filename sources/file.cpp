@@ -192,24 +192,33 @@ bool File::generateName() {
     return true;
 }
 
-int File::write(Buffer buffer) {
-    buffer.read(stream);
-
-    return 0;
-};
-
 int File::write(uint16_t value) {
     little_endian::write<uint16_t>(stream, value);
 
     return 0;
 };
 
+bool File::read(Buffer& buffer)
+{
+
+}
+
+bool File::write(Buffer buffer) {
+    buffer.read(stream);
+};
+
+
+bool File::isAvailable()
+{
+    return true;
+}
+
 bool File::write(std::vector<uint8_t> arr) {
     for(int i=0; i<arr.size(); i++) {
         little_endian::write<uint8_t>(stream, arr[i]);
     }
 
-    return 0;
+    return true;
 };
 
 int File::finalize() {

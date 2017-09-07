@@ -23,8 +23,10 @@ int main()
     File file("endPointDevice.wav", CASM::WRITE, endPoint.getStreamWaveProperties());
 
     // write data
+    Buffer buffer(endPoint.getStreamWaveProperties(), std::chrono::seconds(1));
     for (int i=0; i<8; i++) {
-        file.write(endPoint.read());
+        endPoint.read(buffer);
+        file.write(buffer);
     }
     file.finalize();
     endPoint.close();
