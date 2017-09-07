@@ -6,12 +6,12 @@
 #define CASM_DEVICE_BASE_HPP
 
 #include <CASM/CASM.hpp>
-#include <CASM/core/buffer.hpp>
+#include <CASM/core/end_point.hpp>
 #include <string>
 
-
-/// DeviceBase - base class for Device object.
-class DeviceBase {
+/// @class DeviceBase
+/// @brief base class for Device object.
+class DeviceBase : public EndPointInterface {
 public:
     DeviceBase() = default;
     virtual ~DeviceBase() = default;
@@ -28,10 +28,6 @@ public:
 
     virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
     virtual int close()=0;
-    virtual Buffer read()=0;
-
-    virtual bool read(Buffer& buffer)=0;
-    virtual bool write(Buffer data)=0;
 
 protected:
     std::wstring name;
@@ -39,7 +35,6 @@ protected:
     WaveProperties deviceWaveProperties;    ///< actual device wave properties
     WaveProperties streamWaveProperties;    ///< output stream properties
     uint64_t fragmentDurationRequested;
-    Buffer buffer;
     bool active;
     CASM::DeviceType type;
 };
@@ -49,14 +44,10 @@ class DeviceTemplate : public DeviceBase {
 public:
     DeviceTemplate();
     DeviceTemplate(void* handler, CASM::DeviceType deviceType);
-    virtual ~DeviceTemplate();
+    ~DeviceTemplate() override;
 
-    virtual int open(CASM::Access access, std::chrono::duration<double> fragmentDuration)=0;
-    virtual int close()=0;
-    virtual Buffer read()=0;
-
-    virtual bool read(Buffer& buffer)=0;
-    virtual bool write(Buffer data)=0;
+    int open(CASM::Access access, std::chrono::duration<double> fragmentDuration) override =0;
+    int close() override =0;
 
 protected:
     TDeviceHandler *handler;

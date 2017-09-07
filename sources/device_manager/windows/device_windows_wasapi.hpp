@@ -17,11 +17,11 @@ public:
     ~DeviceWindowsWASAPI() final;
     int open(CASM::Access, std::chrono::duration<double> fragmentDuration) final;
     int close() final;
-    Buffer read() final;
 
-    /// EndPointIntereface
-    bool read(Buffer& buffer);
+    /// EndPointInterface
+    bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;
+    bool isAvailable() final;
 
 private:
     IAudioClient* stream;
