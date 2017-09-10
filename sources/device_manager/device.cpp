@@ -32,17 +32,13 @@ bool Device::write(Buffer buffer) {
     device->write(buffer);
 }
 
-WaveProperties Device::getStreamWaveProperties() {
-    return device->getStreamWaveProperties();
-}
-
 WaveProperties Device::getDeviceWaveProperties()
 {
     return device->getDeviceWaveProperties();
 }
 
-std::wstring Device::getDescpiption() {
-    return device->getDescpiption();
+std::wstring Device::getDescription() {
+    return device->getDescription();
 }
 
 bool Device::isAvailable() {

@@ -10,7 +10,7 @@
 
 typedef IMMDevice DeviceHandler;
 
-class DeviceWindowsWASAPI final : public DeviceTemplate<IMMDevice> {
+class DeviceWindowsWASAPI final : public DeviceBase<IMMDevice> {
 public:
     DeviceWindowsWASAPI();
     DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);

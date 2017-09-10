@@ -73,7 +73,7 @@ File::File(std::string fileName, WaveProperties waveProperties) {
     posFileLength = 0;
     finalized = false;
     splitExtension(fileName);
-    File::waveProperties = waveProperties;
+    File::streamWaveProperties = waveProperties;
 }
 
 File::~File() {
@@ -88,7 +88,7 @@ void File::open(CASM::Access access)
     case CASM::WRITE:
         generateName();
         path = name + '.' + extension;
-        writeFile(waveProperties);
+        writeFile(streamWaveProperties);
         break;
     case CASM::READ:
         path = name + '.' + extension;

@@ -17,7 +17,7 @@ enum FileType{
     WAV
 };
 
-class File final : public EndPointInterface {
+class File final : public EndPointBase {
 public:
     File(std::string fileName, WaveProperties paramWaveProperties = WaveProperties());
     ~File();
@@ -59,7 +59,6 @@ private:
 private:
     bool finalized;
     CASM::WavHeader wavHeader;
-    WaveProperties waveProperties;
     std::string name;
     std::string path;
     std::string extension;

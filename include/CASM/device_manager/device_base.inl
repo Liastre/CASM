@@ -1,39 +1,34 @@
-inline DeviceBase::DeviceBase() {
+template <class TDeviceHandler>
+DeviceBase<TDeviceHandler>::DeviceBase() {
+    bufferDuration = std::chrono::duration<double>::zero();
+    handler = nullptr;
     name = L"";
     description = L"";
     active = false;
 }
 
-inline WaveProperties DeviceBase::getStreamWaveProperties() {
-    return  streamWaveProperties;
-}
-
-inline WaveProperties DeviceBase::getDeviceWaveProperties() {
-    return deviceWaveProperties;
-}
-
-inline std::wstring DeviceBase::getDescpiption() {
-    return description;
-}
-
 template <class TDeviceHandler>
-DeviceTemplate<TDeviceHandler>::DeviceTemplate() {
-    bufferDuration = std::chrono::duration<double>::zero();
-    handler = nullptr;
-}
-
-template <class TDeviceHandler>
-DeviceTemplate<TDeviceHandler>::DeviceTemplate(void* deviceHandler, CASM::DeviceType deviceType) : DeviceTemplate(){
+DeviceBase<TDeviceHandler>::DeviceBase(void* deviceHandler, CASM::DeviceType deviceType) : DeviceBase(){
     handler = static_cast<TDeviceHandler*>(deviceHandler);
     type = deviceType;
 }
 
 template <class TDeviceHandler>
-DeviceTemplate<TDeviceHandler>::~DeviceTemplate() {
+DeviceBase<TDeviceHandler>::~DeviceBase() {
 }
 
 template <class TDeviceHandler>
-void DeviceTemplate<TDeviceHandler>::init(std::chrono::duration<double> bufferDuration)
+void DeviceBase<TDeviceHandler>::init(std::chrono::duration<double> bufferDuration)
 {
-    DeviceTemplate::bufferDuration = bufferDuration;
+    DeviceBase::bufferDuration = bufferDuration;
+}
+
+template <class TDeviceHandler>
+WaveProperties DeviceBase<TDeviceHandler>::getDeviceWaveProperties() {
+    return deviceWaveProperties;
+}
+
+template <class TDeviceHandler>
+std::wstring DeviceBase<TDeviceHandler>::getDescription() {
+    return description;
 }

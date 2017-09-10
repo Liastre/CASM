@@ -33,11 +33,11 @@ public:
     virtual bool isAvailable()=0;
     /// @brief get output stream wave properties
     /// @return output stream wave properties
-    //virtual WaveProperties getStreamWaveProperties()=0;
+    virtual WaveProperties getStreamWaveProperties()=0;
 };
 
 
-/*///@brief EndPoint base class
+///@brief EndPoint base class
 class EndPointBase : public EndPointInterface {
 public:
     WaveProperties getStreamWaveProperties() final {
@@ -46,6 +46,6 @@ public:
 
 protected:
     WaveProperties streamWaveProperties;
-};*/
+};
 
 #endif //CASM_END_POINT_HPP

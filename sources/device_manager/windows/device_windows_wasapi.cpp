@@ -14,7 +14,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
     assert(hr==S_OK);*/
 }
 
-DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice>::DeviceTemplate(device, deviceType){
+DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceBase<IMMDevice>::DeviceBase(device, deviceType){
     HRESULT hr;
     LPWSTR deviceId;
     IPropertyStore* propertyStore;

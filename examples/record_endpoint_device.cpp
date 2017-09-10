@@ -13,7 +13,7 @@ int main()
     // choose Device
     int deviceCount = deviceManager.getDeviceCount();
     for(unsigned int i=0; i<deviceCount; i++) {
-        std::wcout << i << ": " << deviceManager.getDevice(i).getDescpiption() << std::endl;
+        std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
     }
     unsigned int deviceIndex;
     std::cin >> deviceIndex;

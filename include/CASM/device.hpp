@@ -12,26 +12,25 @@
 
 /// @class Device
 /// @brief wrapper under Device fabric
-class Device final : public EndPointInterface {
+class Device final : public DeviceInterface {
 public:
     Device();
     Device(void* deviceHandler, CASM::DeviceType deviceType);
     ~Device() override;
 
     /// EndPointInterface interface
-    void init(std::chrono::duration<double> bufferDuration);
+    void init(std::chrono::duration<double> bufferDuration) final;
     void open(CASM::Access access) final;
     void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;
 
-    WaveProperties getDeviceWaveProperties();
-    WaveProperties getStreamWaveProperties();
-    std::wstring getDescpiption();
+    WaveProperties getDeviceWaveProperties() final;
+    std::wstring getDescription() final;
 
 private:
-    std::shared_ptr<DeviceBase> device;
+    std::shared_ptr<DeviceInterface> device;
 };
 
 #endif //CASM_DEVICE_HPP
