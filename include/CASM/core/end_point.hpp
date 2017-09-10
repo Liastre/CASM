@@ -4,16 +4,21 @@
 #ifndef CASM_END_POINT_HPP
 #define CASM_END_POINT_HPP
 
+#include <CASM/CASM.hpp>
 #include <CASM/core/buffer.hpp>
 
 /// @class EndPointInterface
-/// @brief abstract interface class
-class EndPointInterface{
+/// @brief EndPoint abstract interface class
+class EndPointInterface {
 public:
     EndPointInterface() = default;
     virtual ~EndPointInterface() = default;
 
-
+    /// @brief open EndPoint and initialize the buffer
+    /// @param [in] access - requested access to device
+    virtual void open(CASM::Access access)=0;
+    /// @brief close EndPoint and destroy the buffer
+    virtual void close()=0;
     /// @brief read from EndPoint to Buffer
     /// @param [out] buffer - Buffer where we push data
     /// @return true if we read all data, false if some data left
@@ -22,9 +27,25 @@ public:
     /// @param [in] buffer - Buffer where we take data
     /// @return true if we wrote all data, false if some data left
     virtual bool write(Buffer buffer)=0;
+
     /// @brief check if EndPoint still active and available
     /// @return true if we EndPoint still available, false if don't
     virtual bool isAvailable()=0;
+    /// @brief get output stream wave properties
+    /// @return output stream wave properties
+    //virtual WaveProperties getStreamWaveProperties()=0;
 };
+
+
+/*///@brief EndPoint base class
+class EndPointBase : public EndPointInterface {
+public:
+    WaveProperties getStreamWaveProperties() final {
+        return streamWaveProperties;
+    }
+
+protected:
+    WaveProperties streamWaveProperties;
+};*/
 
 #endif //CASM_END_POINT_HPP

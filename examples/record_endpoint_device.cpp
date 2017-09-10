@@ -19,8 +19,10 @@ int main()
     std::cin >> deviceIndex;
     Device endPoint = deviceManager.getDevice(deviceIndex);
 
-    endPoint.open(CASM::READ, std::chrono::seconds(1));
-    File file("endPointDevice.wav", CASM::WRITE, endPoint.getStreamWaveProperties());
+    endPoint.init(std::chrono::seconds(1));
+    endPoint.open(CASM::READ);
+
+    File file("endPointDevice.wav", endPoint.getStreamWaveProperties());
 
     // write data
     Buffer buffer(endPoint.getStreamWaveProperties(), std::chrono::seconds(1));
@@ -28,7 +30,7 @@ int main()
         endPoint.read(buffer);
         file.write(buffer);
     }
-    file.finalize();
+    file.close();
     endPoint.close();
 
     return 0;

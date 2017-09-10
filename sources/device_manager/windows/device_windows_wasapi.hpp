@@ -15,10 +15,10 @@ public:
     DeviceWindowsWASAPI();
     DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);
     ~DeviceWindowsWASAPI() final;
-    int open(CASM::Access, std::chrono::duration<double> fragmentDuration) final;
-    int close() final;
 
     /// EndPointInterface
+    void open(CASM::Access) final;
+    void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;

@@ -14,48 +14,51 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
     assert(hr==S_OK);*/
 }
 
-DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
-    /*captureClient->Release();
-    renderClient->Release();*/
-}
-
 DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType) : DeviceTemplate<IMMDevice>::DeviceTemplate(device, deviceType){
     HRESULT hr;
     LPWSTR deviceId;
     IPropertyStore* propertyStore;
-    PROPVARIANT deviceProperty{};
-    WAVEFORMATEX deviceWaveProperties{};
+    PROPVARIANT devicePROPVARIANT{};
+    WAVEFORMATEX deviceWAVEFORMATEX{};
 
     // active
-    PropVariantInit(&deviceProperty);
+    PropVariantInit(&devicePROPVARIANT);
 
     // read device properties
     hr = handler->OpenPropertyStore(STGM_READ, &propertyStore);
     assert(hr==S_OK);
-    hr = propertyStore->GetValue(PKEY_AudioEngine_DeviceFormat, &deviceProperty);
+    hr = propertyStore->GetValue(PKEY_AudioEngine_DeviceFormat, &devicePROPVARIANT);
     assert(hr==S_OK);
-    deviceWaveProperties = *((WAVEFORMATEX*)deviceProperty.blob.pBlobData);
-    DeviceWindowsWASAPI::deviceWaveProperties = WaveProperties(deviceWaveProperties.nChannels, deviceWaveProperties.nSamplesPerSec, deviceWaveProperties.wBitsPerSample);
-    propertyStore->GetValue(PKEY_Device_DeviceDesc, &deviceProperty);
-    name = deviceProperty.pwszVal;
+    deviceWAVEFORMATEX = *((WAVEFORMATEX*)devicePROPVARIANT.blob.pBlobData);
+    deviceWaveProperties = WaveProperties(deviceWAVEFORMATEX.nChannels, deviceWAVEFORMATEX.nSamplesPerSec, deviceWAVEFORMATEX.wBitsPerSample);
+    propertyStore->GetValue(PKEY_Device_DeviceDesc, &devicePROPVARIANT);
+    name = devicePROPVARIANT.pwszVal;
 
     hr = handler->OpenPropertyStore(STGM_READ, &propertyStore);
     assert(hr==S_OK);
-    hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &deviceProperty);
+    hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &devicePROPVARIANT);
     assert(hr==S_OK);
-    description = std::wstring(deviceProperty.pwszVal);
+    description = std::wstring(devicePROPVARIANT.pwszVal);
 
     hr = handler->GetId(&deviceId);
     assert(hr==S_OK);
 
     // clear
-    PropVariantClear(&deviceProperty);
+    PropVariantClear(&devicePROPVARIANT);
     CoTaskMemFree(deviceId);
     propertyStore->Release();
 }
 
-int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double> fragmentDuration) {
+DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
+    /*captureClient->Release();
+    renderClient->Release();*/
+}
+
+void DeviceWindowsWASAPI::open(CASM::Access access) {
     // checks
+    if (bufferDuration == std::chrono::duration<double>::zero()) {
+        throw std::logic_error("Buffer duration is zero");
+    }
     if (active) {
         throw std::logic_error("Device already in use");
     }
@@ -68,8 +71,8 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     WAVEFORMATEX *deviceMixFormat = nullptr;
     DWORD streamFlags;
     uint32_t fragmentFrameCount;
+    uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(bufferDuration).count()/100);
 
-    fragmentDurationRequested = (uint64_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(fragmentDuration).count()/100);
     switch(type) {
     case CASM::RENDER:
         streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
@@ -92,10 +95,9 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     case CASM::READ:
         hr = stream->Initialize(
                 AUDCLNT_SHAREMODE_SHARED,
-                streamFlags,
-                //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
+                streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
                 fragmentDurationRequested,
-                0,//0,
+                0,
                 deviceMixFormat,
                 nullptr);
         assert(hr==S_OK);
@@ -151,19 +153,15 @@ int DeviceWindowsWASAPI::open(CASM::Access access, std::chrono::duration<double>
     hr = stream->Start();
     assert(hr==S_OK);
     active = true;
-
-    return 0;
 }
 
-int DeviceWindowsWASAPI::close() {
+void DeviceWindowsWASAPI::close() {
     HRESULT hr;
 
     // stop playing/recording
     hr = stream->Stop();
     assert(hr==S_OK);
     active = false;
-
-    return 0;
 }
 
 bool DeviceWindowsWASAPI::read(Buffer& buffer)

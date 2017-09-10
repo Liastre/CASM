@@ -7,9 +7,8 @@ set(CMAKE_DEBUG_POSTFIX d)
 #======== LIBRARY SOURCES ==========
 #===================================
 file(GLOB library_headers
-    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
-    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.inl
     ${PROJECT_SOURCE_DIR}/include/CASM/*.hpp
+    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
     )
 
 file(GLOB library_sources

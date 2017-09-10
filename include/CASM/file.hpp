@@ -19,10 +19,12 @@ enum FileType{
 
 class File final : public EndPointInterface {
 public:
-    File(std::string fileName, CASM::Access access, WaveProperties paramWaveProperties = WaveProperties());
+    File(std::string fileName, WaveProperties paramWaveProperties = WaveProperties());
     ~File();
 
     // interface
+    void open(CASM::Access access) final;
+    void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;
@@ -39,7 +41,6 @@ public:
         return true;
     }
 
-    int finalize();
     std::string getName();
 
 private:
@@ -58,6 +59,7 @@ private:
 private:
     bool finalized;
     CASM::WavHeader wavHeader;
+    WaveProperties waveProperties;
     std::string name;
     std::string path;
     std::string extension;

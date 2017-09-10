@@ -68,12 +68,22 @@ std::ostream& write_word(std::ostream& outs, Word value, unsigned size = sizeof(
     return outs;
 }*/
 
-File::File(std::string fileName, CASM::Access access, WaveProperties waveProperties) {
+File::File(std::string fileName, WaveProperties waveProperties) {
     posDataChunk = 0;
     posFileLength = 0;
     finalized = false;
     splitExtension(fileName);
+    File::waveProperties = waveProperties;
+}
 
+File::~File() {
+    if (!finalized) {
+        close();
+    }
+}
+
+void File::open(CASM::Access access)
+{
     switch(access){
     case CASM::WRITE:
         generateName();
@@ -81,17 +91,13 @@ File::File(std::string fileName, CASM::Access access, WaveProperties wavePropert
         writeFile(waveProperties);
         break;
     case CASM::READ:
-        path = fileName;
+        path = name + '.' + extension;
         if(isExist(path)) {
             readFile();
         }
         break;
-    }
-}
-
-File::~File() {
-    if (!finalized) {
-        finalize();
+    default:
+        throw std::runtime_error("Impossible access value");
     }
 }
 
@@ -99,13 +105,13 @@ bool File::writeFile(WaveProperties waveProperties) {
     stream.open(path, /*std::ios::out | */std::ios::binary);
 
     // write header
-    stream.write("RIFF", 4);                // RIFF chunk
-    little_endian::write<uint32_t>(stream, 0);      // RIFF chunk size in bytes
-    stream.write("WAVE", 4);                // file type
+    stream.write("RIFF", 4);                    // RIFF chunk
+    little_endian::write<uint32_t>(stream, 0);  // RIFF chunk size in bytes
+    stream.write("WAVE", 4);                    // file type
 
-    stream.write("fmt ", 4);                // fmt chunk
-    little_endian::write<uint32_t>(stream, 16);     // size of fmt chunk 16 + extra format bytes
-    little_endian::write<uint16_t>(stream, 3);      // format (compression code)
+    stream.write("fmt ", 4);                    // fmt chunk
+    little_endian::write<uint32_t>(stream, 16); // size of fmt chunk 16 + extra format bytes
+    little_endian::write<uint16_t>(stream, 3);  // format (compression code)
 
     little_endian::write<uint16_t>(stream, waveProperties.getChannelsCount());
     little_endian::write<uint32_t>(stream, waveProperties.getSamplesPerSecond());
@@ -214,14 +220,15 @@ bool File::isAvailable()
 }
 
 bool File::write(std::vector<uint8_t> arr) {
-    for(int i=0; i<arr.size(); i++) {
-        little_endian::write<uint8_t>(stream, arr[i]);
+    for (uint8_t i : arr) {
+        little_endian::write<uint8_t>(stream, i);
     }
 
     return true;
 };
 
-int File::finalize() {
+void File::close()
+{
     // (We'll need the final file size to fix the chunk sizes above)
     posFileLength = stream.tellp();
 
@@ -235,6 +242,4 @@ int File::finalize() {
 
     stream.close();
     finalized = true;
-
-    return 0;
 }
