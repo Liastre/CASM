@@ -35,7 +35,7 @@ void Buffer::init(uint32_t samplesPerSecond, uint32_t framesCount, uint16_t bloc
     buffer = std::make_shared< BufferBase >(Buffer::framesCount*blockAlign);
 }
 
-void Buffer::read(std::ofstream &stream) {
+void Buffer::read(std::fstream &stream) {
     buffer->read(stream);
 }
 

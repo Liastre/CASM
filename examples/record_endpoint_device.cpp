@@ -18,6 +18,8 @@ int main()
     unsigned int deviceIndex;
     std::cin >> deviceIndex;
     Device endPoint = deviceManager.getDevice(deviceIndex);
+
+    // init device
     endPoint.init(std::chrono::seconds(1));
     endPoint.open(CASM::READ);
 

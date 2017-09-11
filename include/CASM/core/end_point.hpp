@@ -14,7 +14,7 @@ public:
     EndPointInterface() = default;
     virtual ~EndPointInterface() = default;
 
-    /// @brief open EndPoint and initialize the buffer
+    /// @brief set EndPoint ready for transferring/receiving data and initialize the buffer
     /// @param [in] access - requested access to device
     virtual void open(CASM::Access access)=0;
     /// @brief close EndPoint and destroy the buffer

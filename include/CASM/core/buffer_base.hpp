@@ -21,7 +21,7 @@ public:
     BufferBase(uint32_t size);
     ~BufferBase() = default;
 
-    void read(std::ofstream& stream);
+    void read(std::fstream& stream);
     void write(BufferBase* data);
     void write(void* arrayPtr, const uint32_t sizeInBytes);
     void copy(BufferBase* data);

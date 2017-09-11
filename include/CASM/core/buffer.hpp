@@ -21,7 +21,7 @@ public:
     Buffer(uint32_t samplesPerSecond, uint32_t framesCount, uint16_t blockAlign);
     ~Buffer();
 
-    void read(std::ofstream &stream);
+    void read(std::fstream &stream);
 
     /// @brief writes data from input buffer to current
     /// @param [in] data - copying from

@@ -29,23 +29,11 @@ public:
     bool write(Buffer buffer) final;
     bool isAvailable() final;
 
-    int write(uint16_t value);
-    bool write(std::vector<uint8_t> arr);
-
-    template <typename T>
-    bool write(T* array, uint_fast64_t arraySize) {
-        for(uint_fast64_t i=0; i<arraySize; i++) {
-            write<T>(stream, array[i]);
-        }
-
-        return true;
-    }
-
     std::string getName();
 
 private:
-    bool writeFile(WaveProperties waveProperties);
-    bool readFile();
+    bool writeHeader();
+    bool readHeader();
     bool isExist(const std::string& name);
     bool splitExtension(const std::string& fileName);
     bool generateName();
@@ -62,7 +50,7 @@ private:
     std::string name;
     std::string path;
     std::string extension;
-    std::ofstream stream;
+    std::fstream stream;
     int64_t posDataChunk;
     int64_t posFileLength;
 };

@@ -17,7 +17,7 @@ BufferBase::BufferBase(uint32_t size) : BufferBase() {
     buffer.reserve(size);
 }
 
-void BufferBase::read(std::ofstream& stream) {
+void BufferBase::read(std::fstream& stream) {
     bitsRep val;
     for(uint32_t i = 0; i<filled; i+=2) {
         val.int8[0] = buffer[i];

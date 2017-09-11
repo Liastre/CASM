@@ -7,12 +7,17 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
+#include <CASM/CASM.hpp>
 
 namespace little_endian {
 template<typename T>
-void write(std::ofstream& stream, const T& t)
-{
+void write(std::fstream& stream, const T& t) {
     stream.write((const char*) &t, sizeof(T));
+}
+
+template<typename T>
+void read(std::fstream& stream, const T& t) {
+    stream.read((char*) &t, sizeof(T));
 }
 }
 
@@ -88,12 +93,12 @@ void File::open(CASM::Access access)
     case CASM::WRITE:
         generateName();
         path = name + '.' + extension;
-        writeFile(streamWaveProperties);
+        writeHeader();
         break;
     case CASM::READ:
         path = name + '.' + extension;
         if(isExist(path)) {
-            readFile();
+            readHeader();
         }
         break;
     default:
@@ -101,23 +106,22 @@ void File::open(CASM::Access access)
     }
 }
 
-bool File::writeFile(WaveProperties waveProperties) {
-    stream.open(path, /*std::ios::out | */std::ios::binary);
+bool File::writeHeader() {
+    stream.open(path, std::ios::out | std::ios::binary);
 
-    // write header
-    stream.write("RIFF", 4);                    // RIFF chunk
-    little_endian::write<uint32_t>(stream, 0);  // RIFF chunk size in bytes
-    stream.write("WAVE", 4);                    // file type
+    little_endian::write<char[4]>(stream, {'R','I','F','F'});   // RIFF chunk
+    little_endian::write<uint32_t>(stream, 0);                  // RIFF chunk size in bytes
+    little_endian::write<char[4]>(stream, {'W','A','V','E'});   // file type
 
-    stream.write("fmt ", 4);                    // fmt chunk
-    little_endian::write<uint32_t>(stream, 16); // size of fmt chunk 16 + extra format bytes
-    little_endian::write<uint16_t>(stream, 3);  // format (compression code)
+    little_endian::write<char[4]>(stream, {'f','m','t',' '});   // fmt chunk
+    little_endian::write<uint32_t>(stream, 16);                 // size of fmt chunk 16 + extra format bytes
+    little_endian::write<uint16_t>(stream, 3);                  // format (compression code)
 
-    little_endian::write<uint16_t>(stream, waveProperties.getChannelsCount());
-    little_endian::write<uint32_t>(stream, waveProperties.getSamplesPerSecond());
-    little_endian::write<uint32_t>(stream, waveProperties.getBytesPerSecond());
-    little_endian::write<uint16_t>(stream, waveProperties.getBlockAlign());
-    little_endian::write<uint16_t>(stream, waveProperties.getBitsPerSample());
+    little_endian::write<uint16_t>(stream, streamWaveProperties.getChannelsCount());
+    little_endian::write<uint32_t>(stream, streamWaveProperties.getSamplesPerSecond());
+    little_endian::write<uint32_t>(stream, streamWaveProperties.getBytesPerSecond());
+    little_endian::write<uint16_t>(stream, streamWaveProperties.getBlockAlign());
+    little_endian::write<uint16_t>(stream, streamWaveProperties.getBitsPerSample());
 
     // Write the data chunk header
     posDataChunk = stream.tellp();
@@ -126,29 +130,30 @@ bool File::writeFile(WaveProperties waveProperties) {
     return true;
 }
 
-bool File::readFile() {
-    std::ifstream file(path, std::ios::binary);
+bool File::readHeader() {
+    stream.open(path, std::ios::in | std::ios::binary);
 
-    file.read(wavHeader.chunkID, 4);
-    file.read((char*)&wavHeader.chunkSize, 4);
-    file.read(wavHeader.chunkFormat, 4);
-    file.read(wavHeader.fmtID, 4);
-    file.read((char*)&wavHeader.fmtSize, 4);
-    file.read((char*)&wavHeader.fmtAudioFormat, 2);
-    file.read((char*)&wavHeader.fmtNumChannels, 2);
-    file.read((char*)&wavHeader.fmtSampleRate, 4);
-    file.read((char*)&wavHeader.fmtByteRate, 4);
-    file.read((char*)&wavHeader.fmtBlockAlign, 2);
-    file.read((char*)&wavHeader.fmtBitsPerSample, 2);
+    little_endian::read<char[4]>(stream, wavHeader.chunkID);
+    little_endian::read<uint32_t>(stream, wavHeader.chunkSize);
+    little_endian::read<char[4]>(stream, wavHeader.chunkFormat);
+    little_endian::read<char[4]>(stream, wavHeader.fmtID);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtSize);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtAudioFormat);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtNumChannels);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtSampleRate);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtByteRate);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtBlockAlign);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtBitsPerSample);
 
-    int64_t tmpPos = file.tellg();
-    file.read(wavHeader.dataID, 4);
+    int64_t tmpPos = stream.tellg();
+    little_endian::read<char[4]>(stream, wavHeader.dataID);
     if(std::strcmp(wavHeader.dataID, "data")!=0) {
-        file.seekg(tmpPos);
-        file.read((char*)&wavHeader.fmtExtraParamSize, 2);
+        stream.seekg(tmpPos);
+        little_endian::read<uint16_t>(stream, wavHeader.fmtExtraParamSize);
         wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
-        file.read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
-        file.read(wavHeader.dataID, 4);
+        // TODO something
+        stream.read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        little_endian::read<char[4]>(stream, wavHeader.dataID);
     } else {
         wavHeader.fmtExtraParamSize = 0;
         wavHeader.fmtExtraParams = nullptr;
@@ -157,7 +162,10 @@ bool File::readFile() {
     if(std::strcmp(wavHeader.dataID, "data")!=0) {
         return false;
     }
-    file.read((char*)&wavHeader.dataSize, 4);
+    little_endian::read<uint32_t>(stream, wavHeader.dataSize);
+
+    // TODO: set bits type depending on wavHeader.fmtAudioFormat
+    streamWaveProperties = WaveProperties(wavHeader.fmtNumChannels, wavHeader.fmtSampleRate, PCM_16BIT_SIGNED);
 
     return true;
 }
@@ -198,14 +206,7 @@ bool File::generateName() {
     return true;
 }
 
-int File::write(uint16_t value) {
-    little_endian::write<uint16_t>(stream, value);
-
-    return 0;
-};
-
-bool File::read(Buffer& buffer)
-{
+bool File::read(Buffer& buffer) {
 
 }
 
@@ -218,14 +219,6 @@ bool File::isAvailable()
 {
     return true;
 }
-
-bool File::write(std::vector<uint8_t> arr) {
-    for (uint8_t i : arr) {
-        little_endian::write<uint8_t>(stream, i);
-    }
-
-    return true;
-};
 
 void File::close()
 {

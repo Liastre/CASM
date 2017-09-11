@@ -18,8 +18,9 @@ enum BitsType {
 class WaveProperties {
 public:
     WaveProperties();
+    // TODO: rewrite using single init method
     WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, BitsType bitsType);
-    WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t paramSamplesPerSecond, uint32_t paramBitsPerSample, bool paramIsSigned = true);
+    WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned = true);
     ~WaveProperties();
     uint16_t getChannelsCount();
     uint16_t getBitsPerSample();

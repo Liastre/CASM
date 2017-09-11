@@ -10,20 +10,21 @@ WaveProperties::WaveProperties() {
     bitsPerSample = 0;
 }
 
-WaveProperties::WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t paramSamplesPerSecond, uint32_t paramBitsPerSample, bool paramIsSigned) {
-    switch (paramBitsPerSample) {
+WaveProperties::WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned) {
+    switch (bitsPerSample) {
     case 16:
         isSigned = paramIsSigned;
-        bitsPerSample = 16;
+        WaveProperties::bitsPerSample = 16;
         if(isSigned) {
             bitsType = PCM_16BIT_SIGNED;
         } else {
             bitsType = PCM_16BIT_UNSIGNED;
         }
         break;
+
     case 32:
         isSigned = paramIsSigned;
-        bitsPerSample = 32;
+        WaveProperties::bitsPerSample = 32;
         if(isSigned) {
             bitsType = PCM_32BIT_SIGNED;
         } else {
@@ -31,8 +32,8 @@ WaveProperties::WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t p
         }
         break;
     }
-    channelsCount = paramChannelsCount;
-    samplesPerSecond = paramSamplesPerSecond;
+    WaveProperties::channelsCount = channelsCount;
+    WaveProperties::samplesPerSecond = samplesPerSecond;
     blockAlign = (uint16_t)(channelsCount * bitsPerSample / 8);
     bytesPerSecond = samplesPerSecond * blockAlign;
 }
