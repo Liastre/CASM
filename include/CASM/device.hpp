@@ -19,7 +19,7 @@ public:
     ~Device() override;
 
     /// EndPointInterface interface
-    void init(std::chrono::duration<double> bufferDuration) final;
+    bool init(std::chrono::duration<double> bufferDuration) final;
     void open(CASM::Access access) final;
     void close() final;
     bool read(Buffer& buffer) final;
@@ -27,6 +27,7 @@ public:
     bool isAvailable() final;
 
     WaveProperties getDeviceWaveProperties() final;
+    WaveProperties getStreamWaveProperties() final;
     std::wstring getDescription() final;
 
 private:

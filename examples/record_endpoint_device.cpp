@@ -18,11 +18,12 @@ int main()
     unsigned int deviceIndex;
     std::cin >> deviceIndex;
     Device endPoint = deviceManager.getDevice(deviceIndex);
-
     endPoint.init(std::chrono::seconds(1));
     endPoint.open(CASM::READ);
 
+    // create file
     File file("endPointDevice.wav", endPoint.getStreamWaveProperties());
+    file.open(CASM::WRITE);
 
     // write data
     Buffer buffer(endPoint.getStreamWaveProperties(), std::chrono::seconds(1));

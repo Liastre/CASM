@@ -13,24 +13,25 @@
 /// @brief base class for Device object.
 // TODO: DeviceBase to DeviceInterface, pure abstract class and DeviceTemplate to DeviceBase
 // TODO: remove getStreamWaveProperties() and possible rename to gerEndPointWaveProperties?
-class DeviceInterface : public EndPointBase {
+class DeviceInterface : public virtual EndPointInterface {
 public:
     DeviceInterface() = default;
     ~DeviceInterface() override = default;
 
-    virtual void init(std::chrono::duration<double> bufferDuration)=0;
+    /// @return true if success and false if impossible
+    virtual bool init(std::chrono::duration<double> bufferDuration)=0;
     virtual WaveProperties getDeviceWaveProperties()=0;
     virtual std::wstring getDescription()=0;
 };
 
 template <class TDeviceHandler>
-class DeviceBase : public DeviceInterface {
+class DeviceBase : public virtual DeviceInterface, public EndPointBase {
 public:
     DeviceBase();
     DeviceBase(void* handler, CASM::DeviceType deviceType);
     ~DeviceBase() override;
 
-    void init(std::chrono::duration<double> bufferDuration) final;
+    bool init(std::chrono::duration<double> bufferDuration) final;
     WaveProperties getDeviceWaveProperties() final;
     std::wstring getDescription() final;
 
@@ -39,7 +40,6 @@ protected:
     std::wstring name;
     std::wstring description;
     WaveProperties deviceWaveProperties;    ///< actual device wave properties
-    WaveProperties streamWaveProperties;    ///< output stream properties
     bool active;
     CASM::DeviceType type;
     std::chrono::duration<double> bufferDuration;

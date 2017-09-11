@@ -36,9 +36,8 @@ public:
     virtual WaveProperties getStreamWaveProperties()=0;
 };
 
-
 ///@brief EndPoint base class
-class EndPointBase : public EndPointInterface {
+class EndPointBase : public virtual EndPointInterface {
 public:
     WaveProperties getStreamWaveProperties() final {
         return streamWaveProperties;

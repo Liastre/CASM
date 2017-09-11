@@ -12,7 +12,7 @@ device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
 Device::~Device() {
 };
 
-void Device::init(std::chrono::duration<double> bufferDuration) {
+bool Device::init(std::chrono::duration<double> bufferDuration) {
     device->init(bufferDuration);
 }
 
@@ -32,9 +32,12 @@ bool Device::write(Buffer buffer) {
     device->write(buffer);
 }
 
-WaveProperties Device::getDeviceWaveProperties()
-{
+WaveProperties Device::getDeviceWaveProperties() {
     return device->getDeviceWaveProperties();
+}
+
+WaveProperties Device::getStreamWaveProperties() {
+    return device->getStreamWaveProperties();
 }
 
 std::wstring Device::getDescription() {
@@ -44,4 +47,3 @@ std::wstring Device::getDescription() {
 bool Device::isAvailable() {
     return true;
 }
-

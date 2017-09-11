@@ -2,8 +2,8 @@
 // Created on 30 May.
 // ===========================================
 
-#ifndef CROSSAUDIOSTREAMMANAGER_FILE_HPP
-#define CROSSAUDIOSTREAMMANAGER_FILE_HPP
+#ifndef CASM_FILE_HPP
+#define CASM_FILE_HPP
 
 #include <CASM/CASM.hpp>
 #include <CASM/core/end_point.hpp>
@@ -20,7 +20,7 @@ enum FileType{
 class File final : public EndPointBase {
 public:
     File(std::string fileName, WaveProperties paramWaveProperties = WaveProperties());
-    ~File();
+    ~File() override;
 
     // interface
     void open(CASM::Access access) final;
@@ -67,4 +67,4 @@ private:
     int64_t posFileLength;
 };
 
-#endif //CROSSAUDIOSTREAMMANAGER_FILE_HPP
+#endif //CASM_FILE_HPP

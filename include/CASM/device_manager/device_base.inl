@@ -18,9 +18,14 @@ DeviceBase<TDeviceHandler>::~DeviceBase() {
 }
 
 template <class TDeviceHandler>
-void DeviceBase<TDeviceHandler>::init(std::chrono::duration<double> bufferDuration)
+bool DeviceBase<TDeviceHandler>::init(std::chrono::duration<double> bufferDuration)
 {
+    if (active) {
+        return false;
+    }
     DeviceBase::bufferDuration = bufferDuration;
+
+    return true;
 }
 
 template <class TDeviceHandler>
