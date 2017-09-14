@@ -39,6 +39,14 @@ void Buffer::read(std::fstream &stream) {
     buffer->read(stream);
 }
 
+void Buffer::read(void* arrayPtr, uint32_t sizeInBytes) {
+    buffer->read(arrayPtr, sizeInBytes);
+}
+
+void Buffer::write(std::fstream &stream) {
+    buffer->write(stream);
+}
+
 void Buffer::write(Buffer data) {
     buffer->write(data.buffer.get());
 }

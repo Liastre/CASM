@@ -18,17 +18,35 @@ BufferBase::BufferBase(uint32_t size) : BufferBase() {
 }
 
 void BufferBase::read(std::fstream& stream) {
-    bitsRep val;
-    for(uint32_t i = 0; i<filled; i+=2) {
-        val.int8[0] = buffer[i];
-        val.int8[1] = buffer[i+1];
-        int16_t tmp = val.int16[0];
-        stream.write((const char*) &tmp, 2);
+    for(uint32_t i = 0; i<filled; i++) {
+        stream.write((const char*) &buffer[i], 1);
     }
-    /*for(uint32_t i = 0; i<filled; i++) {
-        stream.write((const char*) &(*buffer)[i], 1);
-    }*/
     clear();
+}
+
+
+void BufferBase::read(void* arrayPtr, const uint32_t sizeInBytes) {
+    if (sizeInBytes>filled) {
+        // buffer overflow
+        throw std::runtime_error("Buffer read overflow!");
+    }
+
+    auto array = static_cast<uint8_t*>(arrayPtr);
+    for(uint32_t i=0; i<sizeInBytes; i++) {
+        array[i] = buffer[i];
+    }
+    clear();
+}
+
+void BufferBase::write(std::fstream& stream) {
+    uint32_t i;
+    for(i = filled; i<size; i++) {
+        stream.read((char*) &buffer[i], 1);
+        if(stream.eof()) {
+            break;
+        }
+    }
+    filled = i;
 }
 
 void BufferBase::write(BufferBase* data) {
@@ -53,7 +71,7 @@ void BufferBase::write(void* arrayPtr, const uint32_t sizeInBytes) {
             buffer.emplace_back(0);
         }
     } else {
-        uint8_t* array = static_cast<uint8_t*>(arrayPtr);
+        auto array = static_cast<uint8_t*>(arrayPtr);
         for(uint32_t i=0; i<sizeInBytes; i++) {
             buffer.emplace_back(array[i]);
         }
@@ -82,6 +100,5 @@ void BufferBase::clear() {
 uint32_t BufferBase::getSize() {
     return size;
 }
-
 
 #endif //CASM_BUFFER_BASE_INL

@@ -11,7 +11,6 @@
 
 /// @class DeviceBase
 /// @brief base class for Device object.
-// TODO: DeviceBase to DeviceInterface, pure abstract class and DeviceTemplate to DeviceBase
 // TODO: remove getStreamWaveProperties() and possible rename to gerEndPointWaveProperties?
 class DeviceInterface : public virtual EndPointInterface {
 public:
@@ -42,6 +41,7 @@ protected:
     WaveProperties deviceWaveProperties;    ///< actual device wave properties
     bool active;
     CASM::DeviceType type;
+    uint32_t bufferFramesCount;
     std::chrono::duration<double> bufferDuration;
 };
 

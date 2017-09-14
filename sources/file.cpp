@@ -87,8 +87,7 @@ File::~File() {
     }
 }
 
-void File::open(CASM::Access access)
-{
+void File::open(CASM::Access access) {
     switch(access){
     case CASM::WRITE:
         generateName();
@@ -207,16 +206,14 @@ bool File::generateName() {
 }
 
 bool File::read(Buffer& buffer) {
-
+    buffer.write(stream);
 }
 
 bool File::write(Buffer buffer) {
     buffer.read(stream);
 };
 
-
-bool File::isAvailable()
-{
+bool File::isAvailable() {
     return true;
 }
 

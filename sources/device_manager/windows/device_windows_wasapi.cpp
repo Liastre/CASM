@@ -70,7 +70,7 @@ void DeviceWindowsWASAPI::open(CASM::Access access) {
     HRESULT hr;
     WAVEFORMATEX *deviceMixFormat = nullptr;
     DWORD streamFlags;
-    uint32_t fragmentFrameCount;
+    uint32_t tmpBufferFramesCount;
     uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(bufferDuration).count()/100);
 
     switch(type) {
@@ -133,19 +133,20 @@ void DeviceWindowsWASAPI::open(CASM::Access access) {
     assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
-    hr = stream->GetBufferSize(&fragmentFrameCount);
+    hr = stream->GetBufferSize(&tmpBufferFramesCount);
     assert(hr==S_OK);
+    bufferFramesCount = tmpBufferFramesCount;
 
     /*=======
     // Grab the entire buffer for the initial fill operation.
-    hr = pRenderClient->GetBuffer(bufferFrameCount, &pData);
+    hr = pRenderClient->GetBuffer(bufferFramesCount, &pData);
     EXIT_ON_ERROR(hr)
 
     // Load the initial data into the shared buffer.
-    hr = pMySource->LoadData(bufferFrameCount, pData, &flags);
+    hr = pMySource->LoadData(bufferFramesCount, pData, &flags);
     EXIT_ON_ERROR(hr)
 
-    hr = pRenderClient->ReleaseBuffer(bufferFrameCount, flags);
+    hr = pRenderClient->ReleaseBuffer(bufferFramesCount, flags);
     EXIT_ON_ERROR(hr)
     //============*/
 
@@ -208,7 +209,7 @@ bool DeviceWindowsWASAPI::read(Buffer& buffer)
 bool DeviceWindowsWASAPI::write(Buffer buffer) {
     HRESULT hr;
     DWORD flags(0);
-    uint32_t numFramesPadding(0);
+    uint32_t bufferFramesPadding(0);
     uint32_t numFramesAvailable(0);
     uint8_t *pData;
 
@@ -219,10 +220,10 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
         //Sleep((DWORD)(buffer.getDuration()/fragmentDurationRequested*1000/2));
 
         // See how much buffer space is available.
-        hr = stream->GetCurrentPadding(&numFramesPadding);
+        hr = stream->GetCurrentPadding(&bufferFramesPadding);
         assert(hr==S_OK);
 
-        //numFramesAvailable = buffer.getSize() - numFramesPadding;
+        numFramesAvailable = bufferFramesCount - bufferFramesPadding;
 
         // Grab all the available space in the shared buffer.
         hr = renderClient->GetBuffer(numFramesAvailable, &pData);
@@ -233,14 +234,13 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
         //assert(hr==S_OK);
         //std::fill( pData, pData + numFramesAvailable, 3 );
         //std::copy(buffer.begin(), src.begin()+count, dest);
-        //TODO: add
-        //data.read(pData, numFramesAvailable);
+        buffer.read(pData, numFramesAvailable*streamWaveProperties.getBlockAlign());
 
         hr = renderClient->ReleaseBuffer(numFramesAvailable, flags);
         assert(hr==S_OK);
     }
 
-    return 0;
+    return true;
 }
 
 bool DeviceWindowsWASAPI::isAvailable()
