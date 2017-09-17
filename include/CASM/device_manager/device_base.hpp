@@ -17,8 +17,6 @@ public:
     DeviceInterface() = default;
     ~DeviceInterface() override = default;
 
-    /// @return true if success and false if impossible
-    virtual bool init(std::chrono::duration<double> bufferDuration)=0;
     virtual WaveProperties getDeviceWaveProperties()=0;
     virtual std::wstring getDescription()=0;
 };
@@ -30,7 +28,7 @@ public:
     DeviceBase(void* handler, CASM::DeviceType deviceType);
     ~DeviceBase() override;
 
-    bool init(std::chrono::duration<double> bufferDuration) final;
+    // getters
     WaveProperties getDeviceWaveProperties() final;
     std::wstring getDescription() final;
 
@@ -38,8 +36,8 @@ protected:
     TDeviceHandler *handler;
     std::wstring name;
     std::wstring description;
-    WaveProperties deviceWaveProperties;    ///< actual device wave properties
-    bool active;
+    /// @brief actual device wave properties
+    WaveProperties deviceWaveProperties;
     CASM::DeviceType type;
     uint32_t bufferFramesCount;
     std::chrono::duration<double> bufferDuration;

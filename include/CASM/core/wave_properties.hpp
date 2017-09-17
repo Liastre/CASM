@@ -22,13 +22,13 @@ public:
     WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, BitsType bitsType);
     WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned = true);
     ~WaveProperties();
-    uint16_t getChannelsCount();
-    uint16_t getBitsPerSample();
-    uint32_t getSamplesPerSecond();
-    uint32_t getBytesPerSecond();
-    uint16_t getBlockAlign();
-    BitsType getBitsType();
-    bool getSigned();
+    uint16_t getChannelsCount() const;
+    uint16_t getBitsPerSample() const;
+    uint32_t getSamplesPerSecond() const;
+    uint32_t getBytesPerSecond() const;
+    uint16_t getBlockAlign() const;
+    BitsType getBitsType()const;
+    bool getSigned() const;
     bool operator==(WaveProperties waveProperties);
 
 private:

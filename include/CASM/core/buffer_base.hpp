@@ -15,26 +15,18 @@ union bitsRep{
     int8_t int8[4];
 };
 
-class BufferInterface {
+class BufferStorage {
 public:
-    virtual void read(std::fstream& stream)=0;
-    virtual void write(BufferInterface* data)=0;
-    virtual void write(void* arrayPtr, uint32_t sizeInBytes)=0;
-    virtual void copy(BufferInterface* data)=0;
-};
-
-class BufferBase {
-public:
-    BufferBase();
-    BufferBase(uint32_t size);
-    ~BufferBase() = default;
+    BufferStorage();
+    explicit BufferStorage(uint32_t size);
+    ~BufferStorage() = default;
 
     void read(std::fstream& stream);
     void read(void* arrayPtr, uint32_t sizeInBytes);
     void write(std::fstream& stream);
-    void write(BufferBase* data);
+    void write(BufferStorage* data);
     void write(void* arrayPtr, uint32_t sizeInBytes);
-    void copy(BufferBase* data);
+    void copy(BufferStorage* data);
     void clear();
     uint32_t getSize();
 

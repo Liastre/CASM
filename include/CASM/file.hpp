@@ -19,21 +19,24 @@ enum FileType{
 
 class File final : public EndPointBase {
 public:
-    File(std::string fileName, WaveProperties paramWaveProperties = WaveProperties());
+    File(std::string fileName);
     ~File() override;
 
-    // interface
-    void open(CASM::Access access) final;
+    // inherited interface
+    Buffer open(std::chrono::duration<double> duration) override;
+
+    bool open(Buffer buffer) final;
     void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;
 
+    // getters
     std::string getName();
 
 private:
-    bool writeHeader();
     bool readHeader();
+    bool writeHeader();
     bool isExist(const std::string& name);
     bool splitExtension(const std::string& fileName);
     bool generateName();

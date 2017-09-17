@@ -7,17 +7,17 @@
 
 #include <CASM/core/buffer_base.hpp>
 
-BufferBase::BufferBase(){
+BufferStorage::BufferStorage(){
     size = 0;
     filled = 0;
 };
 
-BufferBase::BufferBase(uint32_t size) : BufferBase() {
-    BufferBase::size = size;
+BufferStorage::BufferStorage(uint32_t size) : BufferStorage() {
+    BufferStorage::size = size;
     buffer.reserve(size);
 }
 
-void BufferBase::read(std::fstream& stream) {
+void BufferStorage::read(std::fstream& stream) {
     for(uint32_t i = 0; i<filled; i++) {
         stream.write((const char*) &buffer[i], 1);
     }
@@ -25,7 +25,7 @@ void BufferBase::read(std::fstream& stream) {
 }
 
 
-void BufferBase::read(void* arrayPtr, const uint32_t sizeInBytes) {
+void BufferStorage::read(void* arrayPtr, const uint32_t sizeInBytes) {
     if (sizeInBytes>filled) {
         // buffer overflow
         throw std::runtime_error("Buffer read overflow!");
@@ -38,7 +38,7 @@ void BufferBase::read(void* arrayPtr, const uint32_t sizeInBytes) {
     clear();
 }
 
-void BufferBase::write(std::fstream& stream) {
+void BufferStorage::write(std::fstream& stream) {
     uint32_t i;
     for(i = filled; i<size; i++) {
         stream.read((char*) &buffer[i], 1);
@@ -49,7 +49,7 @@ void BufferBase::write(std::fstream& stream) {
     filled = i;
 }
 
-void BufferBase::write(BufferBase* data) {
+void BufferStorage::write(BufferStorage* data) {
     uint32_t dataSize = data->getSize();
     if (dataSize > (size-filled)) {
         return;
@@ -60,7 +60,7 @@ void BufferBase::write(BufferBase* data) {
     filled += data->filled;
 }
 
-void BufferBase::write(void* arrayPtr, const uint32_t sizeInBytes) {
+void BufferStorage::write(void* arrayPtr, const uint32_t sizeInBytes) {
     if (filled+sizeInBytes>size) {
         // buffer overflow
         return;
@@ -80,7 +80,7 @@ void BufferBase::write(void* arrayPtr, const uint32_t sizeInBytes) {
     filled += sizeInBytes;
 }
 
-void BufferBase::copy(BufferBase* data) {
+void BufferStorage::copy(BufferStorage* data) {
     if (data->getSize() != size) {
         buffer.reserve(data->getSize());
         size = data->getSize();
@@ -92,12 +92,12 @@ void BufferBase::copy(BufferBase* data) {
     filled = data->filled;
 }
 
-void BufferBase::clear() {
+void BufferStorage::clear() {
     buffer.clear();
     filled = 0;
 }
 
-uint32_t BufferBase::getSize() {
+uint32_t BufferStorage::getSize() {
     return size;
 }
 

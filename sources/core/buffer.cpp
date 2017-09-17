@@ -6,66 +6,69 @@
 
 
 Buffer::Buffer() {
+    duration = std::chrono::duration<double>::zero();
+    framesCount = 0;
 }
 
 Buffer::~Buffer() {
-    buffer.reset();
+    storage.reset();
 }
 
-Buffer::Buffer(WaveProperties waveProperties, uint32_t framesCount) {
-    init(waveProperties.getSamplesPerSecond(), framesCount, waveProperties.getBlockAlign());
+Buffer::Buffer(const WaveProperties waveProperties, const uint32_t framesCount) {
+    init(waveProperties, framesCount);
 }
 
-Buffer::Buffer(WaveProperties waveProperties, std::chrono::duration<double> duration) {
+Buffer::Buffer(const WaveProperties waveProperties, const std::chrono::duration<double> duration) {
     // TODO: round to greater
     uint32_t compFramesCount = (uint32_t)(waveProperties.getSamplesPerSecond()*duration.count());
-    init(waveProperties.getSamplesPerSecond(), compFramesCount, waveProperties.getBlockAlign());
+    init(waveProperties, compFramesCount);
 }
 
-Buffer::Buffer(uint32_t samplesPerSecond, uint32_t framesCount, uint16_t blockAlign) {
-    init(samplesPerSecond, framesCount, blockAlign);
-}
-
-void Buffer::init(uint32_t samplesPerSecond, uint32_t framesCount, uint16_t blockAlign)
+void Buffer::init(WaveProperties waveProperties, uint32_t framesCount)
 {
-    Buffer::blockAlign = blockAlign;
+    Buffer::waveProperties = waveProperties;
     Buffer::framesCount = framesCount;
     // compute actual buffer duration
-    duration = std::chrono::duration<double>((double)Buffer::framesCount/(double)samplesPerSecond);
-    buffer = std::make_shared< BufferBase >(Buffer::framesCount*blockAlign);
+    duration = std::chrono::duration<double>((double)Buffer::framesCount/(double)waveProperties.getSamplesPerSecond());
+    storage = std::make_shared< BufferStorage >(Buffer::framesCount*waveProperties.getBlockAlign());
 }
 
-void Buffer::read(std::fstream &stream) {
-    buffer->read(stream);
+
+uint32_t Buffer::getSize() const {
+    return storage->getSize();
 }
 
-void Buffer::read(void* arrayPtr, uint32_t sizeInBytes) {
-    buffer->read(arrayPtr, sizeInBytes);
-}
-
-void Buffer::write(std::fstream &stream) {
-    buffer->write(stream);
-}
-
-void Buffer::write(Buffer data) {
-    buffer->write(data.buffer.get());
-}
-
-void Buffer::write(void* arrayPtr, uint32_t arraySize, uint8_t sizeOfTypeInBytes) {
-    buffer->write(arrayPtr, (uint32_t) (arraySize*sizeOfTypeInBytes));
-}
-
-std::chrono::duration<double> Buffer::getDuration() {
+std::chrono::duration<double> Buffer::getDuration() const {
     return duration;
 }
 
-uint32_t Buffer::getSize() {
-    return buffer->getSize();
+const WaveProperties& Buffer::getWaveProperties() const {
+    return waveProperties;
+}
+
+void Buffer::read(std::fstream &stream) {
+    storage->read(stream);
+}
+
+void Buffer::read(void* arrayPtr, uint32_t sizeInBytes) {
+    storage->read(arrayPtr, sizeInBytes);
+}
+
+void Buffer::write(std::fstream &stream) {
+    storage->write(stream);
+}
+
+void Buffer::write(Buffer data) {
+    storage->write(data.storage.get());
+}
+
+void Buffer::write(void* arrayPtr, const uint32_t arraySize, const uint8_t sizeOfTypeInBytes) {
+    storage->write(arrayPtr, (uint32_t) (arraySize*sizeOfTypeInBytes));
 }
 
 void Buffer::copy(Buffer data) {
     duration = data.duration;
     framesCount = data.framesCount;
-    blockAlign = data.blockAlign;
-    buffer->copy(data.buffer.get());
+    waveProperties = data.waveProperties;
+    storage->copy(data.storage.get());
 }

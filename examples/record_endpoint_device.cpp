@@ -2,37 +2,36 @@
 #include <CASM/device_manager.hpp>
 #include <CASM/file.hpp>
 #include <iostream>
-
+#include <thread>
 
 int main()
 {
-    // init Device Manager
+    // choose device
     DeviceManager deviceManager;
     deviceManager.update();
-
-    // choose Device
     int deviceCount = deviceManager.getDeviceCount();
     for(unsigned int i=0; i<deviceCount; i++) {
         std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
     }
     unsigned int deviceIndex;
     std::cin >> deviceIndex;
+
+    // init endpoints
     Device endPoint = deviceManager.getDevice(deviceIndex);
+    File file("endPointDevice.wav");
 
-    // init device
-    endPoint.init(std::chrono::seconds(1));
-    endPoint.open(CASM::READ);
-
-    // create file
-    File file("endPointDevice.wav", endPoint.getStreamWaveProperties());
-    file.open(CASM::WRITE);
+    // open endpoints
+    Buffer buffer = endPoint.open(std::chrono::seconds(1));
+    file.open(buffer);
 
     // write data
-    Buffer buffer(endPoint.getStreamWaveProperties(), std::chrono::seconds(1));
     for (int i=0; i<8; i++) {
+        std::this_thread::sleep_for(buffer.getDuration());
         endPoint.read(buffer);
         file.write(buffer);
     }
+
+    // close endpoints
     file.close();
     endPoint.close();
 

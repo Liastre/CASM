@@ -38,7 +38,7 @@ WaveProperties::WaveProperties(std::uint16_t channelsCount, std::uint32_t sample
     bytesPerSecond = samplesPerSecond * blockAlign;
 }
 
-WaveProperties::WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t paramSamplesPerSecond, BitsType paramBitsType) {
+WaveProperties::WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, BitsType bitsType) {
     switch(bitsType) {
     case PCM_16BIT_SIGNED:
         bitsPerSample = 16;
@@ -48,11 +48,19 @@ WaveProperties::WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t p
         bitsPerSample = 16;
         isSigned = false;
         break;
+    case PCM_32BIT_SIGNED:
+        bitsPerSample = 32;
+        isSigned = true;
+        break;
+    case PCM_32BIT_UNSIGNED:
+        bitsPerSample = 32;
+        isSigned = false;
+        break;
     //default:
     }
-    bitsType = paramBitsType;
-    channelsCount = paramChannelsCount;
-    samplesPerSecond = paramSamplesPerSecond;
+    WaveProperties::bitsType = bitsType;
+    WaveProperties::channelsCount = channelsCount;
+    WaveProperties::samplesPerSecond = samplesPerSecond;
     blockAlign = (uint16_t)(channelsCount * bitsPerSample / 8);
     bytesPerSecond = samplesPerSecond * blockAlign;
 }
@@ -60,31 +68,31 @@ WaveProperties::WaveProperties(std::uint16_t paramChannelsCount, std::uint32_t p
 WaveProperties::~WaveProperties() {
 }
 
-uint16_t WaveProperties::getChannelsCount() {
+uint16_t WaveProperties::getChannelsCount() const {
     return channelsCount;
 }
 
-uint16_t WaveProperties::getBitsPerSample() {
+uint16_t WaveProperties::getBitsPerSample() const {
     return bitsPerSample;
 }
 
-uint32_t WaveProperties::getSamplesPerSecond() {
+uint32_t WaveProperties::getSamplesPerSecond() const {
     return samplesPerSecond;
 }
 
-uint32_t WaveProperties::getBytesPerSecond() {
+uint32_t WaveProperties::getBytesPerSecond() const {
     return bytesPerSecond;
 }
 
-uint16_t WaveProperties::getBlockAlign() {
+uint16_t WaveProperties::getBlockAlign() const {
     return blockAlign;
 }
 
-bool WaveProperties::getSigned() {
+bool WaveProperties::getSigned() const {
     return isSigned;
 }
 
-BitsType WaveProperties::getBitsType() {
+BitsType WaveProperties::getBitsType() const {
     return bitsType;
 }
 

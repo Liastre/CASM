@@ -17,7 +17,8 @@ public:
     ~DeviceWindowsWASAPI() final;
 
     /// EndPointInterface
-    void open(CASM::Access) final;
+    Buffer open(std::chrono::duration<double> duration) final;
+    bool open(Buffer buffer) final;
     void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;

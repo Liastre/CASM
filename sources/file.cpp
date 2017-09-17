@@ -32,53 +32,12 @@ std::ostream& write( std::ostream& outs, Word value, unsigned size = sizeof( Wor
 }
 }
 
-/*template <typename T>
-void writeFormat(std::ofstream& stream) {
-    embed::write<short>(stream, 1);
-}
-
-template <>
-void writeFormat<float>(std::ofstream& stream) {
-    embed::write<short>(stream, 3);
-}
-
-template <typename SampleType>
-void writeWAVData(char const* outFile, SampleType* buf, size_t bufSize, int sampleRate, short channels)
-{
-    std::ofstream stream(outFile, std::ios::binary|std::ios::app|std::ios::ate);
-
-    stream.write("RIFF", 4);                                        // Start writting RIFF
-    embed::write<int>(stream, 0);                                          // (file-size)-8 - FOR NOW IGNORED
-    stream.write("WAVE", 4);                                        // File type
-
-    stream.write("fmt ", 4);                                        // Start Writting format chunk "fmt"
-    embed::write<int>(stream, 16);                                         // Chunk Data Size 16 + extra format bytes
-    writeFormat<SampleType>(stream);                                // Format (compression code)
-    embed::write<short>(stream, channels);                                 // Channels
-    embed::write<int>(stream, sampleRate);                                 // Sample Rate
-    embed::write<int>(stream, sampleRate * channels * sizeof(SampleType)); // Byterate (byte/per sec)
-    embed::write<short>(stream, channels * sizeof(SampleType));            // Frame size (block align)
-    embed::write<short>(stream, 8 * sizeof(SampleType));                   // Bits per sample
-
-    stream.write("data", 4);                                        // Start writting chunk for extra format bytes
-    stream.write((const char*)&bufSize, 0);                         //  - FOR NOW IGNORED
-    stream.write((const char*)buf, 0);                              //  - FOR NOW IGNORED
-}
-
-template <typename Word>
-std::ostream& write_word(std::ostream& outs, Word value, unsigned size = sizeof( Word ))
-{
-    for (; size; --size, value >>= 8)
-        outs.put( static_cast <char> (value & 0xFF) );
-    return outs;
-}*/
-
-File::File(std::string fileName, WaveProperties waveProperties) {
+File::File(std::string fileName) {
     posDataChunk = 0;
     posFileLength = 0;
     finalized = false;
+    path = fileName;
     splitExtension(fileName);
-    File::streamWaveProperties = waveProperties;
 }
 
 File::~File() {
@@ -87,22 +46,88 @@ File::~File() {
     }
 }
 
-void File::open(CASM::Access access) {
-    switch(access){
-    case CASM::WRITE:
-        generateName();
-        path = name + '.' + extension;
-        writeHeader();
-        break;
-    case CASM::READ:
-        path = name + '.' + extension;
-        if(isExist(path)) {
-            readHeader();
-        }
-        break;
-    default:
-        throw std::runtime_error("Impossible access value");
+Buffer File::open(std::chrono::duration<double> duration)
+{
+    if(!isExist(path)) {
+        return(Buffer());
     }
+    readHeader();
+
+    return Buffer(streamWaveProperties, duration);
+}
+
+bool File::open(Buffer buffer) {
+    streamWaveProperties = buffer.getWaveProperties();
+
+    generateName();
+    path = name + '.' + extension;
+    return writeHeader();
+}
+
+void File::close()
+{
+    // (We'll need the final file size to fix the chunk sizes above)
+    posFileLength = stream.tellp();
+
+    // Fix the data chunk header to contain the data size
+    stream.seekp(posDataChunk + 4);
+    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - posDataChunk + 8));
+
+    // Fix the file header to contain the proper RIFF chunk size, which is (file size - 8) bytes
+    stream.seekp(0 + 4);
+    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - 8));
+
+    stream.close();
+    finalized = true;
+}
+
+bool File::read(Buffer& buffer) {
+    buffer.write(stream);
+}
+
+bool File::write(Buffer buffer) {
+    buffer.read(stream);
+};
+
+bool File::readHeader() {
+    stream.open(path, std::ios::in | std::ios::binary);
+
+    little_endian::read< std::array<char,4> >(stream, wavHeader.chunkID);
+    little_endian::read<uint32_t>(stream, wavHeader.chunkSize);
+    little_endian::read< std::array<char,4> >(stream, wavHeader.chunkFormat);
+    little_endian::read< std::array<char,4> >(stream, wavHeader.fmtID);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtSize);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtAudioFormat);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtNumChannels);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtSampleRate);
+    little_endian::read<uint32_t>(stream, wavHeader.fmtByteRate);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtBlockAlign);
+    little_endian::read<uint16_t>(stream, wavHeader.fmtBitsPerSample);
+    int64_t tmpPos = stream.tellg();
+    little_endian::read< std::array<char,4> >(stream, wavHeader.dataID);
+
+    std::array<char,4> dataID = {'d','a','t','a'};
+    if(wavHeader.dataID != dataID) {
+        stream.seekg(tmpPos);
+        little_endian::read<uint16_t>(stream, wavHeader.fmtExtraParamSize);
+        wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
+        // TODO something
+        stream.read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        little_endian::read< std::array<char,4> >(stream, wavHeader.dataID);
+    } else {
+        wavHeader.fmtExtraParamSize = 0;
+        wavHeader.fmtExtraParams = nullptr;
+    }
+
+    if(wavHeader.dataID != dataID) {
+        return false;
+    }
+    little_endian::read<uint32_t>(stream, wavHeader.dataSize);
+
+    // TODO: set bits type depending on wavHeader.fmtAudioFormat
+    streamWaveProperties = WaveProperties(wavHeader.fmtNumChannels, wavHeader.fmtSampleRate, PCM_32BIT_SIGNED);
+
+    return true;
 }
 
 bool File::writeHeader() {
@@ -125,46 +150,6 @@ bool File::writeHeader() {
     // Write the data chunk header
     posDataChunk = stream.tellp();
     stream << "data----";  // (chunk size to be filled in later)
-
-    return true;
-}
-
-bool File::readHeader() {
-    stream.open(path, std::ios::in | std::ios::binary);
-
-    little_endian::read<char[4]>(stream, wavHeader.chunkID);
-    little_endian::read<uint32_t>(stream, wavHeader.chunkSize);
-    little_endian::read<char[4]>(stream, wavHeader.chunkFormat);
-    little_endian::read<char[4]>(stream, wavHeader.fmtID);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtSize);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtAudioFormat);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtNumChannels);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtSampleRate);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtByteRate);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtBlockAlign);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtBitsPerSample);
-
-    int64_t tmpPos = stream.tellg();
-    little_endian::read<char[4]>(stream, wavHeader.dataID);
-    if(std::strcmp(wavHeader.dataID, "data")!=0) {
-        stream.seekg(tmpPos);
-        little_endian::read<uint16_t>(stream, wavHeader.fmtExtraParamSize);
-        wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
-        // TODO something
-        stream.read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
-        little_endian::read<char[4]>(stream, wavHeader.dataID);
-    } else {
-        wavHeader.fmtExtraParamSize = 0;
-        wavHeader.fmtExtraParams = nullptr;
-    }
-
-    if(std::strcmp(wavHeader.dataID, "data")!=0) {
-        return false;
-    }
-    little_endian::read<uint32_t>(stream, wavHeader.dataSize);
-
-    // TODO: set bits type depending on wavHeader.fmtAudioFormat
-    streamWaveProperties = WaveProperties(wavHeader.fmtNumChannels, wavHeader.fmtSampleRate, PCM_16BIT_SIGNED);
 
     return true;
 }
@@ -205,31 +190,7 @@ bool File::generateName() {
     return true;
 }
 
-bool File::read(Buffer& buffer) {
-    buffer.write(stream);
-}
-
-bool File::write(Buffer buffer) {
-    buffer.read(stream);
-};
-
 bool File::isAvailable() {
     return true;
 }
 
-void File::close()
-{
-    // (We'll need the final file size to fix the chunk sizes above)
-    posFileLength = stream.tellp();
-
-    // Fix the data chunk header to contain the data size
-    stream.seekp(posDataChunk + 4);
-    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - posDataChunk + 8));
-
-    // Fix the file header to contain the proper RIFF chunk size, which is (file size - 8) bytes
-    stream.seekp(0 + 4);
-    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - 8));
-
-    stream.close();
-    finalized = true;
-}

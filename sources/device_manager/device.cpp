@@ -6,18 +6,19 @@ Device::Device() {
 }
 
 Device::Device(void* deviceHandler, CASM::DeviceType deviceType){
-device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
+    device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
 }
 
 Device::~Device() {
+    device.reset();
 };
 
-bool Device::init(std::chrono::duration<double> bufferDuration) {
-    device->init(bufferDuration);
+Buffer Device::open(std::chrono::duration<double> duration) {
+    return device->open(duration);
 }
 
-void Device::open(CASM::Access access) {
-    device->open(access);
+bool Device::open(Buffer buffer) {
+    return device->open(buffer);
 }
 
 void Device::close() {

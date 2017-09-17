@@ -19,8 +19,9 @@ public:
     ~Device() override;
 
     /// EndPointInterface interface
-    bool init(std::chrono::duration<double> bufferDuration) final;
-    void open(CASM::Access access) final;
+    Buffer open(std::chrono::duration<double> duration) override;
+
+    bool open(Buffer buffer) final;
     void close() final;
     bool read(Buffer& buffer) final;
     bool write(Buffer buffer) final;

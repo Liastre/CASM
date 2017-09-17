@@ -18,17 +18,6 @@ DeviceBase<TDeviceHandler>::~DeviceBase() {
 }
 
 template <class TDeviceHandler>
-bool DeviceBase<TDeviceHandler>::init(std::chrono::duration<double> bufferDuration)
-{
-    if (active) {
-        return false;
-    }
-    DeviceBase::bufferDuration = bufferDuration;
-
-    return true;
-}
-
-template <class TDeviceHandler>
 WaveProperties DeviceBase<TDeviceHandler>::getDeviceWaveProperties() {
     return deviceWaveProperties;
 }

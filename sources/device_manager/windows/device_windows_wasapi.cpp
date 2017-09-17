@@ -54,7 +54,9 @@ DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
     renderClient->Release();*/
 }
 
-void DeviceWindowsWASAPI::open(CASM::Access access) {
+Buffer DeviceWindowsWASAPI::open(std::chrono::duration<double> duration) {
+    bufferDuration = duration;
+
     // checks
     if (bufferDuration == std::chrono::duration<double>::zero()) {
         throw std::logic_error("Buffer duration is zero");
@@ -91,37 +93,105 @@ void DeviceWindowsWASAPI::open(CASM::Access access) {
     hr = stream->GetMixFormat(&deviceMixFormat);
     streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
     assert(hr==S_OK);
-    switch (access) {
-    case CASM::READ:
-        hr = stream->Initialize(
-                AUDCLNT_SHAREMODE_SHARED,
-                streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
-                fragmentDurationRequested,
-                0,
-                deviceMixFormat,
-                nullptr);
-        assert(hr==S_OK);
 
-        hr = stream->GetService(IID_IAudioCaptureClient, (void**)&captureClient);
-        assert(hr==S_OK);
-        if (hr!=S_OK) throw std::runtime_error("Unable to GetService");
+    hr = stream->Initialize(
+            AUDCLNT_SHAREMODE_SHARED,
+            streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
+            fragmentDurationRequested,
+            0,
+            deviceMixFormat,
+            nullptr);
+    assert(hr==S_OK);
+
+    hr = stream->GetService(IID_IAudioCaptureClient, (void**)&captureClient);
+    assert(hr==S_OK);
+    if (hr!=S_OK) throw std::runtime_error("Unable to GetService");
+
+    /*hEvent = CreateEvent(nullptr, false, false, nullptr);
+    //hEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    if (hEvent == NULL)
+    {
+        throw std::runtime_error("Unable to create samples ready event: " + GetLastError());
+    }
+    hr = stream->SetEventHandle(hEvent);
+    assert(hr==S_OK);*/
+
+    // get the actual size of the allocated buffer
+    hr = stream->GetBufferSize(&tmpBufferFramesCount);
+    assert(hr==S_OK);
+    bufferFramesCount = tmpBufferFramesCount;
+
+    /*=======
+    // Grab the entire buffer for the initial fill operation.
+    hr = pRenderClient->GetBuffer(bufferFramesCount, &pData);
+    EXIT_ON_ERROR(hr)
+
+    // Load the initial data into the shared buffer.
+    hr = pMySource->LoadData(bufferFramesCount, pData, &flags);
+    EXIT_ON_ERROR(hr)
+
+    hr = pRenderClient->ReleaseBuffer(bufferFramesCount, flags);
+    EXIT_ON_ERROR(hr)
+    //============*/
+
+    // start device playing/recording
+    hr = stream->Start();
+    assert(hr==S_OK);
+    active = true;
+
+    return Buffer(streamWaveProperties, duration);
+}
+
+bool DeviceWindowsWASAPI::open(Buffer buffer) {
+    bufferDuration = buffer.getDuration();
+
+    // checks
+    if (bufferDuration == std::chrono::duration<double>::zero()) {
+        throw std::logic_error("Buffer duration is zero");
+    }
+    if (active) {
+        throw std::logic_error("Device already in use");
+    }
+    if (handler==nullptr) {
+        throw std::logic_error("Device handler is nullptr");
+    }
+
+    // variables
+    HRESULT hr;
+    WAVEFORMATEX *deviceMixFormat = nullptr;
+    DWORD streamFlags;
+    uint32_t tmpBufferFramesCount;
+    uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(bufferDuration).count()/100);
+
+    switch(type) {
+    case CASM::RENDER:
+        streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
         break;
-    case CASM::WRITE:
-        hr = stream->Initialize(
-                AUDCLNT_SHAREMODE_SHARED,
-                0,
-                fragmentDurationRequested,
-                0,
-                deviceMixFormat,
-                nullptr);
-        assert(hr==S_OK);
-
-        hr = stream->GetService(IID_IAudioRenderClient, (void**)&renderClient);
-        assert(hr==S_OK);
+    case CASM::CAPTURE:
+        streamFlags = 0;
         break;
     default:
-        throw std::runtime_error("Unknown device access");
+        throw std::logic_error("Unknown device type");
     }
+
+    // creates COM object
+    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void**)&stream);
+    assert(hr==S_OK);
+
+    hr = stream->GetMixFormat(&deviceMixFormat);
+    streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    assert(hr==S_OK);
+    hr = stream->Initialize(
+            AUDCLNT_SHAREMODE_SHARED,
+            0,
+            fragmentDurationRequested,
+            0,
+            deviceMixFormat,
+            nullptr);
+    assert(hr==S_OK);
+
+    hr = stream->GetService(IID_IAudioRenderClient, (void**)&renderClient);
+    assert(hr==S_OK);
 
     /*hEvent = CreateEvent(nullptr, false, false, nullptr);
     //hEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -157,6 +227,9 @@ void DeviceWindowsWASAPI::open(CASM::Access access) {
 }
 
 void DeviceWindowsWASAPI::close() {
+    if(!active) {
+        return;
+    }
     HRESULT hr;
 
     // stop playing/recording
@@ -175,7 +248,7 @@ bool DeviceWindowsWASAPI::read(Buffer& buffer)
     std::vector<uint8_t> arr;
 
     // Each loop fills about half of the shared buffer.
-    std::this_thread::sleep_for(buffer.getDuration()/2);
+    //std::this_thread::sleep_for(buffer.getDuration());
     //hrs = WaitForSingleObject(hEvent, INFINITE);
 
     hr = captureClient->GetNextPacketSize(&packetLength);
@@ -215,10 +288,6 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
 
     if (flags != AUDCLNT_BUFFERFLAGS_SILENT)
     {
-        // Sleep for half the buffer duration.
-        std::this_thread::sleep_for(buffer.getDuration());
-        //Sleep((DWORD)(buffer.getDuration()/fragmentDurationRequested*1000/2));
-
         // See how much buffer space is available.
         hr = stream->GetCurrentPadding(&bufferFramesPadding);
         assert(hr==S_OK);
@@ -243,7 +312,6 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
     return true;
 }
 
-bool DeviceWindowsWASAPI::isAvailable()
-{
+bool DeviceWindowsWASAPI::isAvailable() {
     return true;
 }
