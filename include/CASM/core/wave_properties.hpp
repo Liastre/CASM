@@ -15,6 +15,8 @@ enum BitsType {
     PCM_32BIT_UNSIGNED
 };
 
+namespace CASM {
+
 class WaveProperties {
 public:
     WaveProperties();
@@ -27,7 +29,7 @@ public:
     uint32_t getSamplesPerSecond() const;
     uint32_t getBytesPerSecond() const;
     uint16_t getBlockAlign() const;
-    BitsType getBitsType()const;
+    BitsType getBitsType() const;
     bool getSigned() const;
     bool operator==(WaveProperties waveProperties);
 
@@ -40,5 +42,7 @@ private:
     bool isSigned;
     BitsType bitsType;
 };
+
+}
 
 #endif //CASM_WAVE_PROPERTIES_HPP

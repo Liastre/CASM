@@ -7,6 +7,9 @@
 
 #include <CASM/device_manager/device_manager_base.hpp>
 
+
+namespace CASM {
+
 class DeviceManager {
 public:
     DeviceManager();
@@ -15,7 +18,9 @@ public:
     Device getDevice(uint_fast32_t index);
 
 private:
-    std::shared_ptr<DeviceManagerBase> deviceManager;
+    std::shared_ptr< DeviceManagerBase > deviceManager;
 };
+
+}
 
 #endif //CASM_DEVICEMANAGER_HPP

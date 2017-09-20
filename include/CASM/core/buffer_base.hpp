@@ -9,7 +9,8 @@
 #include <vector>
 #include <fstream>
 
-union bitsRep{
+
+union bitsRep {
     int32_t int32;
     int16_t int16[2];
     int8_t int8[4];
@@ -21,17 +22,17 @@ public:
     explicit BufferStorage(uint32_t size);
     ~BufferStorage() = default;
 
-    void read(std::fstream& stream);
-    void read(void* arrayPtr, uint32_t sizeInBytes);
-    void write(std::fstream& stream);
-    void write(BufferStorage* data);
-    void write(void* arrayPtr, uint32_t sizeInBytes);
-    void copy(BufferStorage* data);
+    void read(std::fstream &stream);
+    void read(void *arrayPtr, uint32_t sizeInBytes);
+    void write(std::fstream &stream);
+    void write(BufferStorage *data);
+    void write(void *arrayPtr, uint32_t sizeInBytes);
+    void copy(BufferStorage *data);
     void clear();
     uint32_t getSize();
 
 protected:
-    std::vector<uint8_t> buffer;
+    std::vector< uint8_t > buffer;
     uint32_t filled;
     uint32_t size;
 };

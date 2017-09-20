@@ -11,6 +11,8 @@
 #include <string>
 
 
+namespace CASM {
+
 class DeviceManagerBase {
 public:
     DeviceManagerBase();
@@ -22,8 +24,10 @@ public:
     virtual int update() = 0;
 
 protected:
-    std::vector<Device> deviceList;
+    std::vector< Device > deviceList;
     uint_fast32_t deviceCount;
 };
+
+}
 
 #endif //CASM_BASEDEVICEMANAGER_HPP

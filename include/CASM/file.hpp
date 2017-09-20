@@ -13,23 +13,32 @@
 #include <string>
 #include <fstream>
 
-enum FileType{
+
+namespace CASM {
+
+enum FileType {
     WAV
 };
 
 class File final : public EndPointBase {
 public:
     File();
+
     explicit File(std::string fileName);
+
     ~File() override;
 
     // inherited interface
-    Buffer open(std::chrono::duration<double> duration) override;
+    Buffer open(std::chrono::duration< double > duration) override;
 
     bool open(Buffer buffer) final;
+
     void close() final;
-    bool read(Buffer& buffer) final;
+
+    bool read(Buffer &buffer) final;
+
     bool write(Buffer buffer) final;
+
     bool isAvailable() final;
 
     // getters
@@ -37,9 +46,13 @@ public:
 
 private:
     bool readHeader();
+
     bool writeHeader();
-    bool isExist(const std::string& name);
-    bool splitExtension(const std::string& fileName);
+
+    bool isExist(const std::string &name);
+
+    bool splitExtension(const std::string &fileName);
+
     bool generateName();
 
 private:
@@ -48,9 +61,11 @@ private:
     std::string name;
     std::string path;
     std::string extension;
-    std::fstream* stream;
+    std::fstream *stream;
     int64_t posDataChunk;
     int64_t posFileLength;
 };
+
+}
 
 #endif //CASM_FILE_HPP

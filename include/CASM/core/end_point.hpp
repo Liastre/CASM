@@ -7,6 +7,9 @@
 #include <CASM/CASM.hpp>
 #include <CASM/core/buffer.hpp>
 
+
+namespace CASM {
+
 /// @class EndPointInterface
 /// @brief EndPoint abstract interface class
 class EndPointInterface {
@@ -17,7 +20,7 @@ public:
     /// @brief set EndPoint ready for transferring data and initialize the buffer
     /// @param [in] duration
     /// @return Buffer
-    virtual Buffer open(std::chrono::duration<double> duration)=0;
+    virtual Buffer open(std::chrono::duration< double > duration)=0;
     /// @brief set EndPoint ready for receiving data and initialize the buffer
     /// @param [in] buffer
     /// @return true if success and false if impossible
@@ -27,7 +30,7 @@ public:
     /// @brief read from EndPoint to Buffer
     /// @param [out] buffer - Buffer where we push data
     /// @return true if we read all data, false if some data left
-    virtual bool read(Buffer& buffer)=0;
+    virtual bool read(Buffer &buffer)=0;
     /// @brief write to EndPoint from Buffer
     /// @param [in] buffer - Buffer where we take data
     /// @return true if we wrote all data, false if some data left
@@ -50,13 +53,17 @@ public:
     };
     ~EndPointBase() override = default;
 
+
     WaveProperties getStreamWaveProperties() final {
         return streamWaveProperties;
     }
+
 
 protected:
     bool active;
     WaveProperties streamWaveProperties;
 };
+
+}
 
 #endif //CASM_END_POINT_HPP

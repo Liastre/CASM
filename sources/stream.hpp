@@ -7,47 +7,65 @@
 
 #include <CASM/device.hpp>
 #include <CASM/file.hpp>
+#include <type_traits>
 #include <thread>
 #include <chrono>
 #include <atomic>
+
 
 namespace CASM {
 
 class Stream {
 public:
-    Stream(EndPointInterface& endPointIn, EndPointInterface& endPointOut, std::chrono::duration<double> duration);
-    Stream(Device& endPointIn, File& endPointOut, std::chrono::duration<double> duration);
+    Stream() = delete;
+    Stream(const Stream &) = delete;
 
-    ~Stream() = default;
 
-    void start(std::chrono::duration<double> delay = std::chrono::duration<double>::zero());
+    template < class TEndPointIn, class TEndPointOut >
+    Stream(TEndPointIn endPointIn, TEndPointOut endPointOut, std::chrono::duration< double > duration = std::chrono::duration< double >::zero()) {
+        static_assert(std::is_base_of< EndPointInterface, TEndPointIn >::value, "TEndPointIn is not derived from EndPointInterface");
+        static_assert(std::is_base_of< EndPointInterface, TEndPointOut >::value, "TEndPointOut is not derived from EndPointInterface");
+        static_assert(!(std::is_same< File, TEndPointIn >::value &&
+                        std::is_same< File, TEndPointOut >::value), "You cannot create stream between File and File");
 
-    void stop(std::chrono::duration<double> delay = std::chrono::duration<double>::zero());
-
+        Stream::endPointIn = new TEndPointIn(endPointIn);
+        Stream::endPointOut = new TEndPointOut(endPointOut);
+        requestedDuration = duration;
+    };
+    ~Stream();
+    // methods
+    void start(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
+    void stop(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
+    void join();
     // getters
     std::chrono::steady_clock::duration getUptime() const;
-
     // setters
     /// @brief set bufferDuration (it is minimal by default)
-    void setBufferDuration(std::chrono::duration<float> bufferDuration);
+    void setBufferDuration(std::chrono::duration< float > bufferDuration);
     /// @brief callback to change buffer data with requested way
-    void setCopyCallback(void* onCopyCallbackPtr);
+    void setCopyCallback(void *onCopyCallbackPtr);
 
 private:
-    void doThread();
-    void doClock();
+    /// @brief stream thread
+    void startThread();
+    /// @brief clock thread
+    void startClock();
+    /// @brief delayed stop
+    void stopThread(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
 
-    void* onCopyCallback;
-
-    EndPointInterface* endPointIn;
-    File* endPointOut;
+    // fields
+    EndPointInterface *endPointIn;
+    EndPointInterface *endPointOut;
     Buffer buffer;
-    std::atomic<std::chrono::steady_clock::duration> uptime;
+    std::atomic< std::chrono::steady_clock::duration > uptime;
     std::atomic_bool active;
-    std::chrono::duration<double> bufferDuration;
-    std::chrono::duration<double> requestedDuration;
-    std::thread streamThreadId;
+    std::chrono::duration< double > bufferDuration;
+    std::chrono::duration< double > requestedDuration;
+    // update to async
+    std::thread streamStartThreadId;
     std::thread clockThreadId;
+    std::thread streamStopThreadId;
+    void *onCopyCallback;
 };
 
 }

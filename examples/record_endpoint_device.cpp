@@ -4,28 +4,28 @@
 #include <iostream>
 #include <thread>
 
-int main()
-{
+
+int main() {
     // choose device
-    DeviceManager deviceManager;
+    CASM::DeviceManager deviceManager;
     deviceManager.update();
     int deviceCount = deviceManager.getDeviceCount();
-    for(unsigned int i=0; i<deviceCount; i++) {
+    for (unsigned int i = 0; i < deviceCount; i++) {
         std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
     }
     unsigned int deviceIndex;
     std::cin >> deviceIndex;
 
     // init endpoints
-    Device endPoint = deviceManager.getDevice(deviceIndex);
-    File file("endPointDevice.wav");
+    CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
+    CASM::File file("endPointDevice.wav");
 
     // open endpoints
-    Buffer buffer = endPoint.open(std::chrono::seconds(1));
+    CASM::Buffer buffer = endPoint.open(std::chrono::seconds(1));
     file.open(buffer);
 
     // write data
-    for (int i=0; i<8; i++) {
+    for (int i = 0; i < 8; i++) {
         std::this_thread::sleep_for(buffer.getDuration());
         endPoint.read(buffer);
         file.write(buffer);

@@ -9,9 +9,11 @@
 #include <CASM/core/end_point.hpp>
 #include <string>
 
+
+namespace CASM {
+
 /// @class DeviceBase
 /// @brief base class for Device object.
-// TODO: remove getStreamWaveProperties() and possible rename to gerEndPointWaveProperties?
 class DeviceInterface : public virtual EndPointInterface {
 public:
     DeviceInterface() = default;
@@ -21,11 +23,11 @@ public:
     virtual std::wstring getDescription()=0;
 };
 
-template <class TDeviceHandler>
+template < class TDeviceHandler >
 class DeviceBase : public virtual DeviceInterface, public EndPointBase {
 public:
     DeviceBase();
-    DeviceBase(void* handler, CASM::DeviceType deviceType);
+    DeviceBase(void *handler, CASM::DeviceType deviceType);
     ~DeviceBase() override;
 
     // getters
@@ -40,9 +42,12 @@ protected:
     WaveProperties deviceWaveProperties;
     CASM::DeviceType type;
     uint32_t bufferFramesCount;
-    std::chrono::duration<double> bufferDuration;
+    std::chrono::duration< double > bufferDuration;
 };
 
+}
+
 #include "device_base.inl"
+
 
 #endif //CASM_DEVICE_BASE_HPP

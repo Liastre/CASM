@@ -7,6 +7,8 @@
 #include <cassert>
 
 
+namespace CASM {
+
 DeviceManagerWindowsWASAPI::DeviceManagerWindowsWASAPI() {
     HRESULT hr;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -15,16 +17,18 @@ DeviceManagerWindowsWASAPI::DeviceManagerWindowsWASAPI() {
     update();
 }
 
+
 DeviceManagerWindowsWASAPI::~DeviceManagerWindowsWASAPI() {
     CoUninitialize();
 }
+
 
 int DeviceManagerWindowsWASAPI::update() {
     HRESULT hr;
 
     IMMDeviceCollection *deviceCollection = NULL;
     IMMDeviceEnumerator *deviceEnumerator = NULL;
-    IMMDevice* device = NULL;
+    IMMDevice *device = NULL;
     uint32_t deviceCollectionSize;
 
     //TODO: replace with swap
@@ -39,8 +43,7 @@ int DeviceManagerWindowsWASAPI::update() {
     assert(hr==S_OK);
     hr = deviceCollection->GetCount(&deviceCollectionSize);
     assert(hr==S_OK);
-    for (uint32_t deviceIndex=0; deviceIndex<deviceCollectionSize; deviceIndex++)
-    {
+    for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
         deviceList.push_back(Device(device, CASM::CAPTURE));
     }
@@ -51,16 +54,17 @@ int DeviceManagerWindowsWASAPI::update() {
     assert(hr==S_OK);
     hr = deviceCollection->GetCount(&deviceCollectionSize);
     assert(hr==S_OK);
-    for (uint32_t deviceIndex=0; deviceIndex<deviceCollectionSize; deviceIndex++)
-    {
+    for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
         deviceList.push_back(Device(device, CASM::RENDER));
     }
     deviceCollection->Release();
 
-    deviceCount = (uint_fast32_t)deviceList.size();
+    deviceCount = (uint_fast32_t) deviceList.size();
     deviceEnumerator->Release();
     device->Release();
 
     return 0;
+}
+
 }
