@@ -4,7 +4,6 @@ DeviceBase<TDeviceHandler>::DeviceBase() {
     handler = nullptr;
     name = L"";
     description = L"";
-    active = false;
 }
 
 template <class TDeviceHandler>

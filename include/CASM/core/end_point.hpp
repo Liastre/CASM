@@ -44,6 +44,12 @@ public:
 /// @brief EndPoint base class
 class EndPointBase : public virtual EndPointInterface {
 public:
+    EndPointBase() {
+        active = false;
+        streamWaveProperties = WaveProperties();
+    };
+    ~EndPointBase() override = default;
+
     WaveProperties getStreamWaveProperties() final {
         return streamWaveProperties;
     }

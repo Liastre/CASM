@@ -19,7 +19,8 @@ enum FileType{
 
 class File final : public EndPointBase {
 public:
-    File(std::string fileName);
+    File();
+    explicit File(std::string fileName);
     ~File() override;
 
     // inherited interface
@@ -41,19 +42,13 @@ private:
     bool splitExtension(const std::string& fileName);
     bool generateName();
 
-    template<typename T>
-    void write(std::ofstream& stream, const T& t)
-    {
-        stream.write((const char*) &t, sizeof(T));
-    }
-
 private:
     bool finalized;
     CASM::WavHeader wavHeader;
     std::string name;
     std::string path;
     std::string extension;
-    std::fstream stream;
+    std::fstream* stream;
     int64_t posDataChunk;
     int64_t posFileLength;
 };

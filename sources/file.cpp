@@ -32,7 +32,12 @@ std::ostream& write( std::ostream& outs, Word value, unsigned size = sizeof( Wor
 }
 }
 
-File::File(std::string fileName) {
+File::File() {
+    name = path = extension = "";
+    stream = new std::fstream();
+}
+
+File::File(std::string fileName) : File() {
     posDataChunk = 0;
     posFileLength = 0;
     finalized = false;
@@ -41,8 +46,9 @@ File::File(std::string fileName) {
 }
 
 File::~File() {
+    // TODO: check if fstream exist, or create base class
     if (!finalized) {
-        close();
+        //close();
     }
 }
 
@@ -67,53 +73,53 @@ bool File::open(Buffer buffer) {
 void File::close()
 {
     // (We'll need the final file size to fix the chunk sizes above)
-    posFileLength = stream.tellp();
+    posFileLength = stream->tellp();
 
     // Fix the data chunk header to contain the data size
-    stream.seekp(posDataChunk + 4);
-    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - posDataChunk + 8));
+    stream->seekp(posDataChunk + 4);
+    little_endian::write<uint32_t>(*stream, (uint32_t)(posFileLength - posDataChunk + 8));
 
     // Fix the file header to contain the proper RIFF chunk size, which is (file size - 8) bytes
-    stream.seekp(0 + 4);
-    little_endian::write<uint32_t>(stream, (uint32_t)(posFileLength - 8));
+    stream->seekp(0 + 4);
+    little_endian::write<uint32_t>(*stream, (uint32_t)(posFileLength - 8));
 
-    stream.close();
+    stream->close();
     finalized = true;
 }
 
 bool File::read(Buffer& buffer) {
-    buffer.write(stream);
+    buffer.write(*stream);
 }
 
 bool File::write(Buffer buffer) {
-    buffer.read(stream);
+    buffer.read(*stream);
 };
 
 bool File::readHeader() {
-    stream.open(path, std::ios::in | std::ios::binary);
+    stream->open(path, std::ios::in | std::ios::binary);
 
-    little_endian::read< std::array<char,4> >(stream, wavHeader.chunkID);
-    little_endian::read<uint32_t>(stream, wavHeader.chunkSize);
-    little_endian::read< std::array<char,4> >(stream, wavHeader.chunkFormat);
-    little_endian::read< std::array<char,4> >(stream, wavHeader.fmtID);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtSize);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtAudioFormat);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtNumChannels);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtSampleRate);
-    little_endian::read<uint32_t>(stream, wavHeader.fmtByteRate);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtBlockAlign);
-    little_endian::read<uint16_t>(stream, wavHeader.fmtBitsPerSample);
-    int64_t tmpPos = stream.tellg();
-    little_endian::read< std::array<char,4> >(stream, wavHeader.dataID);
+    little_endian::read< std::array<char,4> >(*stream, wavHeader.chunkID);
+    little_endian::read<uint32_t>(*stream, wavHeader.chunkSize);
+    little_endian::read< std::array<char,4> >(*stream, wavHeader.chunkFormat);
+    little_endian::read< std::array<char,4> >(*stream, wavHeader.fmtID);
+    little_endian::read<uint32_t>(*stream, wavHeader.fmtSize);
+    little_endian::read<uint16_t>(*stream, wavHeader.fmtAudioFormat);
+    little_endian::read<uint16_t>(*stream, wavHeader.fmtNumChannels);
+    little_endian::read<uint32_t>(*stream, wavHeader.fmtSampleRate);
+    little_endian::read<uint32_t>(*stream, wavHeader.fmtByteRate);
+    little_endian::read<uint16_t>(*stream, wavHeader.fmtBlockAlign);
+    little_endian::read<uint16_t>(*stream, wavHeader.fmtBitsPerSample);
+    int64_t tmpPos = stream->tellg();
+    little_endian::read< std::array<char,4> >(*stream, wavHeader.dataID);
 
     std::array<char,4> dataID = {'d','a','t','a'};
     if(wavHeader.dataID != dataID) {
-        stream.seekg(tmpPos);
-        little_endian::read<uint16_t>(stream, wavHeader.fmtExtraParamSize);
+        stream->seekg(tmpPos);
+        little_endian::read<uint16_t>(*stream, wavHeader.fmtExtraParamSize);
         wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
         // TODO something
-        stream.read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
-        little_endian::read< std::array<char,4> >(stream, wavHeader.dataID);
+        stream->read(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        little_endian::read< std::array<char,4> >(*stream, wavHeader.dataID);
     } else {
         wavHeader.fmtExtraParamSize = 0;
         wavHeader.fmtExtraParams = nullptr;
@@ -122,7 +128,7 @@ bool File::readHeader() {
     if(wavHeader.dataID != dataID) {
         return false;
     }
-    little_endian::read<uint32_t>(stream, wavHeader.dataSize);
+    little_endian::read<uint32_t>(*stream, wavHeader.dataSize);
 
     // TODO: set bits type depending on wavHeader.fmtAudioFormat
     streamWaveProperties = WaveProperties(wavHeader.fmtNumChannels, wavHeader.fmtSampleRate, PCM_32BIT_SIGNED);
@@ -131,25 +137,25 @@ bool File::readHeader() {
 }
 
 bool File::writeHeader() {
-    stream.open(path, std::ios::out | std::ios::binary);
+    stream->open(path, std::ios::out | std::ios::binary);
 
-    little_endian::write<char[4]>(stream, {'R','I','F','F'});   // RIFF chunk
-    little_endian::write<uint32_t>(stream, 0);                  // RIFF chunk size in bytes
-    little_endian::write<char[4]>(stream, {'W','A','V','E'});   // file type
+    little_endian::write<char[4]>(*stream, {'R','I','F','F'});   // RIFF chunk
+    little_endian::write<uint32_t>(*stream, 0);                  // RIFF chunk size in bytes
+    little_endian::write<char[4]>(*stream, {'W','A','V','E'});   // file type
 
-    little_endian::write<char[4]>(stream, {'f','m','t',' '});   // fmt chunk
-    little_endian::write<uint32_t>(stream, 16);                 // size of fmt chunk 16 + extra format bytes
-    little_endian::write<uint16_t>(stream, 3);                  // format (compression code)
+    little_endian::write<char[4]>(*stream, {'f','m','t',' '});   // fmt chunk
+    little_endian::write<uint32_t>(*stream, 16);                 // size of fmt chunk 16 + extra format bytes
+    little_endian::write<uint16_t>(*stream, 3);                  // format (compression code)
 
-    little_endian::write<uint16_t>(stream, streamWaveProperties.getChannelsCount());
-    little_endian::write<uint32_t>(stream, streamWaveProperties.getSamplesPerSecond());
-    little_endian::write<uint32_t>(stream, streamWaveProperties.getBytesPerSecond());
-    little_endian::write<uint16_t>(stream, streamWaveProperties.getBlockAlign());
-    little_endian::write<uint16_t>(stream, streamWaveProperties.getBitsPerSample());
+    little_endian::write<uint16_t>(*stream, streamWaveProperties.getChannelsCount());
+    little_endian::write<uint32_t>(*stream, streamWaveProperties.getSamplesPerSecond());
+    little_endian::write<uint32_t>(*stream, streamWaveProperties.getBytesPerSecond());
+    little_endian::write<uint16_t>(*stream, streamWaveProperties.getBlockAlign());
+    little_endian::write<uint16_t>(*stream, streamWaveProperties.getBitsPerSample());
 
     // Write the data chunk header
-    posDataChunk = stream.tellp();
-    stream << "data----";  // (chunk size to be filled in later)
+    posDataChunk = stream->tellp();
+    *stream << "data----";  // (chunk size to be filled in later)
 
     return true;
 }

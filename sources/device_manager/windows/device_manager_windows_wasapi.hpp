@@ -11,8 +11,8 @@
 class DeviceManagerWindowsWASAPI : public DeviceManagerBase {
 public:
     DeviceManagerWindowsWASAPI();
-    ~DeviceManagerWindowsWASAPI();
-    int update();
+    ~DeviceManagerWindowsWASAPI() final;
+    int update() final;
 };
 
 #endif //CASM_DEVICE_MANAGER_WINDOWS_WASAPI_HPP
