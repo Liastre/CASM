@@ -25,7 +25,7 @@ Buffer::Buffer(const WaveProperties waveProperties, const uint32_t framesCount) 
 
 Buffer::Buffer(const WaveProperties waveProperties, const std::chrono::duration< double > duration) {
     // TODO: round to greater
-    uint32_t compFramesCount = (uint32_t) (waveProperties.getSamplesPerSecond()*duration.count());
+    auto compFramesCount = (uint32_t) (waveProperties.getSamplesPerSecond()*duration.count());
     init(waveProperties, compFramesCount);
 }
 

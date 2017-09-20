@@ -31,6 +31,7 @@ void Stream::start(std::chrono::duration< double > delay) {
 
 
 void Stream::stop(const std::chrono::duration< double > delay) {
+    // TODO: check if thread already runned
     streamStopThreadId = std::thread(stopThread, this, delay);
 }
 

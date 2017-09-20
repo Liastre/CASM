@@ -18,6 +18,7 @@ file(GLOB library_sources
     device_manager/device.cpp
     device_manager/device_manager.cpp
     device_manager/device_manager_base.cpp
+    device_manager/windows/windows_utilities.cpp
     device_manager/windows/device_windows_wasapi.cpp
     device_manager/windows/device_manager_windows_wasapi.cpp
     )

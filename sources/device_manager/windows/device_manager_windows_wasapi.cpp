@@ -11,8 +11,8 @@ namespace CASM {
 
 DeviceManagerWindowsWASAPI::DeviceManagerWindowsWASAPI() {
     HRESULT hr;
-    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    assert(hr==S_OK);
+    hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (hr!=S_OK) throw std::runtime_error("Unable to CoInitializeEx(). Error code: " + WinUtils::HRESULTtoString(hr));
 
     update();
 }
@@ -26,37 +26,36 @@ DeviceManagerWindowsWASAPI::~DeviceManagerWindowsWASAPI() {
 int DeviceManagerWindowsWASAPI::update() {
     HRESULT hr;
 
-    IMMDeviceCollection *deviceCollection = NULL;
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
-    IMMDevice *device = NULL;
+    IMMDeviceCollection *deviceCollection = nullptr;
+    IMMDeviceEnumerator *deviceEnumerator = nullptr;
+    IMMDevice *device = nullptr;
     uint32_t deviceCollectionSize;
 
-    //TODO: replace with swap
     deviceList.clear();
 
     //CLSID_MMDeviceEnumerator or __uuidof(IMMDeviceEnumerator)
-    hr = CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
-    assert(hr==S_OK);
+    hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
+    if (hr!=S_OK) throw std::runtime_error("Unable to CoCreateInstance(). Error code: " + WinUtils::HRESULTtoString(hr));
 
-    // eCapture - includes capture endpoints to collection
+    // include capture endpoints (eCapture) to collection
     hr = deviceEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
-    assert(hr==S_OK);
+    if (hr!=S_OK) throw std::runtime_error("Unable to deviceEnumerator->EnumAudioEndpoints(). Error code: " + WinUtils::HRESULTtoString(hr));
     hr = deviceCollection->GetCount(&deviceCollectionSize);
-    assert(hr==S_OK);
+    if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.push_back(Device(device, CASM::CAPTURE));
+        deviceList.emplace_back(Device(device, CASM::CAPTURE));
     }
     deviceCollection->Release();
 
-    // eRender - includes rendering endpoints to collection
+    // include rendering endpoints (eRender) to collection
     hr = deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
-    assert(hr==S_OK);
+    if (hr!=S_OK) throw std::runtime_error("Unable to deviceEnumerator->EnumAudioEndpoints(). Error code: " + WinUtils::HRESULTtoString(hr));
     hr = deviceCollection->GetCount(&deviceCollectionSize);
-    assert(hr==S_OK);
+    if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.push_back(Device(device, CASM::RENDER));
+        deviceList.emplace_back(Device(device, CASM::RENDER));
     }
     deviceCollection->Release();
 
