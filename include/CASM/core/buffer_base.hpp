@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 05 Jun.
-// ===========================================
+/// @file buffer_base.hpp
+/// @brief class BufferStorage for storing bits
 
 #ifndef CASM_BUFFER_BASE_HPP
 #define CASM_BUFFER_BASE_HPP

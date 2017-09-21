@@ -1,9 +1,8 @@
-// =============== DESCRIPTION ===============
-// ===========================================
+/// @file device_windows_wasapi.cpp
+/// @brief definition for device_windows_wasapi.hpp
 
 #include "device_windows_wasapi.hpp"
 #include <thread>
-#include <sstream>
 
 
 namespace CASM {

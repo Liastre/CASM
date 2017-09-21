@@ -1,7 +1,12 @@
-// =============== DESCRIPTION ===============
-// class for Buffer
-// on copying, new object uses the same data storage
-// ===========================================
+/// @file buffer.hpp
+/// @brief class Buffer for storage transferring data
+/**
+    Details:
+    On copying, new object uses the same data storage, since
+    shared_ptr is used for storage.
+    To copy, use Buffer.copy(Buffer) method, it copies data
+    of passed buffer to this.
+**/
 
 #ifndef CASM_BUFFER_HPP
 #define CASM_BUFFER_HPP

@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/// @file device_manager.hpp
+/// @brief class DeviceManager stores collection of devices
 
 #ifndef CASM_DEVICEMANAGER_HPP
 #define CASM_DEVICEMANAGER_HPP

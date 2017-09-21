@@ -1,5 +1,5 @@
-// =============== DESCRIPTION ===============
-// ===========================================
+/// @file buffer.cpp
+/// @brief definition of Buffer class
 
 #include <CASM/core/buffer.hpp>
 #include <cassert>

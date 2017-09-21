@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 27-Aug-17.
-// ===========================================
+/// @file stream.hpp
+/// @brief class Stream for transferring data in between audio end points
 
 #ifndef CASM_STREAM_HPP
 #define CASM_STREAM_HPP
@@ -22,7 +21,7 @@ public:
 
 
     template < class TEndPointIn, class TEndPointOut >
-    Stream(TEndPointIn endPointIn, TEndPointOut endPointOut, std::chrono::duration< double > duration = std::chrono::duration< double >::zero()) {
+    Stream(TEndPointIn endPointIn, TEndPointOut endPointOut, std::chrono::duration< double > bufferDuration = std::chrono::duration< double >::zero()) {
         static_assert(std::is_base_of< EndPointInterface, TEndPointIn >::value, "TEndPointIn is not derived from EndPointInterface");
         static_assert(std::is_base_of< EndPointInterface, TEndPointOut >::value, "TEndPointOut is not derived from EndPointInterface");
         static_assert(!(std::is_same< File, TEndPointIn >::value &&
@@ -30,7 +29,7 @@ public:
 
         Stream::endPointIn = new TEndPointIn(endPointIn);
         Stream::endPointOut = new TEndPointOut(endPointOut);
-        requestedDuration = duration;
+        Stream::requestedBufferDuration = bufferDuration;
         onCopyCallback = [](Buffer&){};
     };
     ~Stream();
@@ -43,7 +42,7 @@ public:
     std::chrono::steady_clock::duration getUptime() const;
     // setters
     /// @brief set bufferDuration (it is minimal by default)
-    void setBufferDuration(std::chrono::duration< float > bufferDuration);
+    void setBufferDuration(std::chrono::duration< double > bufferDuration);
     /// @brief callback to change buffer data with requested way
     void setCopyCallback(void (*onCopyCallbackPtr)(Buffer&));
 
@@ -51,9 +50,9 @@ private:
     /// @brief clock thread
     void startClock();
     /// @brief stream thread
-    void startThread();
+    void startThread(std::chrono::duration< double > delay);
     /// @brief delayed stop
-    void stopThread(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
+    void stopThread(std::chrono::duration< double > delay);
 
     // fields
     EndPointInterface *endPointIn;
@@ -61,7 +60,7 @@ private:
     Buffer buffer;
     std::atomic< std::chrono::steady_clock::duration > uptime;
     std::atomic_bool active;
-    std::chrono::duration< double > requestedDuration;
+    std::chrono::duration< double > requestedBufferDuration;
     // update to async
     std::thread streamStartThreadId;
     std::thread clockThreadId;

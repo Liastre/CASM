@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/// @file wave_properties.hpp
+/// @brief definition of WaveProperties class
 
 #include <CASM/core/wave_properties.hpp>
 
@@ -15,6 +14,7 @@ WaveProperties::WaveProperties() {
 
 
 WaveProperties::WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned) {
+    // TODO: remake
     switch (bitsPerSample) {
     case 16:
         isSigned = paramIsSigned;

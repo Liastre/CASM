@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 30 May.
-// ===========================================
+/// @file file.cpp
+/// @brief definition of File class
 
 #include "CASM/file.hpp"
 

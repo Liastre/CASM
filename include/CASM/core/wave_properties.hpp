@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/// @file wave_properties.hpp
+/// @brief class WaveProperties for storing wave properties
 
 #ifndef CASM_WAVE_PROPERTIES_HPP
 #define CASM_WAVE_PROPERTIES_HPP

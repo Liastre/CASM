@@ -1,6 +1,4 @@
-// =============== DESCRIPTION ===============
-// Created on 14 Jun.
-// ===========================================
+/// @file CASMincludes.hpp
 
 #ifndef CASM_CASMINCLUDES_HPP
 #define CASM_CASMINCLUDES_HPP

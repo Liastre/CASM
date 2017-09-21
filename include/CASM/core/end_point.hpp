@@ -1,5 +1,11 @@
-// =============== DESCRIPTION ===============
-// ===========================================
+/// @file end_point.hpp
+/// @brief EndPointInterface and EndPointBase class
+/**
+    Description:
+    Provides public EndPoint interface and base definitions
+    for base functions derived classes. This allows using
+    any of derived classes the same way
+**/
 
 #ifndef CASM_END_POINT_HPP
 #define CASM_END_POINT_HPP

@@ -1,19 +1,17 @@
-// =============== DESCRIPTION ===============
-// Created on 24 May.
-// ===========================================
+/// @file CASM.hpp
+/// @brief main header of library
 
 #ifndef CASM_CASM_HPP
 #define CASM_CASM_HPP
 
 #include "CASMconfig.hpp"
-
 #include <cstdint>
 #include <array>
 
 
 namespace CASM {
 
-//TODO: handle exclusive types
+// TODO: handle exclusive types
 enum Access {
     READ, READ_EXCLUSIVE, WRITE, WRITE_EXCLUSIVE
 };
@@ -22,6 +20,7 @@ enum DeviceType {
     CAPTURE, RENDER
 };
 
+// TODO: replace
 typedef struct {
     std::array< char, 4 > chunkID;
     uint32_t chunkSize;

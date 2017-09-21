@@ -1,8 +1,11 @@
-// =============== DESCRIPTION ===============
-// Class Device represent end point device
-// not copyable (copy will contain same
-// instance)
-// ===========================================
+/// @file Device.hpp
+/// @brief class Device
+/**
+    Description:
+    Class Device represent end point device
+    Details:
+    Not copyable (copy will contain same instance)
+**/
 
 #ifndef CASM_DEVICE_HPP
 #define CASM_DEVICE_HPP

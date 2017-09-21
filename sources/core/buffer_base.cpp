@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 05 Jun.
-// ===========================================
+/// @file buffer_base.cpp
+/// @brief definition for BufferStorage class
 
 #ifndef CASM_BUFFER_BASE_INL
 #define CASM_BUFFER_BASE_INL

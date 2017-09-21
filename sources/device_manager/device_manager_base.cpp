@@ -1,4 +1,7 @@
-#include "CASM/device_manager/device_manager_base.hpp"
+/// @file device_manager_base.cpp
+/// @brief definition of DeviceManagerBase class
+
+#include <CASM/device_manager/device_manager_base.hpp>
 
 
 namespace CASM {

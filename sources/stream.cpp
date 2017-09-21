@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 27-Aug-17.
-// ===========================================
+/// @file stream.cpp
+/// @brief definition of Stream class
 
 #include <CASM/file.hpp>
 #include "stream.hpp"
@@ -17,7 +16,7 @@ Stream::~Stream() {
 bool Stream::start(std::chrono::duration< double > delay) {
     // initialisation
     active = true;
-    buffer = endPointIn->open(std::chrono::seconds(1));
+    buffer = endPointIn->open(requestedBufferDuration);
     endPointOut->open(buffer);
     // this should never be happen, since StreamManager cares about to pass correct data
     if (Stream::endPointIn->getStreamWaveProperties() != Stream::endPointOut->getStreamWaveProperties()) {
@@ -28,14 +27,14 @@ bool Stream::start(std::chrono::duration< double > delay) {
 
     uptime = std::chrono::steady_clock::duration::zero();
     clockThreadId = std::thread(startClock, this);
-    streamStartThreadId = std::thread(startThread, this);
+    streamStartThreadId = std::thread(startThread, this, delay);
 
     return true;
 }
 
 
 void Stream::stop(const std::chrono::duration< double > delay) {
-    // TODO: check if thread already runned
+    // TODO: check if thread already launched
     streamStopThreadId = std::thread(stopThread, this, delay);
 }
 
@@ -48,7 +47,8 @@ void Stream::startClock() {
 }
 
 
-void Stream::startThread() {
+void Stream::startThread(std::chrono::duration< double > delay) {
+    std::this_thread::sleep_for(delay);
     auto bufferDuration = buffer.getDuration();
     // write data
     while (endPointIn->isAvailable() && endPointOut->isAvailable() && active) {
