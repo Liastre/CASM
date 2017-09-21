@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/// @file device_manager_windows_wasapi.cpp
+/// @brief definition for DeviceManagerWindowsWASAPI class
 
 #include "device_manager_windows_wasapi.hpp"
 #include "windows_wasapi.hpp"

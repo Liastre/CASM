@@ -1,3 +1,6 @@
+/// @file windows_utilities.cpp
+/// @brief definition of Windows utilities
+
 #include "windows_utilities.hpp"
 
 namespace CASM {

@@ -1,5 +1,5 @@
-// =============== DESCRIPTION ===============
-// ===========================================
+/// @file device_windows_wasapi.hpp
+/// @brief class DeviceWindowsWASAPI derived from DeviceBase
 
 #ifndef CASM_DEVICE_WINDOWS_WASAPI_HPP
 #define CASM_DEVICE_WINDOWS_WASAPI_HPP

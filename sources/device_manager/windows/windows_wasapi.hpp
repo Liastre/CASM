@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 12 Jun.
-// ===========================================
+/// @file windows_wasapi.hpp
+/// @brief base includes for Windows WASAPI API
 
 #ifndef CASM_WINDOWS_WASAPI_HPP
 #define CASM_WINDOWS_WASAPI_HPP

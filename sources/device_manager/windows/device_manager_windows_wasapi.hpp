@@ -1,6 +1,5 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/// @file device_manager_windows_wasapi.hpp
+/// @brief class DeviceManagerWindowsWASAPI derived from DeviceManagerBase
 
 #ifndef CASM_DEVICE_MANAGER_WINDOWS_WASAPI_HPP
 #define CASM_DEVICE_MANAGER_WINDOWS_WASAPI_HPP

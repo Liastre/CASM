@@ -1,3 +1,6 @@
+/// @file device.cpp
+/// @brief definition of Device class
+
 #include "CASM/device.hpp"
 #include "windows/device_windows_wasapi.hpp"
 

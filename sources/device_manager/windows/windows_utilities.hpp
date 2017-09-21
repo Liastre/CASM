@@ -1,3 +1,6 @@
+/// @file windows_utilities.hpp
+/// @brief class for basic Windows methods
+
 #ifndef CASM_ERROR_HANDLER_HPP
 #define CASM_ERROR_HANDLER_HPP
 

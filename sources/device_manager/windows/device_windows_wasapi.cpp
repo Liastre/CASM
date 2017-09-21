@@ -1,5 +1,5 @@
 /// @file device_windows_wasapi.cpp
-/// @brief definition for device_windows_wasapi.hpp
+/// @brief definition for DeviceWindowsWASAPI class
 
 #include "device_windows_wasapi.hpp"
 #include <thread>
