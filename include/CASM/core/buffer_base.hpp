@@ -5,6 +5,7 @@
 #ifndef CASM_BUFFER_BASE_HPP
 #define CASM_BUFFER_BASE_HPP
 
+#include <atomic>
 #include <chrono>
 #include <vector>
 #include <fstream>
@@ -24,7 +25,7 @@ public:
 
     void read(std::fstream &stream);
     void read(void *arrayPtr, uint32_t sizeInBytes);
-    void write(std::fstream &stream);
+    bool write(std::fstream &stream);
     void write(BufferStorage *data);
     void write(void *arrayPtr, uint32_t sizeInBytes);
     void copy(BufferStorage *data);
@@ -33,8 +34,8 @@ public:
 
 protected:
     std::vector< uint8_t > buffer;
-    uint32_t filled;
-    uint32_t size;
+    std::atomic<uint32_t> filled;
+    std::atomic<uint32_t> size;
 };
 
 #endif //CASM_BUFFER_BASE_HPP

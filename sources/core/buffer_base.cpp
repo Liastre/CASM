@@ -42,15 +42,16 @@ void BufferStorage::read(void *arrayPtr, const uint32_t sizeInBytes) {
 }
 
 
-void BufferStorage::write(std::fstream &stream) {
+bool BufferStorage::write(std::fstream &stream) {
     uint32_t i;
     for (i = filled; i < size; i++) {
-        stream.read((char *) &buffer[i], 1);
         if (stream.eof()) {
-            break;
+            return false;
         }
+        stream.read((char *) &buffer[i], 1);
+        filled++;
     }
-    filled = i;
+    return true;
 }
 
 
@@ -97,7 +98,7 @@ void BufferStorage::copy(BufferStorage *data) {
     for (int i = 0; i < size; i++) {
         buffer.emplace_back(data->buffer[i]);
     }
-    filled = data->filled;
+    filled += data->filled;
 }
 
 

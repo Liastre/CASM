@@ -112,7 +112,7 @@ BitsType WaveProperties::getBitsType() const {
 }
 
 
-bool WaveProperties::operator==(WaveProperties waveProperties) {
+bool WaveProperties::operator==(WaveProperties waveProperties) const {
     if (this->channelsCount!=waveProperties.channelsCount)
         return false;
     if (this->samplesPerSecond!=waveProperties.samplesPerSecond)
@@ -121,6 +121,11 @@ bool WaveProperties::operator==(WaveProperties waveProperties) {
         return false;
 
     return true;
+}
+
+
+bool WaveProperties::operator!=(WaveProperties waveProperties) const {
+    return !(*this == waveProperties);
 }
 
 }

@@ -31,10 +31,12 @@ public:
         Stream::endPointIn = new TEndPointIn(endPointIn);
         Stream::endPointOut = new TEndPointOut(endPointOut);
         requestedDuration = duration;
+        onCopyCallback = [](Buffer&){};
     };
     ~Stream();
     // methods
-    void start(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
+    /// @return true if succeed, false if some errors appeared
+    bool start(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
     void stop(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
     void join();
     // getters
@@ -43,13 +45,13 @@ public:
     /// @brief set bufferDuration (it is minimal by default)
     void setBufferDuration(std::chrono::duration< float > bufferDuration);
     /// @brief callback to change buffer data with requested way
-    void setCopyCallback(void *onCopyCallbackPtr);
+    void setCopyCallback(void (*onCopyCallbackPtr)(Buffer&));
 
 private:
-    /// @brief stream thread
-    void startThread();
     /// @brief clock thread
     void startClock();
+    /// @brief stream thread
+    void startThread();
     /// @brief delayed stop
     void stopThread(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
 
@@ -59,13 +61,12 @@ private:
     Buffer buffer;
     std::atomic< std::chrono::steady_clock::duration > uptime;
     std::atomic_bool active;
-    std::chrono::duration< double > bufferDuration;
     std::chrono::duration< double > requestedDuration;
     // update to async
     std::thread streamStartThreadId;
     std::thread clockThreadId;
     std::thread streamStopThreadId;
-    void *onCopyCallback;
+    void (*onCopyCallback)(Buffer&);
 };
 
 }

@@ -108,7 +108,7 @@ void File::close() {
 
 
 bool File::read(Buffer &buffer) {
-    buffer.write(*stream);
+    return buffer.write(*stream);
 }
 
 

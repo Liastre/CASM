@@ -18,8 +18,13 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
 }
 
 
-DeviceWindowsWASAPI::DeviceWindowsWASAPI(void *device, CASM::DeviceType deviceType)
-        :DeviceBase< IMMDevice >::DeviceBase(device, deviceType) {
+DeviceWindowsWASAPI::DeviceWindowsWASAPI(void *device, CASM::DeviceType deviceType) :DeviceBase< IMMDevice >::DeviceBase(device, deviceType) {
+    // init
+    stream = nullptr;
+    captureClient = nullptr;
+    renderClient = nullptr;
+
+    // local variables
     HRESULT hr;
     LPWSTR deviceId;
     IPropertyStore *propertyStore;
