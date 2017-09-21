@@ -1,48 +1,44 @@
-// =============== DESCRIPTION ===============
-// Created on 24 May.
-// ===========================================
+/// @file CASM.hpp
+/// @brief main header of library
 
-#ifndef CROSSAUDIOSTREAMMANAGER_CASM_HPP
-#define CROSSAUDIOSTREAMMANAGER_CASM_HPP
+#ifndef CASM_CASM_HPP
+#define CASM_CASM_HPP
 
 #include "CASMconfig.hpp"
-
 #include <cstdint>
+#include <array>
 
 
 namespace CASM {
 
-//TODO: handle exclusive types
+// TODO: handle exclusive types
 enum Access {
-    READ,
-    READ_EXCLUSIVE,
-    WRITE,
-    WRITE_EXCLUSIVE
+    READ, READ_EXCLUSIVE, WRITE, WRITE_EXCLUSIVE
 };
 
 enum DeviceType {
-    CAPTURE,
-    RENDER
+    CAPTURE, RENDER
 };
 
+// TODO: replace
 typedef struct {
-    char        chunkID[4];
-    uint32_t    chunkSize;
-    char        chunkFormat[4];
-    char        fmtID[4];       // sub-chunk 1
-    uint32_t    fmtSize;
-    uint16_t    fmtAudioFormat;
-    uint16_t    fmtNumChannels;
-    uint32_t    fmtSampleRate;
-    uint32_t    fmtByteRate;
-    uint16_t    fmtBlockAlign;
-    uint16_t    fmtBitsPerSample;
-    uint16_t    fmtExtraParamSize;
-    char*       fmtExtraParams;
-    char        dataID[4];      // sub-chunk 2
-    uint32_t    dataSize;
+    std::array< char, 4 > chunkID;
+    uint32_t chunkSize;
+    std::array< char, 4 > chunkFormat;
+    std::array< char, 4 > fmtID;       // sub-chunk 1
+    uint32_t fmtSize;
+    uint16_t fmtAudioFormat;
+    uint16_t fmtNumChannels;
+    uint32_t fmtSampleRate;
+    uint32_t fmtByteRate;
+    uint16_t fmtBlockAlign;
+    uint16_t fmtBitsPerSample;
+    uint16_t fmtExtraParamSize;
+    char *fmtExtraParams;
+    std::array< char, 4 > dataID;      // sub-chunk 2
+    uint32_t dataSize;
 } WavHeader;
 
 } // end of namespace CASM
 
-#endif //CROSSAUDIOSTREAMMANAGER_CASM_HPP
+#endif //CASM_CASM_HPP
