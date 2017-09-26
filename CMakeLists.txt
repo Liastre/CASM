@@ -24,6 +24,7 @@ set(CASM_LIBRARY ${PROJECT_NAME})
 # options
 option(CASM_STATIC "Build shared library" OFF)
 option(CASM_BUILD_EXAMPLES "Build examples" ON)
+option(CASM_BUILD_DOC "Build documentation" ON)
 
 # detect system definitions
 if(WIN32) # windows (32 and 64 bit)
@@ -47,7 +48,8 @@ endif()
 #============= OUTPUT ==============
 #===================================
 set(casm_build_output_dir          ${CMAKE_BINARY_DIR})
-set(casm_binary_output_dir         ${CMAKE_BINARY_DIR}/binary)
+set(casm_binary_output_dir         ${casm_build_output_dir}/binary)
+set(casm_doc_output_dir            ${casm_build_output_dir}/docs)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${casm_binary_output_dir})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${casm_binary_output_dir})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casm_binary_output_dir})
@@ -62,4 +64,9 @@ add_subdirectory(sources)
 # examples
 if(CASM_BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+# documentation
+if(CASM_BUILD_DOC)
+    add_subdirectory(docs)
 endif()
