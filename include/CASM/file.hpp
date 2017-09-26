@@ -1,14 +1,14 @@
-// =============== DESCRIPTION ===============
-// Created on 30 May.
-// ===========================================
+/**
+    @file file.hpp
+    @copyright LGPLv3
+**/
 
 #ifndef CASM_FILE_HPP
 #define CASM_FILE_HPP
 
 #include <CASM/CASM.hpp>
 #include <CASM/core/end_point.hpp>
-#include "CASM/core/buffer.hpp"
-#include "CASM/core/wave_properties.hpp"
+#include <CASM/core/buffer.hpp>
 
 #include <string>
 #include <fstream>
@@ -28,7 +28,7 @@ public:
 
     ~File() override;
 
-    // inherited interface
+    // EndPointInterface
     Buffer open(std::chrono::duration< double > duration) override;
 
     bool open(Buffer buffer) final;
@@ -66,6 +66,6 @@ private:
     int64_t posFileLength;
 };
 
-}
+} // namespace CASM
 
 #endif //CASM_FILE_HPP

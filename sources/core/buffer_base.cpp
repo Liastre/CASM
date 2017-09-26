@@ -1,16 +1,21 @@
-/// @file buffer_base.cpp
-/// @brief definition for BufferStorage class
+/**
+    @file buffer_base.cpp
+    @copyright LGPLv3
+    @brief definition for BufferStorage class
+**/
 
-#ifndef CASM_BUFFER_BASE_INL
-#define CASM_BUFFER_BASE_INL
+#ifndef CASM_BUFFER_STORAGE_INL
+#define CASM_BUFFER_STORAGE_INL
 
 #include <CASM/core/buffer_base.hpp>
 
 
+namespace CASM {
+
 BufferStorage::BufferStorage() {
     size = 0;
     filled = 0;
-};
+}
 
 
 BufferStorage::BufferStorage(uint32_t size) :BufferStorage() {
@@ -76,8 +81,7 @@ void BufferStorage::write(void *arrayPtr, const uint32_t sizeInBytes) {
         for (uint32_t i = 0; i < sizeInBytes; i++) {
             buffer.emplace_back(0);
         }
-    }
-    else {
+    } else {
         auto array = static_cast<uint8_t *>(arrayPtr);
         for (uint32_t i = 0; i < sizeInBytes; i++) {
             buffer.emplace_back(array[i]);
@@ -111,5 +115,6 @@ uint32_t BufferStorage::getSize() {
     return size;
 }
 
+} // namespace CASM
 
-#endif //CASM_BUFFER_BASE_INL
+#endif //CASM_BUFFER_STORAGE_INL

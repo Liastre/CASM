@@ -1,7 +1,10 @@
-/// @file device.cpp
-/// @brief definition of Device class
+/**
+    @file device.cpp
+    @copyright LGPLv3
+    @brief definition of Device class
+**/
 
-#include "CASM/device.hpp"
+#include <CASM/device.hpp>
 #include "windows/device_windows_wasapi.hpp"
 
 
@@ -18,15 +21,19 @@ Device::Device(void *deviceHandler, CASM::DeviceType deviceType) {
 
 Device::~Device() {
     device.reset();
-};
+}
 
 
 Buffer Device::open(std::chrono::duration< double > duration) {
+    if (device->isInUsage()) throw std::logic_error("Device already in use");
+
     return device->open(duration);
 }
 
 
 bool Device::open(Buffer buffer) {
+    if (device->isInUsage()) throw std::logic_error("Device already in use");
+
     return device->open(buffer);
 }
 
@@ -65,4 +72,9 @@ bool Device::isAvailable() {
     return true;
 }
 
+
+bool Device::isInUsage() {
+    return device->isInUsage();
 }
+
+} // namespace CASM

@@ -1,5 +1,8 @@
-/// @file wave_properties.hpp
-/// @brief class WaveProperties for storing wave properties
+/**
+    @file wave_properties.hpp
+    @copyright LGPLv3
+    @brief class WaveProperties for storing wave properties
+**/
 
 #ifndef CASM_WAVE_PROPERTIES_HPP
 #define CASM_WAVE_PROPERTIES_HPP
@@ -25,12 +28,19 @@ public:
     ~WaveProperties();
 
     // getters
+    /// @return channels count
     uint16_t getChannelsCount() const;
+    /// @return bits per sample
     uint16_t getBitsPerSample() const;
+    /// @return samples per second
     uint32_t getSamplesPerSecond() const;
+    /// @return bytes per second
     uint32_t getBytesPerSecond() const;
+    /// @return get block align
     uint16_t getBlockAlign() const;
+    /// @return get enum value of bit's type
     BitsType getBitsType() const;
+    /// @return true if signed, false if not
     bool getSigned() const;
 
     // operators
@@ -38,15 +48,22 @@ public:
     bool operator!=(WaveProperties waveProperties) const;
 
 private:
-    uint16_t channelsCount;     // channels count
-    uint16_t bitsPerSample;     // bits per sample
-    uint16_t blockAlign;        // frame size (size of two integer samples, one for each channel, in bytes)
-    uint32_t samplesPerSecond;  // samples per second (Hz)
-    uint32_t bytesPerSecond;    // bytes per second
+    /// @brief channels count
+    uint16_t channelsCount;
+    /// @brief bits per sample
+    uint16_t bitsPerSample;
+    /// @brief frame size (size of two integer samples, one for each channel, in bytes)
+    uint16_t blockAlign;
+    /// @brief samples per second (Hz)
+    uint32_t samplesPerSecond;
+    /// @brief bytes per second
+    uint32_t bytesPerSecond;
+    /// @brief true if signed, false if not
     bool isSigned;
+    /// @brief enum bit's type
     BitsType bitsType;
 };
 
-}
+} // namespace CASM
 
 #endif //CASM_WAVE_PROPERTIES_HPP

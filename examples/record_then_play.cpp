@@ -18,6 +18,7 @@ int main() {
 
     // init endpoints
     CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
+    // TODO: add flag for forcing renaming
     CASM::File file("recording.wav");
 
     CASM::Stream connector1(endPoint, file, std::chrono::milliseconds(500));

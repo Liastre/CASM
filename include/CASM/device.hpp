@@ -1,10 +1,6 @@
-/// @file Device.hpp
-/// @brief class Device
 /**
-    Description:
-    Class Device represent end point device
-    Details:
-    Not copyable (copy will contain same instance)
+    @file device.hpp
+    @copyright LGPLv3
 **/
 
 #ifndef CASM_DEVICE_HPP
@@ -18,6 +14,7 @@ namespace CASM {
 
 /// @class Device
 /// @brief wrapper under Device fabric
+/// @details not copyable (copy will contain same instance)
 class Device final : public DeviceInterface {
 public:
     Device();
@@ -32,6 +29,7 @@ public:
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;
+    bool isInUsage() final;
 
     WaveProperties getDeviceWaveProperties() final;
     WaveProperties getStreamWaveProperties() final;

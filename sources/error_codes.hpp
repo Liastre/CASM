@@ -1,12 +1,8 @@
-// =============== DESCRIPTION ===============
-// Created on 25 May.
-// ===========================================
-
-#ifndef CROSSAUDIOSTREAMMANAGER_ERROR_CODES_HPP
-#define CROSSAUDIOSTREAMMANAGER_ERROR_CODES_HPP
+#ifndef CASM_ERROR_CODES_HPP
+#define CASM_ERROR_CODES_HPP
 
 namespace CASM {
-//#   define CASM_
+//#   define CASM
 }
 
-#endif //CROSSAUDIOSTREAMMANAGER_ERROR_CODES_HPP
+#endif //CASM_ERROR_CODES_HPP

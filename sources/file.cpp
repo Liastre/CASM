@@ -15,8 +15,7 @@ template < typename T >
 void write(std::fstream &stream, const T &data, uint32_t dataSize = 0) {
     if (dataSize==0) {
         stream.write((const char *) &data, sizeof(T));
-    }
-    else {
+    } else {
         stream.write((const char *) &data, dataSize);
     }
 }
@@ -25,9 +24,9 @@ void write(std::fstream &stream, const T &data, uint32_t dataSize = 0) {
 template < typename T >
 void read(std::fstream &stream, const T &data, uint32_t dataSize = 0) {
     if (dataSize==0) {
-        stream.read((char *) &data, sizeof(T));
+        stream.read(reinterpret_cast<char *>(const_cast<T *>(&data)), sizeof(T));
     } else {
-        stream.read((char *) &data, dataSize);
+        stream.read(reinterpret_cast<char *>(const_cast<T *>(&data)), dataSize);
     }
 }
 
@@ -140,10 +139,9 @@ bool File::readHeader() {
         stream->seekg(tmpPos);
         little_endian::read< uint16_t >(*stream, wavHeader.fmtExtraParamSize);
         wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
-        little_endian::read< char* >(*stream, wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        little_endian::read< char * >(*stream, wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
         little_endian::read< std::array< char, 4 > >(*stream, wavHeader.dataID);
-    }
-    else {
+    } else {
         wavHeader.fmtExtraParamSize = 0;
         wavHeader.fmtExtraParams = nullptr;
     }
@@ -228,4 +226,4 @@ bool File::isAvailable() {
     return true;
 }
 
-}
+} // namespace CASM

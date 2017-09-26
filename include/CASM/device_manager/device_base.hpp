@@ -1,6 +1,8 @@
-// =============== DESCRIPTION ===============
-// Created on 26 May.
-// ===========================================
+/**
+    @file device_base.hpp
+    @copyright LGPLv3
+    @brief declaration for DeviceInterface and DeviceBase classes
+**/
 
 #ifndef CASM_DEVICE_BASE_HPP
 #define CASM_DEVICE_BASE_HPP
@@ -12,8 +14,8 @@
 
 namespace CASM {
 
-/// @class DeviceBase
-/// @brief base class for Device object.
+/// @class DeviceInterface
+/// @brief interface class for Device object
 class DeviceInterface : public virtual EndPointInterface {
 public:
     DeviceInterface() = default;
@@ -23,6 +25,8 @@ public:
     virtual std::wstring getDescription()=0;
 };
 
+/// @class DeviceBase
+/// @brief base class for Device object.
 template < class TDeviceHandler >
 class DeviceBase : public virtual DeviceInterface, public EndPointBase {
 public:
@@ -45,7 +49,7 @@ protected:
     std::chrono::duration< double > bufferDuration;
 };
 
-}
+} // namespace CASM
 
 #include "device_base.inl"
 

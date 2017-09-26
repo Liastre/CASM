@@ -1,5 +1,8 @@
-/// @file buffer_base.hpp
-/// @brief class BufferStorage for storing bits
+/**
+    @file buffer_base.hpp
+    @copyright LGPLv3
+    @brief declaration of BufferStorage class
+**/
 
 #ifndef CASM_BUFFER_BASE_HPP
 #define CASM_BUFFER_BASE_HPP
@@ -10,12 +13,15 @@
 #include <fstream>
 
 
+namespace CASM {
+
 union bitsRep {
     int32_t int32;
     int16_t int16[2];
     int8_t int8[4];
 };
 
+/// @class BufferStorage
 class BufferStorage {
 public:
     BufferStorage();
@@ -32,9 +38,14 @@ public:
     uint32_t getSize();
 
 protected:
+    /// @brief storage for sequence of bytes
     std::vector< uint8_t > buffer;
-    std::atomic<uint32_t> filled;
-    std::atomic<uint32_t> size;
+    /// @brief amount of filled bytes
+    std::atomic< uint32_t > filled;
+    /// @brief buffer storage size
+    std::atomic< uint32_t > size;
 };
+
+} // namespace CASM
 
 #endif //CASM_BUFFER_BASE_HPP

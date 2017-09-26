@@ -1,10 +1,7 @@
-/// @file end_point.hpp
-/// @brief EndPointInterface and EndPointBase class
 /**
-    Description:
-    Provides public EndPoint interface and base definitions
-    for base functions derived classes. This allows using
-    any of derived classes the same way
+    @file end_point.hpp
+    @copyright LGPLv3
+    @brief declaration for EndPointInterface and EndPointBase classes
 **/
 
 #ifndef CASM_END_POINT_HPP
@@ -48,6 +45,9 @@ public:
     /// @brief check if EndPoint still active and available
     /// @return true if we EndPoint still available, false if don't
     virtual bool isAvailable()=0;
+    /// @brief check if EndPoint in usage
+    /// @return true if we EndPoint still available, false if don't
+    virtual bool isInUsage()=0;
 };
 
 /// @brief EndPoint base class
@@ -65,11 +65,16 @@ public:
     }
 
 
+    bool isInUsage() final {
+        active;
+    }
+
+
 protected:
-    bool active;
+    std::atomic_bool active;
     WaveProperties streamWaveProperties;
 };
 
-}
+} // namespace CASM
 
 #endif //CASM_END_POINT_HPP

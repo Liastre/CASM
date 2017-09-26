@@ -1,5 +1,8 @@
-/// @file device_windows_wasapi.cpp
-/// @brief definition for DeviceWindowsWASAPI class
+/**
+    @file device_windows_wasapi.cpp
+    @copyright LGPLv3
+    @brief definition for DeviceWindowsWASAPI class
+**/
 
 #include "device_windows_wasapi.hpp"
 #include <thread>
@@ -73,18 +76,12 @@ DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
 
 
 Buffer DeviceWindowsWASAPI::open(std::chrono::duration< double > duration) {
+    // TODO: set to minimum available duration and check if lesser
     bufferDuration = duration;
 
     // checks
-    if (bufferDuration==std::chrono::duration< double >::zero()) {
-        throw std::logic_error("Buffer duration is zero");
-    }
-    if (active) {
-        throw std::logic_error("Device already in use");
-    }
-    if (handler==nullptr) {
-        throw std::logic_error("Device handler is nullptr");
-    }
+    if (bufferDuration==std::chrono::duration< double >::zero()) throw std::logic_error("Buffer duration is zero");
+    if (handler==nullptr) throw std::logic_error("Device handler is nullptr");
 
     // variables
     HRESULT hr;
