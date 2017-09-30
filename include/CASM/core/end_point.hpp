@@ -23,13 +23,15 @@ public:
     /// @brief set EndPoint ready for transferring data and initialize the buffer
     /// @param [in] duration
     /// @return Buffer
-    virtual Buffer open(std::chrono::duration< double > duration)=0;
+    virtual Buffer openCaptureStream(std::chrono::duration< double > duration)=0;
     /// @brief set EndPoint ready for receiving data and initialize the buffer
     /// @param [in] buffer
     /// @return true if success and false if impossible
-    virtual bool open(Buffer buffer)=0;
-    /// @brief close EndPoint and destroy the buffer
-    virtual void close()=0;
+    virtual bool openRenderStream(Buffer buffer)=0;
+    /// @brief close EndPoint capture stream
+    virtual void closeCaptureStream()=0;
+    /// @brief close EndPoint record stream
+    virtual void closeRenderStream()=0;
     /// @brief read from EndPoint to Buffer
     /// @param [out] buffer - Buffer where we push data
     /// @return true if we read all data, false if some data left
@@ -53,10 +55,7 @@ public:
 /// @brief EndPoint base class
 class EndPointBase : public virtual EndPointInterface {
 public:
-    EndPointBase() {
-        active = false;
-        streamWaveProperties = WaveProperties();
-    };
+    EndPointBase() = default;
     ~EndPointBase() override = default;
 
 
@@ -66,13 +65,13 @@ public:
 
 
     bool isInUsage() final {
-        active;
+        return active;
     }
 
 
 protected:
-    std::atomic_bool active;
-    WaveProperties streamWaveProperties;
+    std::atomic_bool active {false};
+    WaveProperties streamWaveProperties = WaveProperties();
 };
 
 } // namespace CASM

@@ -24,24 +24,27 @@ Device::~Device() {
 }
 
 
-Buffer Device::open(std::chrono::duration< double > duration) {
+Buffer Device::openCaptureStream(std::chrono::duration< double > duration) {
+    //if (device->isInUsage()) throw std::logic_error("Device already in use");
+
+    return device->openCaptureStream(duration);
+}
+
+
+bool Device::openRenderStream(Buffer buffer) {
     if (device->isInUsage()) throw std::logic_error("Device already in use");
 
-    return device->open(duration);
+    return device->openRenderStream(buffer);
 }
 
 
-bool Device::open(Buffer buffer) {
-    if (device->isInUsage()) throw std::logic_error("Device already in use");
-
-    return device->open(buffer);
+void Device::closeCaptureStream() {
+    device->closeCaptureStream();
 }
 
-
-void Device::close() {
-    device->close();
+void Device::closeRenderStream() {
+    device->closeRenderStream();
 }
-
 
 bool Device::read(Buffer &buffer) {
     return device->read(buffer);

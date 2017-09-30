@@ -29,16 +29,12 @@ public:
     ~File() override;
 
     // EndPointInterface
-    Buffer open(std::chrono::duration< double > duration) override;
-
-    bool open(Buffer buffer) final;
-
-    void close() final;
-
+    Buffer openCaptureStream(std::chrono::duration< double > bufferDuration) final;
+    bool openRenderStream(Buffer buffer) final;
+    void closeRenderStream() final;
+    void closeCaptureStream() final;
     bool read(Buffer &buffer) final;
-
     bool write(Buffer buffer) final;
-
     bool isAvailable() final;
 
     // getters
@@ -46,13 +42,9 @@ public:
 
 private:
     bool readHeader();
-
     bool writeHeader();
-
     bool isExist(const std::string &name);
-
     bool splitExtension(const std::string &fileName);
-
     bool generateName();
 
 private:

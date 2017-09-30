@@ -16,8 +16,8 @@ Stream::~Stream() {
 bool Stream::start(std::chrono::duration< double > delay) {
     // initialisation
     active = true;
-    buffer = endPointIn->open(requestedBufferDuration);
-    endPointOut->open(buffer);
+    buffer = endPointIn->openCaptureStream(requestedBufferDuration);
+    endPointOut->openRenderStream(buffer);
     // this should never be happen, since StreamManager cares about to pass correct data
     if (Stream::endPointIn->getStreamWaveProperties() != Stream::endPointOut->getStreamWaveProperties()) {
         // TODO: add some logger
@@ -48,6 +48,7 @@ void Stream::startClock() {
 
 
 void Stream::startThread(std::chrono::duration< double > delay) {
+    // TODO: wrap with try catch
     std::this_thread::sleep_for(delay);
     auto bufferDuration = buffer.getDuration();
     // write data
@@ -63,8 +64,8 @@ void Stream::startThread(std::chrono::duration< double > delay) {
         }
     }
     // close endpoints
-    endPointIn->close();
-    endPointOut->close();
+    endPointIn->closeRenderStream();
+    endPointOut->closeRenderStream();
     active = false;
 }
 

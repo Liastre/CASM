@@ -20,18 +20,20 @@ public:
     ~DeviceWindowsWASAPI() final;
 
     /// EndPointInterface
-    Buffer open(std::chrono::duration< double > duration) final;
-    bool open(Buffer buffer) final;
-    void close() final;
+    Buffer openCaptureStream(std::chrono::duration< double > duration) final;
+    bool openRenderStream(Buffer buffer) final;
+    void closeCaptureStream() final;
+    void closeRenderStream() final;
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;
 
 private:
-    IAudioClient *stream;
-    HANDLE hEvent;
+    IAudioClient *captureStream;
+    IAudioClient *renderStream;
     IAudioCaptureClient *captureClient;
     IAudioRenderClient *renderClient;
+    HANDLE hEvent;
 };
 
 }

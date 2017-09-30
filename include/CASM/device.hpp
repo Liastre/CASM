@@ -22,10 +22,10 @@ public:
     ~Device() override;
 
     /// EndPointInterface interface
-    Buffer open(std::chrono::duration< double > duration) override;
-
-    bool open(Buffer buffer) final;
-    void close() final;
+    Buffer openCaptureStream(std::chrono::duration< double > duration) final;
+    bool openRenderStream(Buffer buffer) final;
+    void closeCaptureStream() final;
+    void closeRenderStream() final;
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
     bool isAvailable() final;

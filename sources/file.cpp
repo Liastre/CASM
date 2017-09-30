@@ -64,22 +64,22 @@ File::File(std::string fileName) :File() {
 File::~File() {
     // TODO: check if fstream exist, or create base class
     if (!finalized) {
-        close();
+        closeRenderStream();
     }
 }
 
 
-Buffer File::open(std::chrono::duration< double > duration) {
+Buffer File::openCaptureStream(std::chrono::duration< double > bufferDuration) {
     if (!isExist(path)) {
         return (Buffer());
     }
     readHeader();
 
-    return Buffer(streamWaveProperties, duration);
+    return Buffer(streamWaveProperties, bufferDuration);
 }
 
 
-bool File::open(Buffer buffer) {
+bool File::openRenderStream(Buffer buffer) {
     streamWaveProperties = buffer.getWaveProperties();
 
     generateName();
@@ -88,7 +88,7 @@ bool File::open(Buffer buffer) {
 }
 
 
-void File::close() {
+void File::closeRenderStream() {
     // (We'll need the final file size to fix the chunk sizes above)
     posFileLength = stream->tellp();
 
@@ -104,6 +104,9 @@ void File::close() {
     finalized = true;
 }
 
+void File::closeCaptureStream() {
+    stream->close();
+}
 
 bool File::read(Buffer &buffer) {
     return buffer.write(*stream);
