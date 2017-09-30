@@ -24,16 +24,16 @@ BufferStorage::BufferStorage(uint32_t size) :BufferStorage() {
 }
 
 
-void BufferStorage::read(std::fstream &stream) {
+// TODO: const fstream?
+void BufferStorage::read(std::fstream &stream) const {
     for (uint32_t i = 0; i < filled; i++) {
         stream.write((const char *) &buffer[i], 1);
     }
-    clear();
 }
 
 
-void BufferStorage::read(void *arrayPtr, const uint32_t sizeInBytes) {
-    if (sizeInBytes > filled) {
+void BufferStorage::read(void *arrayPtr, const uint32_t sizeInBytes) const {
+    if (filled > sizeInBytes) {
         // buffer overflow
         throw std::runtime_error("Buffer read overflow!");
     }
@@ -42,7 +42,6 @@ void BufferStorage::read(void *arrayPtr, const uint32_t sizeInBytes) {
     for (uint32_t i = 0; i < sizeInBytes; i++) {
         array[i] = buffer[i];
     }
-    clear();
 }
 
 
@@ -52,9 +51,10 @@ bool BufferStorage::write(std::fstream &stream) {
         if (stream.eof()) {
             return false;
         }
-        stream.read((char *) &buffer[i], 1);
+        stream.read(reinterpret_cast<char *>(&buffer[i]), 1);
         filled++;
     }
+
     return true;
 }
 

@@ -45,25 +45,14 @@ public:
     /// @param [in] arrayPtr - pointer to begin of array
     /// @param [in] arraySize - actual array size
     /// @param [in] sizeOfTypeInBytes
-    void write(void *arrayPtr, uint32_t arraySize, uint8_t sizeOfTypeInBytes);
-
-
-    /// @brief template method that writes raw data into the buffer
-    /// @tparam PassedType - type of passed array
-    /// @param [in] arrayPtr - pointer to begin of array
-    /// @param [in] arraySize - actual array size
-    template < typename PassedType >
-    void write(void *arrayPtr, const uint32_t arraySize) {
-        // static checks
-        static_assert(std::is_integral< PassedType >::value, "Only integer types are allowed");
-
-        write(arrayPtr, arraySize, sizeof(PassedType));
-    }
-
+    void write(void *arrayPtr, uint32_t sizeInBytes);
 
     /// @brief copy data to the new storage allocated in memory
     /// @param [in] data - data where we copying
     void copy(Buffer data);
+
+    /// @brief clear the buffer
+    void clear();
 
 private:
     void init(WaveProperties waveProperties, uint32_t framesCount);

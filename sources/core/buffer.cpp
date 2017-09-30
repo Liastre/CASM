@@ -74,8 +74,8 @@ void Buffer::write(Buffer data) {
 }
 
 
-void Buffer::write(void *arrayPtr, const uint32_t arraySize, const uint8_t sizeOfTypeInBytes) {
-    storage->write(arrayPtr, (uint32_t) (arraySize*sizeOfTypeInBytes));
+void Buffer::write(void *arrayPtr, const uint32_t sizeInBytes) {
+    storage->write(arrayPtr, sizeInBytes);
 }
 
 
@@ -84,6 +84,11 @@ void Buffer::copy(Buffer data) {
     framesCount = data.framesCount;
     waveProperties = data.waveProperties;
     storage->copy(data.storage.get());
+}
+
+
+void Buffer::clear() {
+    storage->clear();
 }
 
 }

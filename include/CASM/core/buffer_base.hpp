@@ -28,8 +28,8 @@ public:
     explicit BufferStorage(uint32_t size);
     ~BufferStorage() = default;
 
-    void read(std::fstream &stream);
-    void read(void *arrayPtr, uint32_t sizeInBytes);
+    void read(std::fstream &stream) const;
+    void read(void *arrayPtr, uint32_t sizeInBytes) const;
     bool write(std::fstream &stream);
     void write(BufferStorage *data);
     void write(void *arrayPtr, uint32_t sizeInBytes);
