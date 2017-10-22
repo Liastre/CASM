@@ -8,26 +8,25 @@
 namespace CASM {
 
 Stream::~Stream() {
-    delete endPointIn;
-    delete endPointOut;
+    delete _endPointIn;
+    delete _endPointOut;
 }
 
 
 bool Stream::start(std::chrono::duration< double > delay) {
     // initialisation
-    active = true;
-    buffer = endPointIn->openCaptureStream(requestedBufferDuration);
-    endPointOut->openRenderStream(buffer);
+    _isActive = true;
+    _buffer = _endPointIn->openCaptureStream(_requestedBufferDuration);
+    _endPointOut->openRenderStream(_buffer);
     // this should never be happen, since StreamManager cares about to pass correct data
-    if (Stream::endPointIn->getStreamWaveProperties() != Stream::endPointOut->getStreamWaveProperties()) {
+    if (Stream::_endPointIn->getStreamWaveProperties() != Stream::_endPointOut->getStreamWaveProperties()) {
         // TODO: add some logger
         throw std::runtime_error("Unable to connect two points with different WaveProperties");
         //return false;
     }
 
-    uptime = std::chrono::steady_clock::duration::zero();
-    clockThreadId = std::thread(startClock, this);
-    streamStartThreadId = std::thread(startThread, this, delay);
+    _startTime = std::chrono::steady_clock::now();
+    _doTransferThreadId = std::thread(_doTransferThread, this, delay);
 
     return true;
 }
@@ -35,70 +34,67 @@ bool Stream::start(std::chrono::duration< double > delay) {
 
 void Stream::stop(const std::chrono::duration< double > delay) {
     // TODO: check if thread already launched
-    streamStopThreadId = std::thread(stopThread, this, delay);
+    _doStopCallbackThreadId = std::thread(_doStopCallbackThread, this, delay);
 }
 
 
-void Stream::startClock() {
-    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-    while (active) {
-        uptime = (std::chrono::steady_clock::now()-startTime);
-    }
-}
-
-
-void Stream::startThread(std::chrono::duration< double > delay) {
+void Stream::_doTransferThread(std::chrono::duration< double > delay) {
     // TODO: wrap with try catch
     std::this_thread::sleep_for(delay);
-    auto bufferDuration = buffer.getDuration();
+    auto bufferDuration = _buffer.getDuration();
     // write data
-    while (endPointIn->isAvailable() && endPointOut->isAvailable() && active) {
+    while (_endPointIn->isAvailable() && _endPointOut->isAvailable() && _isActive) {
+        _doCopyDataThreadFuture = std::async(_doCopyDataThread);
         std::this_thread::sleep_for(bufferDuration);
-        if (endPointIn->read(buffer)) {
-            // call callback method on data
-            onCopyCallback(buffer);
-            endPointOut->write(buffer);
-        } else {
-            // no more data to read
-            break;
+        if(!_doCopyDataThreadFuture.wait_for(std::chrono::duration::zero())==std::future_status::ready) {
+            throw std::runtime_error("Execution of CopyDataThread exceeded await time");
         }
+
+        _endPointOut->write(_buffer);
     }
+    
     // close endpoints
-    endPointIn->closeRenderStream();
-    endPointOut->closeRenderStream();
-    active = false;
+    _endPointIn->closeRenderStream();
+    _endPointOut->closeRenderStream();
+    _isActive = false;
 }
 
 
-void Stream::stopThread(const std::chrono::duration< double > delay) {
+void Stream::_doStopCallbackThread(std::chrono::duration< double > delay) {
     std::this_thread::sleep_for(delay);
-    if (active) {
-        active = false;
+    if (_isActive) {
+        _isActive = false;
     }
 }
 
 
-std::chrono::steady_clock::duration Stream::getUptime() const {
-    return uptime;
+std::chrono::duration<double> Stream::getUptime() const {
+    return (_startTime-std::chrono::steady_clock::now());
 }
 
 
 void Stream::join() {
     // TODO: check if stop thread exist
-    if (streamStopThreadId.joinable()) {
-        streamStopThreadId.join();
+    if (_doStopCallbackThreadId.joinable()) {
+        _doStopCallbackThreadId.join();
     }
-    if (streamStartThreadId.joinable()) {
-        streamStartThreadId.join();
-    }
-    if (clockThreadId.joinable()) {
-        clockThreadId.join();
+    if (_doTransferThreadId.joinable()) {
+        _doTransferThreadId.join();
     }
 }
 
 
 void Stream::setCopyCallback(void (*onCopyCallbackPtr)(Buffer&)) {
-    onCopyCallback = onCopyCallbackPtr;
+    _onCopyCallback = onCopyCallbackPtr;
 }
 
+
+bool Stream::_doCopyDataThread() {
+    bool status (true);
+    status = _endPointIn->read(_buffer);
+    _onCopyCallback(_buffer);
+
+    return status;
 }
+
+} // namespace CASM
