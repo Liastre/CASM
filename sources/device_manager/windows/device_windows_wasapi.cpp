@@ -109,7 +109,7 @@ Buffer DeviceWindowsWASAPI::openCaptureStream(std::chrono::duration< double > du
 
     hr = captureStream->GetMixFormat(&deviceMixFormat);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code:" + WinUtils::HRESULTtoString(hr));
-    streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
 
     hr = captureStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
@@ -154,9 +154,9 @@ Buffer DeviceWindowsWASAPI::openCaptureStream(std::chrono::duration< double > du
     // start device playing/recording
     hr = captureStream->Start();
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Start(). Error code: " + WinUtils::HRESULTtoString(hr));
-    active = true;
+    _active = true;
 
-    return Buffer(streamWaveProperties, duration);
+    return Buffer(_streamWaveProperties, duration);
 }
 
 
@@ -167,7 +167,7 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer buffer) {
     if (bufferDuration==std::chrono::duration< double >::zero()) {
         throw std::logic_error("Buffer duration is zero");
     }
-    if (active) {
+    if (_active) {
         throw std::logic_error("Device already in use");
     }
     if (handler==nullptr) {
@@ -197,7 +197,7 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer buffer) {
     if (hr!=S_OK) throw std::runtime_error("Unable to handler->Activate(). Error code: " + WinUtils::HRESULTtoString(hr));
     hr = renderStream->GetMixFormat(&deviceMixFormat);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code: " + WinUtils::HRESULTtoString(hr));
-    streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
     hr = renderStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             0,
@@ -240,12 +240,12 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer buffer) {
     // start device playing/recording
     hr = renderStream->Start();
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Start(). Error code: " + WinUtils::HRESULTtoString(hr));
-    active = true;
+    _active = true;
 }
 
 
 void DeviceWindowsWASAPI::closeCaptureStream() {
-    if (!active) {
+    if (!_active) {
         return;
     }
     HRESULT hr;
@@ -256,7 +256,7 @@ void DeviceWindowsWASAPI::closeCaptureStream() {
         captureStream = nullptr;
     }
 
-    active = false;
+    _active = false;
 }
 
 void DeviceWindowsWASAPI::closeRenderStream() {
@@ -296,7 +296,7 @@ bool DeviceWindowsWASAPI::read(Buffer &buffer) {
 
         // each frame contains number of bytes equal to block align
         // TODO: return true or false?
-        buffer.write(pData, numFramesAvailable*streamWaveProperties.getBlockAlign());
+        buffer.write(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
 
         // release data
         hr = captureClient->ReleaseBuffer(numFramesAvailable);
@@ -334,7 +334,7 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
         //assert(hr==S_OK);
         //std::fill( pData, pData + numFramesAvailable, 3 );
         //std::copy(buffer.begin(), src.begin()+count, dest);
-        buffer.read(pData, numFramesAvailable*streamWaveProperties.getBlockAlign());
+        buffer.read(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
 
         hr = renderClient->ReleaseBuffer(numFramesAvailable, flags);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: " + WinUtils::HRESULTtoString(hr));
@@ -344,7 +344,7 @@ bool DeviceWindowsWASAPI::write(Buffer buffer) {
 }
 
 
-bool DeviceWindowsWASAPI::isAvailable() {
+bool DeviceWindowsWASAPI::isAvailable() const {
     return true;
 }
 

@@ -21,8 +21,8 @@ int main() {
     CASM::File file("endPointDevice(8).wav");
 
     // open endpoints
-    CASM::Buffer buffer = file.open(std::chrono::seconds(1));
-    endPoint.open(buffer);
+    CASM::Buffer buffer = file.openCaptureStream(std::chrono::seconds(1));
+    endPoint.openRenderStream(buffer);
 
     // write data
     for (int i = 0; i < 8; i++) {
@@ -32,8 +32,8 @@ int main() {
     }
 
     // close endpoints
-    file.close();
-    endPoint.close();
+    file.closeRenderStream();
+    endPoint.closeCaptureStream();
 
     return 0;
 }

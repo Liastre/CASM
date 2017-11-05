@@ -26,7 +26,7 @@ public:
     void closeRenderStream() final;
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
-    bool isAvailable() final;
+    bool isAvailable() const final;
 
 private:
     IAudioClient *captureStream;

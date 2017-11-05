@@ -44,15 +44,15 @@ void Stream::_doTransferThread(std::chrono::duration< double > delay) {
     auto bufferDuration = _buffer.getDuration();
     // write data
     while (_endPointIn->isAvailable() && _endPointOut->isAvailable() && _isActive) {
-        _doCopyDataThreadFuture = std::async(_doCopyDataThread);
+        _doCopyDataThreadFuture = std::async(&Stream::_doCopyDataThread, this);
         std::this_thread::sleep_for(bufferDuration);
-        if(!_doCopyDataThreadFuture.wait_for(std::chrono::duration::zero())==std::future_status::ready) {
+        if(_doCopyDataThreadFuture.wait_for(std::chrono::duration<double>::zero())!=std::future_status::ready) {
             throw std::runtime_error("Execution of CopyDataThread exceeded await time");
         }
 
         _endPointOut->write(_buffer);
     }
-    
+
     // close endpoints
     _endPointIn->closeRenderStream();
     _endPointOut->closeRenderStream();

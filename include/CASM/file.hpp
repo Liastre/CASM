@@ -7,8 +7,7 @@
 #define CASM_FILE_HPP
 
 #include <CASM/CASM.hpp>
-#include <CASM/core/end_point.hpp>
-#include <CASM/core/buffer.hpp>
+#include <CASM/core/file_base.hpp>
 
 #include <string>
 #include <fstream>
@@ -20,42 +19,37 @@ enum FileType {
     WAV
 };
 
-class File final : public EndPointBase {
+class File final : public FileInterface {
 public:
-    File();
-
-    explicit File(std::string fileName);
-
+    File() = default;
+    File(std::string filePath, bool isForceWriting = false);
     ~File() override;
 
-    // EndPointInterface
+    // FileInterface
     Buffer openCaptureStream(std::chrono::duration< double > bufferDuration) final;
     bool openRenderStream(Buffer buffer) final;
     void closeRenderStream() final;
     void closeCaptureStream() final;
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
-    bool isAvailable() final;
-
-    // getters
-    std::string getName();
+    bool isAvailable() const final;
+    bool isInUsage() const final;
+    std::string getName() const final;
+    WaveProperties getStreamWaveProperties() const final;
 
 private:
-    bool readHeader();
-    bool writeHeader();
-    bool isExist(const std::string &name);
-    bool splitExtension(const std::string &fileName);
+    bool readHeader() final;
+    bool writeHeader() final;
+    bool finalize() final;
+    bool isExist(const std::string &filePath);
+    bool parsePath();
     bool generateName();
 
-private:
-    bool finalized;
-    CASM::WavHeader wavHeader;
-    std::string name;
-    std::string path;
-    std::string extension;
-    std::fstream *stream;
-    int64_t posDataChunk;
-    int64_t posFileLength;
+    std::string _path = "";
+    std::string _name = "";
+    std::string _extension = "";
+
+    std::shared_ptr< FileInterface > _file;
 };
 
 } // namespace CASM

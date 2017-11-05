@@ -43,13 +43,13 @@ public:
 
     /// @brief get output stream wave properties
     /// @return output stream wave properties
-    virtual WaveProperties getStreamWaveProperties()=0;
+    virtual WaveProperties getStreamWaveProperties() const =0;
     /// @brief check if EndPoint still active and available
     /// @return true if we EndPoint still available, false if don't
-    virtual bool isAvailable()=0;
+    virtual bool isAvailable() const =0;
     /// @brief check if EndPoint in usage
     /// @return true if we EndPoint still available, false if don't
-    virtual bool isInUsage()=0;
+    virtual bool isInUsage() const =0;
 };
 
 /// @brief EndPoint base class
@@ -59,19 +59,19 @@ public:
     ~EndPointBase() override = default;
 
 
-    WaveProperties getStreamWaveProperties() final {
-        return streamWaveProperties;
+    WaveProperties getStreamWaveProperties() const final {
+        return _streamWaveProperties;
     }
 
 
-    bool isInUsage() final {
-        return active;
+    bool isInUsage() const final {
+        return _active;
     }
 
 
 protected:
-    std::atomic_bool active {false};
-    WaveProperties streamWaveProperties = WaveProperties();
+    std::atomic<bool> _active = {false};
+    WaveProperties _streamWaveProperties = WaveProperties();
 };
 
 } // namespace CASM

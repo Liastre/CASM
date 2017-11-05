@@ -61,7 +61,7 @@ WaveProperties Device::getDeviceWaveProperties() {
 }
 
 
-WaveProperties Device::getStreamWaveProperties() {
+WaveProperties Device::getStreamWaveProperties() const {
     return device->getStreamWaveProperties();
 }
 
@@ -71,12 +71,12 @@ std::wstring Device::getDescription() {
 }
 
 
-bool Device::isAvailable() {
+bool Device::isAvailable() const {
     return true;
 }
 
 
-bool Device::isInUsage() {
+bool Device::isInUsage() const {
     return device->isInUsage();
 }
 

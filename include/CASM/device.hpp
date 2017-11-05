@@ -28,11 +28,11 @@ public:
     void closeRenderStream() final;
     bool read(Buffer &buffer) final;
     bool write(Buffer buffer) final;
-    bool isAvailable() final;
-    bool isInUsage() final;
+    bool isAvailable() const final;
+    bool isInUsage() const final;
 
     WaveProperties getDeviceWaveProperties() final;
-    WaveProperties getStreamWaveProperties() final;
+    WaveProperties getStreamWaveProperties() const final;
     std::wstring getDescription() final;
 
 private:
