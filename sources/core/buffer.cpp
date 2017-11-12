@@ -78,7 +78,7 @@ void Buffer::write(void *arrayPtr, const uint32_t sizeInBytes) {
     storage->write(arrayPtr, sizeInBytes);
 }
 
-
+//TODO: pass by const ref
 void Buffer::copy(Buffer data) {
     duration = data.duration;
     framesCount = data.framesCount;

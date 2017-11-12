@@ -6,6 +6,7 @@
     shared_ptr is used for storage.
     To copy, use Buffer.copy(Buffer) method, it copies data
     of passed buffer to this.
+    Don't forget to clear buffer before fill with new data
 **/
 
 #ifndef CASM_BUFFER_HPP

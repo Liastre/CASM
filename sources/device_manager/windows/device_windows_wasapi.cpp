@@ -310,7 +310,7 @@ bool DeviceWindowsWASAPI::read(Buffer &buffer) {
     return true;
 }
 
-
+//TODO: pass buffer by const ref
 bool DeviceWindowsWASAPI::write(Buffer buffer) {
     HRESULT hr;
     DWORD flags(0);
