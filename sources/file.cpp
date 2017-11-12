@@ -6,16 +6,18 @@
 
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 
 namespace CASM {
 
-File::File(std::string filePath, bool isForceWriting) {
-    _path = filePath;
-    if(parsePath()) {
+File::File(std::string path, bool isForceWriting) {
+    if(parsePath(path)) {
         if(!isForceWriting) {
             generateName();
         }
+
+        _path = _destination+_name+_extension;
         _file = std::make_shared< FileWave >(_path);
     } else {
         // report no extension
@@ -29,9 +31,6 @@ File::~File() {
 
 
 Buffer File::openCaptureStream(std::chrono::duration< double > bufferDuration) {
-    if (!isExist(_path)) {
-        return (Buffer());
-    }
     return _file->openCaptureStream(bufferDuration);
 }
 
@@ -76,38 +75,48 @@ bool File::isAvailable() const {
 }
 
 
-bool File::isExist(const std::string &filePath) {
-    std::ifstream f(filePath.c_str());
-    return f.good();
+bool File::isExist(const std::string &path) {
+    std::ifstream file(path);
+    return file.good();
 }
 
 
-bool File::parsePath() {
-    std::string::size_type idx;
-    idx = _path.rfind('.');
+bool File::parsePath(std::string &path) {
+    // formatting
+    // TODO: do replacements
+    std::replace( path.begin(), path.end(), '\\', '/');
 
-    if (idx==std::string::npos) {
+    // splitting
+    std::string::size_type extensionIndex = path.rfind('.');
+    std::string::size_type destinationIndex = path.rfind('/');
+
+    if (extensionIndex==std::string::npos) {
+        // TODO: logger message no extension
         return false;
     }
 
-    _extension = _path.substr(idx+1);
-    _name = _path.substr(0, idx);
+    if (destinationIndex!=std::string::npos) {
+        _destination = path.substr(0, destinationIndex);
+    } else {
+        destinationIndex = 0;
+    }
+
+    _name = path.substr(destinationIndex, extensionIndex);
+    _extension = path.substr(extensionIndex);
 
     return true;
 }
 
 
-bool File::generateName() {
+void File::generateName() {
     std::string fileName = _name;
     uint32_t i = 0;
 
-    while (isExist(fileName+'.'+_extension)) {
+    while (isExist(fileName+_extension)) {
         fileName = _name+'('+std::to_string(i)+')';
         i++;
     }
     _name = fileName;
-
-    return true;
 }
 
 
@@ -127,7 +136,7 @@ bool File::isInUsage() const {
 
 
 std::string File::getName() const {
-    return _path;
+    return _name;
 }
 
 } // namespace CASM

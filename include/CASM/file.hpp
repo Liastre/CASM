@@ -22,7 +22,7 @@ enum FileType {
 class File final : public FileInterface {
 public:
     File() = default;
-    File(std::string filePath, bool isForceWriting = false);
+    File(std::string path, bool isForceWriting = false);
     ~File() override;
 
     // FileInterface
@@ -42,10 +42,11 @@ private:
     bool writeHeader() final;
     bool finalize() final;
     bool isExist(const std::string &filePath);
-    bool parsePath();
-    bool generateName();
+    bool parsePath(std::string &path);
+    void generateName();
 
     std::string _path = "";
+    std::string _destination = "";
     std::string _name = "";
     std::string _extension = "";
 

@@ -41,14 +41,6 @@ std::ostream &write(std::ostream &outs, Word value, unsigned size = sizeof(Word)
 
 }
 
-
-typedef struct FileName {
-    std::string path;
-    std::string name;
-    std::string extension;
-} FileName;
-
-
 class FileInterface : public virtual EndPointInterface {
 public:
     FileInterface() = default;
