@@ -3,6 +3,10 @@
 
 namespace CASM {
 
+FileBase::FileBase(std::string &filePath) {
+    _path = filePath;
+}
+
 Buffer FileBase::openCaptureStream(std::chrono::duration< double > bufferDuration) {
     if (readHeader()) {
         return Buffer(_streamWaveProperties, bufferDuration);
@@ -28,12 +32,6 @@ void FileBase::closeRenderStream() {
     finalize();
     _stream->close();
 }
-
-
-std::string FileBase::getName() const {
-    return (_name+_extension);
-}
-
 
 bool FileBase::isAvailable() const {
     return _stream->good();

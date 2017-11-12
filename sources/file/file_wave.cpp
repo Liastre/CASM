@@ -1,13 +1,10 @@
-// =============== DESCRIPTION ===============
-// Created on 30-Sep-17.
-// ===========================================
 
 #include "file_wave.hpp"
 
 
 namespace CASM {
 
-FileWave::FileWave(std::string fileName) :FileWave() {
+FileWave::FileWave(std::string& filePath) : FileBase(filePath) {
 }
 
 

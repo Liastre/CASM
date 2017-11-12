@@ -127,7 +127,7 @@ bool File::isInUsage() const {
 
 
 std::string File::getName() const {
-    return _file->getName();
+    return _path;
 }
 
 } // namespace CASM

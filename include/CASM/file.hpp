@@ -34,7 +34,7 @@ public:
     bool write(Buffer buffer) final;
     bool isAvailable() const final;
     bool isInUsage() const final;
-    std::string getName() const final;
+    std::string getName() const;
     WaveProperties getStreamWaveProperties() const final;
 
 private:
