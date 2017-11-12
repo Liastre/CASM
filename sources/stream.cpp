@@ -8,16 +8,16 @@
 namespace CASM {
 
 Stream::~Stream() {
-    delete _endPointIn;
-    delete _endPointOut;
+    _endPointIn.reset();
+    _endPointOut.reset();
 }
 
 
 bool Stream::start(std::chrono::duration< double > delay) {
     // initialisation
     _isActive = true;
-    _buffer = _endPointIn->openCaptureStream(_requestedBufferDuration);
-    _endPointOut->openRenderStream(_buffer);
+    _buffer = std::make_unique<Buffer>(_endPointIn->openCaptureStream(_requestedBufferDuration));
+    _endPointOut->openRenderStream(*_buffer);
     // this should never be happen, since StreamManager cares about to pass correct data
     if (Stream::_endPointIn->getStreamWaveProperties() != Stream::_endPointOut->getStreamWaveProperties()) {
         // TODO: add some logger
@@ -27,6 +27,7 @@ bool Stream::start(std::chrono::duration< double > delay) {
 
     _startTime = std::chrono::steady_clock::now();
     _doTransferThreadId = std::thread(_doTransferThread, this, delay);
+    _doDataReadThreadId = std::thread(_doDataReadThread, this);
 
     return true;
 }
@@ -41,20 +42,20 @@ void Stream::stop(const std::chrono::duration< double > delay) {
 void Stream::_doTransferThread(std::chrono::duration< double > delay) {
     // TODO: wrap with try catch
     std::this_thread::sleep_for(delay);
-    auto bufferDuration = _buffer.getDuration();
+    auto bufferDuration = _buffer->getDuration();
     // write data
     while (_endPointIn->isAvailable() && _endPointOut->isAvailable() && _isActive) {
-        _doCopyDataThreadFuture = std::async(&Stream::_doCopyDataThread, this);
+        _isCopying = true;
         std::this_thread::sleep_for(bufferDuration);
-        if(_doCopyDataThreadFuture.wait_for(std::chrono::duration<double>::zero())!=std::future_status::ready) {
+        if(_isCopying) {
             throw std::runtime_error("Execution of CopyDataThread exceeded await time");
         }
 
-        _endPointOut->write(_buffer);
+        _endPointOut->write(*_buffer);
     }
 
     // close endpoints
-    _endPointIn->closeRenderStream();
+    _endPointIn->closeCaptureStream();
     _endPointOut->closeRenderStream();
     _isActive = false;
 }
@@ -89,12 +90,17 @@ void Stream::setCopyCallback(void (*onCopyCallbackPtr)(Buffer&)) {
 }
 
 
-bool Stream::_doCopyDataThread() {
-    bool status (true);
-    status = _endPointIn->read(_buffer);
-    _onCopyCallback(_buffer);
-
-    return status;
+void Stream::_doDataReadThread() {
+    while(_isActive) {
+        if(_isCopying) {
+            bool status(true);
+            _buffer->clear();
+            status = _endPointIn->read(*_buffer);
+            _onCopyCallback(*_buffer);
+            _isCopying = false;
+        }
+        std::this_thread::yield();
+    }
 }
 
 } // namespace CASM

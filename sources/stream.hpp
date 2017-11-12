@@ -30,8 +30,8 @@ public:
                         std::is_same< File, TEndPointIn >::value && std::is_same< File, TEndPointOut >::value),
                 "You cannot create stream between File and File");
 
-        Stream::_endPointIn = new TEndPointIn(endPointIn);
-        Stream::_endPointOut = new TEndPointOut(endPointOut);
+        Stream::_endPointIn = std::make_unique<TEndPointIn>(endPointIn);
+        Stream::_endPointOut = std::make_unique<TEndPointOut>(endPointOut);
         Stream::_requestedBufferDuration = bufferDuration;
         _onCopyCallback = [](Buffer &) {};
     };
@@ -42,7 +42,7 @@ public:
     void stop(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
     void join();
     // getters
-    std::chrono::duration<double> getUptime() const;
+    std::chrono::duration< double > getUptime() const;
     // setters
     /// @brief set bufferDuration (it is minimal by default)
     void setBufferDuration(std::chrono::duration< double > bufferDuration);
@@ -51,23 +51,23 @@ public:
 
 private:
     /// @brief clock thread
-    void startClock();
-    bool _doCopyDataThread();
+    void _doDataReadThread();
     /// @brief stream thread
     void _doTransferThread(std::chrono::duration< double > delay);
     /// @brief delayed stop
     void _doStopCallbackThread(std::chrono::duration< double > delay);
 
     // fields
-    EndPointInterface *_endPointIn;
-    EndPointInterface *_endPointOut;
-    Buffer _buffer;
-    std::chrono::steady_clock::time_point _startTime;
-    std::atomic_bool _isActive;
+    std::unique_ptr< EndPointInterface > _endPointIn;
+    std::unique_ptr< EndPointInterface > _endPointOut;
+    std::unique_ptr< Buffer > _buffer;
     std::chrono::duration< double > _requestedBufferDuration;
+    std::chrono::steady_clock::time_point _startTime;
+    std::atomic< bool > _isActive;
+    std::atomic< bool > _isCopying;
 
-    std::future< bool > _doCopyDataThreadFuture;
     std::thread _doTransferThreadId;
+    std::thread _doDataReadThreadId;
     std::thread _doStopCallbackThreadId;
     void (*_onCopyCallback)(Buffer &);
 };
