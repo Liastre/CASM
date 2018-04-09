@@ -16,19 +16,17 @@ FileWave::~FileWave() {
 }
 
 
-bool FileWave::read(Buffer &buffer) {
+bool FileWave::read(Buffer & buffer) {
     return buffer.write(*_stream);
 }
 
 
-bool FileWave::write(Buffer buffer) {
+bool FileWave::write(Buffer const & buffer) {
     buffer.read(*_stream);
 }
 
 
 bool FileWave::readHeader() {
-    _stream->open(_path, std::ios::in | std::ios::binary);
-
     little_endian::read< std::array< char, 4 > >(*_stream, wavHeader.chunkID);       // RIFF chunk
     little_endian::read< uint32_t >(*_stream, wavHeader.chunkSize);                  // RIFF chunk size in bytes
     little_endian::read< std::array< char, 4 > >(*_stream, wavHeader.chunkFormat);   // file type
@@ -70,8 +68,6 @@ bool FileWave::readHeader() {
 
 
 bool FileWave::writeHeader() {
-    _stream->open(_path, std::ios::out | std::ios::binary);
-
     little_endian::write< char[4] >(*_stream, {'R', 'I', 'F', 'F'});     // RIFF chunk
     little_endian::write< uint32_t >(*_stream, 0);                       // RIFF chunk size in bytes
     little_endian::write< char[4] >(*_stream, {'W', 'A', 'V', 'E'});     // file type
