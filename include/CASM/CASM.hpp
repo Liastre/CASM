@@ -7,18 +7,25 @@
 #include "CASMconfig.hpp"
 #include <cstdint>
 #include <array>
+#include <chrono>
 
 
 namespace CASM {
 
 // TODO: handle exclusive types
 enum Access {
-    READ, READ_EXCLUSIVE, WRITE, WRITE_EXCLUSIVE
+    READ,
+    READ_EXCLUSIVE,
+    WRITE,
+    WRITE_EXCLUSIVE
 };
 
 enum DeviceType {
     CAPTURE, RENDER
 };
+
+// Base typedefs
+typedef std::chrono::duration<double> Duration;
 
 } // end of namespace CASM
 
