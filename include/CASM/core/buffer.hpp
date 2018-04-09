@@ -24,18 +24,18 @@ namespace CASM {
 class Buffer {
 public:
     Buffer();
-    Buffer(WaveProperties waveProperties, uint32_t framesCount);
-    Buffer(WaveProperties waveProperties, std::chrono::duration< double > duration);
+    Buffer(WaveProperties const & waveProperties, uint32_t framesCount);
+    Buffer(WaveProperties const & waveProperties, Duration const & duration);
     ~Buffer();
 
     // getters
-    const WaveProperties &getWaveProperties() const;
+    WaveProperties getWaveProperties() const;
     uint32_t getSize() const;
     std::chrono::duration< double > getDuration() const;
 
     // methods
-    void read(std::fstream &stream);
-    void read(void *arrayPtr, uint32_t sizeInBytes);
+    void read(std::fstream &stream) const;
+    void read(void *arrayPtr, uint32_t sizeInBytes) const;
     bool write(std::fstream &stream);
 
     /// @brief writes data from input buffer to current
@@ -56,14 +56,14 @@ public:
     void clear();
 
 private:
-    void init(WaveProperties waveProperties, uint32_t framesCount);
+    void init(WaveProperties const & waveProperties, uint32_t framesCount);
 
-    std::shared_ptr< BufferStorage > storage;
-    WaveProperties waveProperties;
+    std::shared_ptr< BufferStorage > _storage;
+    WaveProperties _waveProperties;
     /// @brief approximate duration in time units
-    std::chrono::duration< double > duration;
+    Duration _duration;
     /// @brief frames needed for requested duration
-    uint32_t framesCount;
+    uint32_t _framesCount;
 };
 
 }

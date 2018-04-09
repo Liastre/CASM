@@ -8,87 +8,87 @@
 namespace CASM {
 
 Buffer::Buffer() {
-    duration = std::chrono::duration< double >::zero();
-    framesCount = 0;
+    _duration = Duration::zero();
+    _framesCount = 0;
 }
 
 
 Buffer::~Buffer() {
-    storage.reset();
+    _storage.reset();
 }
 
 
-Buffer::Buffer(const WaveProperties waveProperties, const uint32_t framesCount) {
+Buffer::Buffer(WaveProperties const & waveProperties, const uint32_t framesCount) {
     init(waveProperties, framesCount);
 }
 
 
-Buffer::Buffer(const WaveProperties waveProperties, const std::chrono::duration< double > duration) {
+Buffer::Buffer(WaveProperties const & waveProperties, Duration const & duration) {
     // TODO: round to greater
     auto compFramesCount = (uint32_t) (waveProperties.getSamplesPerSecond()*duration.count());
     init(waveProperties, compFramesCount);
 }
 
 
-void Buffer::init(WaveProperties waveProperties, uint32_t framesCount) {
-    Buffer::waveProperties = waveProperties;
-    Buffer::framesCount = framesCount;
+void Buffer::init(WaveProperties const & waveProperties, uint32_t framesCount) {
+    Buffer::_waveProperties = waveProperties;
+    Buffer::_framesCount = framesCount;
     // compute actual buffer duration
-    duration = std::chrono::duration< double >((double) Buffer::framesCount/(double) waveProperties.getSamplesPerSecond());
-    storage = std::make_shared< BufferStorage >(Buffer::framesCount*waveProperties.getBlockAlign());
+    _duration = std::chrono::duration< double >((double) Buffer::_framesCount/(double) waveProperties.getSamplesPerSecond());
+    _storage = std::make_shared< BufferStorage >(Buffer::_framesCount*waveProperties.getBlockAlign());
 }
 
 
 uint32_t Buffer::getSize() const {
-    return storage->getSize();
+    return _storage->getSize();
 }
 
 
-std::chrono::duration< double > Buffer::getDuration() const {
-    return duration;
+Duration Buffer::getDuration() const {
+    return _duration;
 }
 
 
-const WaveProperties &Buffer::getWaveProperties() const {
-    return waveProperties;
+WaveProperties Buffer::getWaveProperties() const {
+    return _waveProperties;
 }
 
 
-void Buffer::read(std::fstream &stream) {
-    storage->read(stream);
+void Buffer::read(std::fstream &stream) const {
+    _storage->read(stream);
 }
 
 
-void Buffer::read(void *arrayPtr, uint32_t sizeInBytes) {
-    storage->read(arrayPtr, sizeInBytes);
+void Buffer::read(void *arrayPtr, uint32_t sizeInBytes) const {
+    _storage->read(arrayPtr, sizeInBytes);
 }
 
 
 bool Buffer::write(std::fstream &stream) {
-    return storage->write(stream);
+    return _storage->write(stream);
 }
 
 
 void Buffer::write(Buffer data) {
-    storage->write(data.storage.get());
+    _storage->write(data._storage.get());
 }
 
 
 void Buffer::write(void *arrayPtr, const uint32_t sizeInBytes) {
-    storage->write(arrayPtr, sizeInBytes);
+    _storage->write(arrayPtr, sizeInBytes);
 }
 
 //TODO: pass by const ref
 void Buffer::copy(Buffer data) {
-    duration = data.duration;
-    framesCount = data.framesCount;
-    waveProperties = data.waveProperties;
-    storage->copy(data.storage.get());
+    _duration = data._duration;
+    _framesCount = data._framesCount;
+    _waveProperties = data._waveProperties;
+    _storage->copy(data._storage.get());
 }
 
 
 void Buffer::clear() {
-    storage->clear();
+    _storage->clear();
 }
 
 }

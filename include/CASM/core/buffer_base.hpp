@@ -7,6 +7,7 @@
 #ifndef CASM_BUFFER_BASE_HPP
 #define CASM_BUFFER_BASE_HPP
 
+#include <CASM/CASM.hpp>
 #include <atomic>
 #include <chrono>
 #include <vector>
