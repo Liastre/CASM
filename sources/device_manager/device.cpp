@@ -14,7 +14,7 @@ Device::Device() {
 }
 
 
-Device::Device(void *deviceHandler, CASM::DeviceType deviceType) {
+Device::Device(void * deviceHandler, DeviceType deviceType) {
     device = std::make_shared< DeviceWindowsWASAPI >(deviceHandler, deviceType);
 }
 
@@ -24,14 +24,14 @@ Device::~Device() {
 }
 
 
-Buffer Device::openCaptureStream(std::chrono::duration< double > duration) {
+bool Device::openCaptureStream(Duration const & duration, Buffer & buffer) {
     //if (device->isInUsage()) throw std::logic_error("Device already in use");
 
-    return device->openCaptureStream(duration);
+    return device->openCaptureStream(duration, buffer);
 }
 
 
-bool Device::openRenderStream(Buffer buffer) {
+bool Device::openRenderStream(Buffer const & buffer) {
     if (device->isInUsage()) throw std::logic_error("Device already in use");
 
     return device->openRenderStream(buffer);
@@ -42,16 +42,18 @@ void Device::closeCaptureStream() {
     device->closeCaptureStream();
 }
 
+
 void Device::closeRenderStream() {
     device->closeRenderStream();
 }
 
-bool Device::read(Buffer &buffer) {
+
+bool Device::read(Buffer & buffer) {
     return device->read(buffer);
 }
 
 
-bool Device::write(Buffer buffer) {
+bool Device::write(Buffer const & buffer) {
     device->write(buffer);
 }
 
@@ -78,6 +80,16 @@ bool Device::isAvailable() const {
 
 bool Device::isInUsage() const {
     return device->isInUsage();
+}
+
+
+bool Device::isValid() const {
+    return device->isValid();
+}
+
+
+Device::operator bool() const {
+    return isValid();
 }
 
 } // namespace CASM

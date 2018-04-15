@@ -18,22 +18,28 @@ namespace CASM {
 class Device final : public DeviceInterface {
 public:
     Device();
-    Device(void *deviceHandler, CASM::DeviceType deviceType);
+    Device(void * deviceHandler, DeviceType deviceType);
     ~Device() override;
 
     /// EndPointInterface interface
-    Buffer openCaptureStream(std::chrono::duration< double > duration) final;
-    bool openRenderStream(Buffer buffer) final;
+    bool openCaptureStream(Duration const & duration, Buffer & buffer) final;
+    bool openRenderStream(Buffer const & buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
-    bool read(Buffer &buffer) final;
-    bool write(Buffer buffer) final;
+    bool read(Buffer & buffer) final;
+    bool write(Buffer const & buffer) final;
+
+    // TODO: add getState method
     bool isAvailable() const final;
     bool isInUsage() const final;
+    bool isValid() const final;
 
     WaveProperties getDeviceWaveProperties() final;
     WaveProperties getStreamWaveProperties() const final;
     std::wstring getDescription() final;
+
+    // operators
+    operator bool() const;
 
 private:
     std::shared_ptr< DeviceInterface > device;

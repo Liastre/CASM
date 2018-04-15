@@ -16,23 +16,23 @@ typedef IMMDevice DeviceHandler;
 class DeviceWindowsWASAPI final : public DeviceBase< IMMDevice > {
 public:
     DeviceWindowsWASAPI();
-    DeviceWindowsWASAPI(void *device, CASM::DeviceType deviceType);
+    DeviceWindowsWASAPI(void * device, CASM::DeviceType deviceType);
     ~DeviceWindowsWASAPI() final;
 
     /// EndPointInterface
-    Buffer openCaptureStream(std::chrono::duration< double > duration) final;
-    bool openRenderStream(Buffer buffer) final;
+    bool openCaptureStream(Duration const & duration, Buffer & buffer) final;
+    bool openRenderStream(Buffer const & buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
-    bool read(Buffer &buffer) final;
-    bool write(Buffer buffer) final;
+    bool read(Buffer & buffer) final;
+    bool write(Buffer const & buffer) final;
     bool isAvailable() const final;
 
 private:
-    IAudioClient *captureStream;
-    IAudioClient *renderStream;
-    IAudioCaptureClient *captureClient;
-    IAudioRenderClient *renderClient;
+    IAudioClient * captureStream;
+    IAudioClient * renderStream;
+    IAudioCaptureClient * captureClient;
+    IAudioRenderClient * renderClient;
     HANDLE hEvent;
 };
 
