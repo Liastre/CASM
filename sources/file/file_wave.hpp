@@ -7,21 +7,21 @@
 namespace CASM {
 
 typedef struct {
-    std::array< char, 4 > chunkID;
-    uint32_t chunkSize;
-    std::array< char, 4 > chunkFormat;
-    std::array< char, 4 > fmtID;       // sub-chunk 1
-    uint32_t fmtSize;
-    uint16_t fmtAudioFormat;
-    uint16_t fmtNumChannels;
-    uint32_t fmtSampleRate;
-    uint32_t fmtByteRate;
-    uint16_t fmtBlockAlign;
-    uint16_t fmtBitsPerSample;
-    uint16_t fmtExtraParamSize;
-    char *fmtExtraParams;
-    std::array< char, 4 > dataID;      // sub-chunk 2
-    uint32_t dataSize;
+    std::array< char, 4 > chunkID       {'R','I','F','F'};  // chunk
+    uint32_t chunkSize                  {0};
+    std::array< char, 4 > chunkFormat   {'W','A','V','E'};
+    std::array< char, 4 > fmtID         {'f','m','t',' '};  // sub-chunk 1
+    uint32_t fmtSize                    {0};
+    uint16_t fmtAudioFormat             {0};
+    uint16_t fmtNumChannels             {0};
+    uint32_t fmtSampleRate              {0};
+    uint32_t fmtByteRate                {0};
+    uint16_t fmtBlockAlign              {0};
+    uint16_t fmtBitsPerSample           {0};
+    uint16_t fmtExtraParamSize          {0};
+    char *fmtExtraParams                {nullptr};
+    std::array< char, 4 > dataID        {'d','a','t','a'};  // sub-chunk 2
+    uint32_t dataSize                   {0};
 } WavHeader;
 
 class FileWave : public FileBase {
