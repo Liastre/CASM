@@ -29,21 +29,18 @@ File::~File() {
 }
 
 
-bool File::openCaptureStream(std::chrono::duration< double > const & bufferDuration, Buffer & buffer) {
-    if (_isExist()) {
+bool File::openCaptureStream(Duration const & bufferDuration, Buffer & buffer) {
+    if (!_isExist()) {
         return false;
     }
-    if(!_shouldForceWriting) {
-        _generateName();
-        _file->setPath(_path);
-    }
+
     return _file->openCaptureStream(bufferDuration, buffer);
 }
 
 
 bool File::openRenderStream(Buffer const & buffer) {
-    if (_isExist()) {
-        return false;
+    if (_isExist() && !_shouldForceWriting) {
+        _generateName();
     }
     return _file->openRenderStream(buffer);
 }
@@ -128,6 +125,7 @@ void File::_generateName() {
         i++;
     }
     _name = tmpName;
+    _file->setPath(_path);
 }
 
 

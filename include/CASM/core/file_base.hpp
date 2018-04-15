@@ -49,25 +49,27 @@ public:
     virtual bool readHeader()=0;
     virtual bool writeHeader()=0;
     virtual bool finalize()=0;
+    virtual void setPath(std::string const & path)=0;
 };
 
 
 class FileBase : public virtual FileInterface, public EndPointBase {
 public:
     FileBase() = default;
-    FileBase(std::string &filePath);
+    FileBase(std::string const & filePath);
     ~FileBase() override = default;
 
-    Buffer openCaptureStream(std::chrono::duration< double > bufferDuration) final;
-    bool openRenderStream(Buffer buffer) final;
+    bool openCaptureStream(Duration const & bufferDuration, Buffer & buffer) final;
+    bool openRenderStream(Buffer const & buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
     bool isAvailable() const final;
+    void setPath(std::string const & path) final;
 
 protected:
+    // TODO: fix memory leak
     std::fstream *_stream = new std::fstream();
     std::string _path = "";
-
 };
 
 }
