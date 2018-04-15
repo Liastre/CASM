@@ -47,14 +47,13 @@ bool FileWave::readHeader() {
     if (wavHeader.dataID!=dataID) {
         _stream->seekg(tmpPos);
         little_endian::read< uint16_t >(*_stream, wavHeader.fmtExtraParamSize);
-        wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
-        little_endian::read< char * >(*_stream, wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        if (wavHeader.fmtExtraParamSize > 0) {
+            // TODO: fix memory leak
+            wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
+            little_endian::read< char * >(*_stream, wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+        }
         little_endian::read< std::array< char, 4 > >(*_stream, wavHeader.dataID);
-    } else {
-        wavHeader.fmtExtraParamSize = 0;
-        wavHeader.fmtExtraParams = nullptr;
     }
-
     if (wavHeader.dataID!=dataID) {
         return false;
     }
