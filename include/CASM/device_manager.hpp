@@ -12,6 +12,8 @@ namespace CASM {
 class DeviceManager {
 public:
     DeviceManager();
+    ~DeviceManager();
+
     int update();
     uint_fast32_t getDeviceCount();
     Device getDevice(uint_fast32_t index);

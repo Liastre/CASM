@@ -12,6 +12,11 @@ DeviceManager::DeviceManager() {
 }
 
 
+DeviceManager::~DeviceManager() {
+    deviceManager.reset();
+}
+
+
 int DeviceManager::update() {
     return deviceManager->update();
 }
