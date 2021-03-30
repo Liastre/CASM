@@ -30,7 +30,7 @@ public:
 
     // getters
     WaveProperties getWaveProperties() const;
-    uint32_t getSize() const;
+    std::size_t getSize() const;
     std::chrono::duration< double > getDuration() const;
 
     // methods

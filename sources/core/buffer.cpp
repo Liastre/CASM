@@ -39,7 +39,7 @@ void Buffer::init(WaveProperties const & waveProperties, uint32_t framesCount) {
 }
 
 
-uint32_t Buffer::getSize() const {
+std::size_t Buffer::getSize() const {
     return _storage->getSize();
 }
 
