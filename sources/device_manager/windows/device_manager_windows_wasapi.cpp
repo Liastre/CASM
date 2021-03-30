@@ -43,7 +43,7 @@ int DeviceManagerWindowsWASAPI::update() {
     if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, CASM::CAPTURE));
+        deviceList.emplace_back(Device(device, DeviceType::CAPTURE));
     }
     deviceCollection->Release();
 
@@ -54,7 +54,7 @@ int DeviceManagerWindowsWASAPI::update() {
     if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, CASM::RENDER));
+        deviceList.emplace_back(Device(device, DeviceType::RENDER));
     }
     deviceCollection->Release();
 

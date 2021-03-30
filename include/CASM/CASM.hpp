@@ -13,15 +13,16 @@
 namespace CASM {
 
 // TODO: handle exclusive types
-enum Access {
+enum class Access {
     READ,
     READ_EXCLUSIVE,
     WRITE,
-    WRITE_EXCLUSIVE
+    WRITE_EXCLUSIVE,
 };
 
-enum DeviceType {
-    CAPTURE, RENDER
+enum class DeviceType {
+    CAPTURE,
+    RENDER,
 };
 
 // Base typedefs

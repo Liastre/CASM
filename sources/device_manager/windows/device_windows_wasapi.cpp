@@ -87,10 +87,10 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     uint32_t fragmentDurationRequested = (uint32_t) (std::chrono::duration_cast< std::chrono::nanoseconds >(bufferDuration).count()/100);
 
     switch (type) {
-    case CASM::RENDER:
+    case DeviceType::RENDER:
         streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
         break;
-    case CASM::CAPTURE:
+    case DeviceType::CAPTURE:
         streamFlags = 0;
         break;
     default:
@@ -178,10 +178,10 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
     uint32_t fragmentDurationRequested = (uint32_t) (std::chrono::duration_cast< std::chrono::nanoseconds >(bufferDuration).count()/100);
 
     switch (type) {
-    case CASM::RENDER:
+    case DeviceType::RENDER:
         streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
         break;
-    case CASM::CAPTURE:
+    case DeviceType::CAPTURE:
         streamFlags = 0;
         break;
     default:
