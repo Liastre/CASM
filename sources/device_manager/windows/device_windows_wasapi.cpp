@@ -11,10 +11,6 @@
 namespace CASM {
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
-    captureStream = nullptr;
-    renderStream = nullptr;
-    captureClient = nullptr;
-    renderClient = nullptr;
     /*HRESULT hr;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     assert(hr==S_OK);*/
@@ -22,12 +18,6 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
 
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI(void * device, CASM::DeviceType deviceType) :DeviceBase< IMMDevice >::DeviceBase(device, deviceType) {
-    // init
-    captureStream = nullptr;
-    renderStream = nullptr;
-    captureClient = nullptr;
-    renderClient = nullptr;
-
     // local variables
     HRESULT hr;
     LPWSTR deviceId;
@@ -72,11 +62,11 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void * device, CASM::DeviceType deviceT
 
 
 DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
-    if (captureClient!=nullptr) {
-        captureClient->Release();
+    if (_captureClient!=nullptr) {
+        _captureClient->Release();
     }
-    if (renderClient!=nullptr) {
-        renderClient->Release();
+    if (_renderClient!=nullptr) {
+        _renderClient->Release();
     }
 }
 
@@ -108,14 +98,14 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     }
 
     // creates COM object
-    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void **) &captureStream);
+    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void **) &_captureStream);
     if (hr!=S_OK) throw std::runtime_error("Unable to handler->Activate(). Error code: "+WinUtils::HRESULTtoString(hr));
 
     hr = captureStream->GetMixFormat(&deviceMixFormat);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code:"+WinUtils::HRESULTtoString(hr));
     _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
 
-    hr = captureStream->Initialize(
+    hr = _captureStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
             fragmentDurationRequested,
@@ -125,7 +115,7 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     );
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Initialize(). Error code: "+WinUtils::HRESULTtoString(hr));
 
-    hr = captureStream->GetService(IID_IAudioCaptureClient, (void **) &captureClient);
+    hr = _captureStream->GetService(IID_IAudioCaptureClient, (void **) &_captureClient);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetService(). Error code: "+WinUtils::HRESULTtoString(hr));
 
     /*hEvent = CreateEvent(nullptr, false, false, nullptr);
@@ -138,7 +128,7 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
-    hr = captureStream->GetBufferSize(&tmpBufferFramesCount);
+    hr = _captureStream->GetBufferSize(&tmpBufferFramesCount);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: "+WinUtils::HRESULTtoString(hr));
     bufferFramesCount = tmpBufferFramesCount;
 
@@ -156,11 +146,13 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     //============*/
 
     // start device playing/recording
-    hr = captureStream->Start();
+    hr = _captureStream->Start();
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Start(). Error code: "+WinUtils::HRESULTtoString(hr));
     _active = true;
 
     buffer = Buffer(_streamWaveProperties, duration);
+
+    return true;
 }
 
 
@@ -197,12 +189,12 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
     }
 
     // creates COM object
-    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void **) &renderStream);
+    hr = handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void **) &_renderStream);
     if (hr!=S_OK) throw std::runtime_error("Unable to handler->Activate(). Error code: "+WinUtils::HRESULTtoString(hr));
-    hr = renderStream->GetMixFormat(&deviceMixFormat);
+    hr = _renderStream->GetMixFormat(&deviceMixFormat);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code: "+WinUtils::HRESULTtoString(hr));
     _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
-    hr = renderStream->Initialize(
+    hr = _renderStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             0,
             fragmentDurationRequested,
@@ -211,7 +203,7 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
             nullptr
     );
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Initialize(). Error code: "+WinUtils::HRESULTtoString(hr));
-    hr = renderStream->GetService(IID_IAudioRenderClient, (void **) &renderClient);
+    hr = _renderStream->GetService(IID_IAudioRenderClient, (void **) &_renderClient);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetService(). Error code: "+WinUtils::HRESULTtoString(hr));
 
     /*hEvent = CreateEvent(nullptr, false, false, nullptr);
@@ -224,7 +216,7 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
     assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
-    hr = renderStream->GetBufferSize(&tmpBufferFramesCount);
+    hr = _renderStream->GetBufferSize(&tmpBufferFramesCount);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: "+WinUtils::HRESULTtoString(hr));
     bufferFramesCount = tmpBufferFramesCount;
 
@@ -242,9 +234,11 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
     //============*/
 
     // start device playing/recording
-    hr = renderStream->Start();
+    hr = _renderStream->Start();
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Start(). Error code: "+WinUtils::HRESULTtoString(hr));
     _active = true;
+
+    return true;
 }
 
 
@@ -254,10 +248,10 @@ void DeviceWindowsWASAPI::closeCaptureStream() {
     }
     HRESULT hr;
 
-    if (captureStream!=nullptr) {
-        hr = captureStream->Stop();
+    if (_captureStream!=nullptr) {
+        hr = _captureStream->Stop();
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Stop(). Error code: "+WinUtils::HRESULTtoString(hr));
-        captureStream = nullptr;
+        _captureStream = nullptr;
     }
 
     _active = false;
@@ -267,10 +261,10 @@ void DeviceWindowsWASAPI::closeCaptureStream() {
 void DeviceWindowsWASAPI::closeRenderStream() {
     HRESULT hr;
 
-    if (renderStream!=nullptr) {
-        hr = renderStream->Stop();
+    if (_renderStream!=nullptr) {
+        hr = _renderStream->Stop();
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Stop(). Error code: "+WinUtils::HRESULTtoString(hr));
-        renderStream = nullptr;
+        _renderStream = nullptr;
     }
 }
 
@@ -287,12 +281,12 @@ bool DeviceWindowsWASAPI::read(Buffer & buffer) {
     //std::this_thread::sleep_for(buffer.getDuration());
     //hrs = WaitForSingleObject(hEvent, INFINITE);
 
-    hr = captureClient->GetNextPacketSize(&packetLength);
+    hr = _captureClient->GetNextPacketSize(&packetLength);
     if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: "+WinUtils::HRESULTtoString(hr));
 
     while (packetLength!=0) {
         // get the available data in the shared buffer.
-        hr = captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
+        hr = _captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
 
         if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
@@ -304,11 +298,11 @@ bool DeviceWindowsWASAPI::read(Buffer & buffer) {
         buffer.write(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
 
         // release data
-        hr = captureClient->ReleaseBuffer(numFramesAvailable);
+        hr = _captureClient->ReleaseBuffer(numFramesAvailable);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
 
         // start next capture
-        hr = captureClient->GetNextPacketSize(&packetLength);
+        hr = _captureClient->GetNextPacketSize(&packetLength);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: "+WinUtils::HRESULTtoString(hr));
     }
 
@@ -326,13 +320,13 @@ bool DeviceWindowsWASAPI::write(Buffer const & buffer) {
 
     if (flags!=AUDCLNT_BUFFERFLAGS_SILENT) {
         // See how much buffer space is available.
-        hr = renderStream->GetCurrentPadding(&bufferFramesPadding);
+        hr = _renderStream->GetCurrentPadding(&bufferFramesPadding);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetCurrentPadding(). Error code: "+WinUtils::HRESULTtoString(hr));
 
         numFramesAvailable = bufferFramesCount-bufferFramesPadding;
 
         // Grab all the available space in the shared buffer.
-        hr = renderClient->GetBuffer(numFramesAvailable, &pData);
+        hr = _renderClient->GetBuffer(numFramesAvailable, &pData);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
 
         // Get next 1/2-second of data from the audio source.
@@ -342,7 +336,7 @@ bool DeviceWindowsWASAPI::write(Buffer const & buffer) {
         //std::copy(buffer.begin(), src.begin()+count, dest);
         buffer.read(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
 
-        hr = renderClient->ReleaseBuffer(numFramesAvailable, flags);
+        hr = _renderClient->ReleaseBuffer(numFramesAvailable, flags);
         if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
     }
 

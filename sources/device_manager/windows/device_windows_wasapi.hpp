@@ -29,10 +29,10 @@ public:
     bool isAvailable() const final;
 
 private:
-    IAudioClient * captureStream;
-    IAudioClient * renderStream;
-    IAudioCaptureClient * captureClient;
-    IAudioRenderClient * renderClient;
+    IAudioClient* _captureStream        = nullptr;
+    IAudioClient* _renderStream         = nullptr;
+    IAudioCaptureClient* _captureClient = nullptr;
+    IAudioRenderClient* _renderClient   = nullptr;
     HANDLE hEvent;
 };
 
