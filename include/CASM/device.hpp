@@ -42,7 +42,7 @@ public:
     operator bool() const;
 
 private:
-    std::shared_ptr< DeviceInterface > device;
+    std::shared_ptr<DeviceInterface> _device;
 };
 
 }

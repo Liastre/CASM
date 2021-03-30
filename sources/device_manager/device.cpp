@@ -15,61 +15,62 @@ Device::Device() {
 
 
 Device::Device(void * deviceHandler, DeviceType deviceType) {
-    device = std::make_shared< DeviceWindowsWASAPI >(deviceHandler, deviceType);
+    _device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
 }
 
 
 Device::~Device() {
-    device.reset();
+    _device.reset();
 }
 
 
 bool Device::openCaptureStream(Duration const & duration, Buffer & buffer) {
-    //if (device->isInUsage()) throw std::logic_error("Device already in use");
+    //if (_device->isInUsage()) throw std::logic_error("Device already in use");
 
-    return device->openCaptureStream(duration, buffer);
+    return _device->openCaptureStream(duration, buffer);
 }
 
 
 bool Device::openRenderStream(Buffer const & buffer) {
-    if (device->isInUsage()) throw std::logic_error("Device already in use");
+    if (_device->isInUsage()) throw std::logic_error("Device already in use");
 
-    return device->openRenderStream(buffer);
+    return _device->openRenderStream(buffer);
 }
 
 
 void Device::closeCaptureStream() {
-    device->closeCaptureStream();
+    _device->closeCaptureStream();
 }
 
 
 void Device::closeRenderStream() {
-    device->closeRenderStream();
+    _device->closeRenderStream();
 }
 
 
 bool Device::read(Buffer & buffer) {
-    return device->read(buffer);
+    return _device->read(buffer);
 }
 
 
 bool Device::write(Buffer const & buffer) {
-    device->write(buffer);
+    _device->write(buffer);
+    return true;
 }
 
 
 WaveProperties Device::getDeviceWaveProperties() {
-    return device->getDeviceWaveProperties();
+    return _device->getDeviceWaveProperties();
 }
 
 
 WaveProperties Device::getStreamWaveProperties() const {
-    return device->getStreamWaveProperties();
+    return _device->getStreamWaveProperties();
 }
 
 
 std::wstring Device::getDescription() {
-    return device->getDescription();
+    return _device->getDescription();
 }
 
 
@@ -79,12 +80,12 @@ bool Device::isAvailable() const {
 
 
 bool Device::isInUsage() const {
-    return device->isInUsage();
+    return _device->isInUsage();
 }
 
 
 bool Device::isValid() const {
-    return device->isValid();
+    return _device->isValid();
 }
 
 
