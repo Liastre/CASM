@@ -70,7 +70,7 @@ bool Buffer::write(std::fstream &stream) {
 
 
 void Buffer::write(Buffer data) {
-    _storage->write(data._storage.get());
+    _storage->write(*(data._storage));
 }
 
 
@@ -83,7 +83,7 @@ void Buffer::copy(Buffer data) {
     _duration = data._duration;
     _framesCount = data._framesCount;
     _waveProperties = data._waveProperties;
-    _storage->copy(data._storage.get());
+    _storage->copy(*(data._storage));
 }
 
 
