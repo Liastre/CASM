@@ -60,7 +60,6 @@ int DeviceManagerWindowsWASAPI::update() {
 
     _deviceCount = _deviceList.size();
     deviceEnumerator->Release();
-    device->Release();
 
     return 0;
 }
