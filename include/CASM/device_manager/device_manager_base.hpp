@@ -18,7 +18,7 @@ public:
     DeviceManagerBase();
     virtual ~DeviceManagerBase();
 
-    Device& getDevice(uint_fast32_t index);
+    Device& getDevice(std::size_t index);
     std::size_t getDeviceCount();
 
     virtual int update() = 0;

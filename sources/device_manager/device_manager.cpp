@@ -22,12 +22,12 @@ int DeviceManager::update() {
 }
 
 
-uint_fast32_t DeviceManager::getDeviceCount() {
+std::size_t DeviceManager::getDeviceCount() {
     return deviceManager->getDeviceCount();
 }
 
 
-Device DeviceManager::getDevice(uint_fast32_t index) {
+Device& DeviceManager::getDevice(std::size_t index) {
     return deviceManager->getDevice(index);
 }
 

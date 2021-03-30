@@ -1,8 +1,7 @@
 /// @file device_manager.hpp
 /// @brief class DeviceManager stores collection of devices
 
-#ifndef CASM_DEVICEMANAGER_HPP
-#define CASM_DEVICEMANAGER_HPP
+#pragma once
 
 #include <CASM/device_manager/device_manager_base.hpp>
 
@@ -15,13 +14,11 @@ public:
     ~DeviceManager();
 
     int update();
-    uint_fast32_t getDeviceCount();
-    Device getDevice(uint_fast32_t index);
+    std::size_t getDeviceCount();
+    Device& getDevice(std::size_t index);
 
 private:
-    std::shared_ptr< DeviceManagerBase > deviceManager;
+    std::shared_ptr<DeviceManagerBase> deviceManager;
 };
 
-}
-
-#endif //CASM_DEVICEMANAGER_HPP
+} // namespace CASM

@@ -15,7 +15,7 @@ DeviceManagerBase::~DeviceManagerBase() {
 };
 
 
-Device& DeviceManagerBase::getDevice(uint_fast32_t index) {
+Device& DeviceManagerBase::getDevice(std::size_t index) {
     return _deviceList[index];
 };
 
