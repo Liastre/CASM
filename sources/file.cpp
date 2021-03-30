@@ -9,6 +9,12 @@
 #include <algorithm>
 
 
+namespace {
+
+constexpr char kSplitPathSymbol = '/';
+
+}
+
 namespace CASM {
 
 File::File(std::string const & path, bool shouldForceWriting) {
@@ -16,7 +22,6 @@ File::File(std::string const & path, bool shouldForceWriting) {
     _formatPath(resPath);
     if(_parsePath(resPath)) {
         _shouldForceWriting = shouldForceWriting;
-        _path = _destination+_name+_extension;
         _file = std::make_shared< FileWave >(_path);
     } else {
         // report no extension
@@ -88,28 +93,27 @@ bool File::_isExist() const {
 
 
 void File::_formatPath(std::string & path) {
-    std::replace(path.begin(), path.end(), '\\', '/');
+    std::replace(path.begin(), path.end(), '\\', kSplitPathSymbol);
 }
 
 bool File::_parsePath(std::string const & path) {
-    // splitting
     std::string::size_type extensionIndex = path.rfind('.');
-    std::string::size_type destinationIndex = path.rfind('/');
-
     if (extensionIndex==std::string::npos) {
         // TODO: logger message no extension
         return false;
     }
 
+    std::string::size_type destinationIndex = path.rfind(kSplitPathSymbol);
     if (destinationIndex!=std::string::npos) {
         _destination = path.substr(0, destinationIndex);
+        ++destinationIndex; // escape split character
     } else {
         destinationIndex = 0;
     }
 
-    _name = path.substr(destinationIndex, extensionIndex);
+    _name = path.substr(destinationIndex, extensionIndex - destinationIndex);
     _extension = path.substr(extensionIndex);
-    _path = _destination + _name + _extension;
+    _path = path;
 
     return true;
 }
@@ -139,7 +143,7 @@ void File::setPath(std::string const & path) {
 }
 
 
-WaveProperties File::getStreamWaveProperties() const{
+WaveProperties File::getStreamWaveProperties() const {
     return _file->getStreamWaveProperties();
 }
 
