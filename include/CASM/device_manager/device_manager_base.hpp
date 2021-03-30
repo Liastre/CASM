@@ -18,14 +18,14 @@ public:
     DeviceManagerBase();
     virtual ~DeviceManagerBase();
 
-    Device getDevice(uint_fast32_t index);
-    uint_fast32_t getDeviceCount();
+    Device& getDevice(uint_fast32_t index);
+    std::size_t getDeviceCount();
 
     virtual int update() = 0;
 
 protected:
-    std::vector< Device > deviceList;
-    uint_fast32_t deviceCount;
+    std::vector<Device> _deviceList;
+    std::size_t _deviceCount;
 };
 
 }

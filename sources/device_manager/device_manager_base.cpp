@@ -7,7 +7,7 @@
 namespace CASM {
 
 DeviceManagerBase::DeviceManagerBase() {
-    deviceCount = 0;
+    _deviceCount = 0;
 };
 
 
@@ -15,16 +15,13 @@ DeviceManagerBase::~DeviceManagerBase() {
 };
 
 
-Device DeviceManagerBase::getDevice(uint_fast32_t index) {
-    if (index < deviceCount) {
-        return deviceList[index];
-    }
-    throw std::logic_error("Device index requested out of range");
+Device& DeviceManagerBase::getDevice(uint_fast32_t index) {
+    return _deviceList[index];
 };
 
 
-uint_fast32_t DeviceManagerBase::getDeviceCount() {
-    return deviceCount;
+std::size_t DeviceManagerBase::getDeviceCount() {
+    return _deviceCount;
 }
 
 }
