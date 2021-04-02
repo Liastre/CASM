@@ -33,7 +33,7 @@ private:
     IAudioClient* _renderStream         = nullptr;
     IAudioCaptureClient* _captureClient = nullptr;
     IAudioRenderClient* _renderClient   = nullptr;
-    HANDLE hEvent;
+    HANDLE _hEvent                      = nullptr;
 };
 
 }

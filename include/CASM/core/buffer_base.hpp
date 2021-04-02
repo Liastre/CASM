@@ -23,7 +23,9 @@ union bitsRep {
     int8_t int8[4];
 };
 
-/// @class BufferStorage
+/**
+ * Storage for sequence of bytes
+ */
 class BufferStorage {
 public:
     BufferStorage();
@@ -43,7 +45,6 @@ protected:
     using Byte = std::uint8_t;
     using ByteBuffer = CircleBuffer<Byte>;
 
-    /// @brief storage for sequence of bytes
     ByteBuffer _buffer;
 };
 

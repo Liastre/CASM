@@ -25,13 +25,15 @@ public:
     virtual std::wstring getDescription()=0;
 };
 
+// TODO: add << overload with description
+
 /// @class DeviceBase
 /// @brief base class for Device object.
 template < class TDeviceHandler >
 class DeviceBase : public virtual DeviceInterface, public EndPointBase {
 public:
     DeviceBase();
-    DeviceBase(void *handler, CASM::DeviceType deviceType);
+    DeviceBase(void* handler, CASM::DeviceType deviceType);
     ~DeviceBase() override;
 
     // getters
@@ -39,14 +41,14 @@ public:
     std::wstring getDescription() final;
 
 protected:
-    TDeviceHandler *handler;
-    std::wstring name;
-    std::wstring description;
+    TDeviceHandler* _handler;
+    std::wstring _name;
+    std::wstring _description;
     /// @brief actual device wave properties
-    WaveProperties deviceWaveProperties;
-    CASM::DeviceType type;
-    uint32_t bufferFramesCount;
-    std::chrono::duration< double > bufferDuration;
+    WaveProperties _deviceWaveProperties;
+    CASM::DeviceType _type;
+    uint32_t _bufferFramesCount;
+    std::chrono::duration<double> _bufferDuration;
 };
 
 } // namespace CASM
