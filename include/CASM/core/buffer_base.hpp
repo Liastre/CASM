@@ -32,6 +32,11 @@ public:
     explicit BufferStorage(std::size_t size);
     ~BufferStorage() = default;
 
+    /**
+     * Read buffer to fstream. Copies all the data
+     * from buffer to fstream.
+     * @param[in,out] stream
+     */
     void read(std::fstream &stream) const;
     void read(void *arrayPtr, std::size_t sizeInBytes) const;
     BufferStatus write(std::fstream & stream);
