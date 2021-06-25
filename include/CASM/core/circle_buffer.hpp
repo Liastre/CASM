@@ -35,6 +35,7 @@ public:
     void clear();
     std::size_t size() const noexcept;
     bool empty() const noexcept;
+    bool full() const noexcept;
 
     T operator[](std::size_t index) const;
 
@@ -199,6 +200,12 @@ template <typename T>
 bool
 CircleBuffer<T>::empty() const noexcept {
     return _currentSize == 0;
+}
+
+template <typename T>
+bool
+CircleBuffer<T>::full() const noexcept {
+    return _currentSize == _allocatedSize;
 }
 
 template <typename T>
