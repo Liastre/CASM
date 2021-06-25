@@ -4,66 +4,50 @@
     @brief class WaveProperties for storing wave properties
 **/
 
-#ifndef CASM_WAVE_PROPERTIES_HPP
-#define CASM_WAVE_PROPERTIES_HPP
+#pragma once
 
 #include <cstdint>
-
-
-enum BitsType {
-    PCM_16BIT_SIGNED,
-    PCM_16BIT_UNSIGNED,
-    PCM_32BIT_SIGNED,
-    PCM_32BIT_UNSIGNED
-};
 
 namespace CASM {
 
 class WaveProperties {
 public:
-    WaveProperties();
-    // TODO: rewrite using single init method
-    WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, BitsType bitsType);
-    WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned = true);
-    ~WaveProperties();
+    WaveProperties() = default;
+    WaveProperties(std::uint16_t channelsCount,
+      std::uint32_t samplesPerSecond,
+      std::uint16_t bitsPerSample,
+      std::uint16_t bitsPerSampleContainerSize,
+      bool paramIsSigned = true);
 
-    // getters
-    /// @return channels count
-    uint16_t getChannelsCount() const;
-    /// @return bits per sample
-    uint16_t getBitsPerSample() const;
-    /// @return samples per second
-    uint32_t getSamplesPerSecond() const;
-    /// @return bytes per second
-    uint32_t getBytesPerSecond() const;
-    /// @return get block align
-    uint16_t getBlockAlign() const;
-    /// @return get enum value of bit's type
-    BitsType getBitsType() const;
-    /// @return true if signed, false if not
-    bool getSigned() const;
+    std::uint16_t getChannelsCount() const;
+    std::uint16_t getBitsPerSample() const;
+    std::uint16_t getBitsPerSampleContainerSize() const;
+    std::uint32_t getSamplesPerSecond() const;
+    std::uint32_t getBytesPerSecond() const;
+    std::uint16_t getBlockAlign() const;
+    /**
+     * @return true if signed, false if not
+     */
+    bool getSign() const;
 
-    // operators
-    bool operator==(WaveProperties waveProperties) const;
-    bool operator!=(WaveProperties waveProperties) const;
+    bool operator==(WaveProperties const& waveProperties) const;
+    bool operator!=(WaveProperties const& waveProperties) const;
 
 private:
     /// @brief channels count
-    uint16_t channelsCount;
+    std::uint16_t _channelsCount = 0;
     /// @brief bits per sample
-    uint16_t bitsPerSample;
+    std::uint8_t _bitsPerSample = 0;
+    /// Container size for sample bits
+    std::uint8_t _bitsPerSampleContainerSize = 0;
     /// @brief frame size (size of two integer samples, one for each channel, in bytes)
-    uint16_t blockAlign;
+    std::uint16_t _blockAlign = 0;
     /// @brief samples per second (Hz)
-    uint32_t samplesPerSecond;
+    std::uint32_t _samplesPerSecond = 0;
     /// @brief bytes per second
-    uint32_t bytesPerSecond;
+    std::uint32_t _bytesPerSecond = 0;
     /// @brief true if signed, false if not
-    bool isSigned;
-    /// @brief enum bit's type
-    BitsType bitsType;
+    bool _isSigned = false;
 };
 
 } // namespace CASM
-
-#endif //CASM_WAVE_PROPERTIES_HPP
