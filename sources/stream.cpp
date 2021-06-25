@@ -91,7 +91,7 @@ Stream::isActive() const {
 
 Duration
 Stream::getUptime() const {
-    return (_startTime - std::chrono::steady_clock::now());
+    return (std::chrono::steady_clock::now() - _startTime);
 }
 
 void
