@@ -4,8 +4,7 @@
     @brief declaration of BufferStorage class
 **/
 
-#ifndef CASM_BUFFER_BASE_HPP
-#define CASM_BUFFER_BASE_HPP
+#pragma once
 
 #include <CASM/CASM.hpp>
 #include <CASM/core/circle_buffer.hpp>
@@ -49,5 +48,3 @@ protected:
 };
 
 } // namespace CASM
-
-#endif //CASM_BUFFER_BASE_HPP

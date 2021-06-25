@@ -1,8 +1,7 @@
 /// @file buffer_array.hpp
 /// @brief class BufferStream to storage stream data
 
-#ifndef CASM_BUFFER_ARRAY_HPP
-#define CASM_BUFFER_ARRAY_HPP
+#pragma once
 
 #include <exception>
 #include <type_traits>
@@ -210,5 +209,3 @@ CircleBuffer<T>::empty() const {
 }
 
 } // namespace CASM
-
-#endif //CASM_BUFFER_ARRAY_HPP

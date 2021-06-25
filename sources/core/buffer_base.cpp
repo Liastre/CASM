@@ -4,9 +4,6 @@
     @brief definition for BufferStorage class
 **/
 
-#ifndef CASM_BUFFER_STORAGE_INL
-#define CASM_BUFFER_STORAGE_INL
-
 #include <CASM/core/buffer_base.hpp>
 
 
@@ -116,5 +113,3 @@ uint32_t BufferStorage::getSize() {
 }
 
 } // namespace CASM
-
-#endif //CASM_BUFFER_STORAGE_INL
