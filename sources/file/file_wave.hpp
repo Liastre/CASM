@@ -31,7 +31,7 @@ public:
     ~FileWave() final;
 
     // FileBase interface
-    bool read(Buffer & buffer) final;
+    BufferStatus read(Buffer & buffer) final;
     bool write(Buffer const & buffer) final;
     bool readHeader() final;
     bool writeHeader() final;

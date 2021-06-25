@@ -36,7 +36,7 @@ public:
     // methods
     void read(std::fstream &stream) const;
     void read(void *arrayPtr, uint32_t sizeInBytes) const;
-    bool write(std::fstream &stream);
+    BufferStatus write(std::fstream &stream);
 
     /// @brief writes data from input buffer to current
     /// @param [in] data - copying from

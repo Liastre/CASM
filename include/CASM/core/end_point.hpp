@@ -40,10 +40,12 @@ public:
     virtual void closeCaptureStream()=0;
     /// @brief close EndPoint record stream
     virtual void closeRenderStream()=0;
-    /// @brief read from EndPoint to Buffer
-    /// @param [out] buffer - Buffer where we push data
-    /// @return true if we read all data, false if some data left
-    virtual bool read(Buffer & buffer)=0;
+    /**
+     * Read from EndPoint to Buffer
+     * @param[out] buffer - Buffer where we push data
+     * @return true if we read all data, false if some data left
+     */
+    virtual BufferStatus read(Buffer & buffer)=0;
     /// @brief write to EndPoint from Buffer
     /// @param [in] buffer - Buffer where we take data
     /// @return true if we wrote all data, false if some data left

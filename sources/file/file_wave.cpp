@@ -16,7 +16,8 @@ FileWave::~FileWave() {
 }
 
 
-bool FileWave::read(Buffer & buffer) {
+BufferStatus
+FileWave::read(Buffer& buffer) {
     return buffer.write(*_stream);
 }
 

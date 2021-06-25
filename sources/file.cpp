@@ -61,7 +61,8 @@ void File::closeCaptureStream() {
 }
 
 
-bool File::read(Buffer &buffer) {
+BufferStatus
+File::read(Buffer& buffer) {
     return _file->read(buffer);
 }
 

@@ -284,7 +284,8 @@ void DeviceWindowsWASAPI::closeRenderStream() {
 }
 
 
-bool DeviceWindowsWASAPI::read(Buffer & buffer) {
+BufferStatus
+DeviceWindowsWASAPI::read(Buffer& buffer) {
     HRESULT hr = S_OK;
     DWORD flags = 0;
     uint32_t packetLength;

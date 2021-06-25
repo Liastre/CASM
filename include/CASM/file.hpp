@@ -30,7 +30,7 @@ public:
     bool openRenderStream(Buffer const & buffer) final;
     void closeRenderStream() final;
     void closeCaptureStream() final;
-    bool read(Buffer & buffer) final;
+    BufferStatus read(Buffer & buffer) final;
     bool write(Buffer const & buffer) final;
     bool isAvailable() const final;
     bool isInUsage() const final;

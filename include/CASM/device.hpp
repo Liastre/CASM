@@ -30,7 +30,7 @@ public:
     bool openRenderStream(Buffer const & buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
-    bool read(Buffer & buffer) final;
+    BufferStatus read(Buffer & buffer) final;
     bool write(Buffer const & buffer) final;
 
     // TODO: add getState method

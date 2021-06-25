@@ -16,10 +16,11 @@
 // TODO: rename file to buffer_storage
 namespace CASM {
 
-union bitsRep {
-    int32_t int32;
-    int16_t int16[2];
-    int8_t int8[4];
+enum class BufferStatus {
+    BufferFilled,
+    BufferEmpty,
+    DataEmpty,
+    DataFilled,
 };
 
 /**
@@ -33,7 +34,7 @@ public:
 
     void read(std::fstream &stream) const;
     void read(void *arrayPtr, std::size_t sizeInBytes) const;
-    bool write(std::fstream & stream);
+    BufferStatus write(std::fstream & stream);
     void write(BufferStorage const & data);
     void write(void *arrayPtr, std::size_t sizeInBytes);
     void copy(BufferStorage const & data);
