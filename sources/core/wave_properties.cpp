@@ -40,7 +40,7 @@ WaveProperties::WaveProperties(std::uint16_t channelsCount, std::uint32_t sample
     }
     WaveProperties::channelsCount = channelsCount;
     WaveProperties::samplesPerSecond = samplesPerSecond;
-    blockAlign = (uint16_t) (channelsCount*bitsPerSample/8);
+    blockAlign = static_cast<uint16_t>(channelsCount*bitsPerSample/8);
     bytesPerSecond = samplesPerSecond*blockAlign;
 }
 

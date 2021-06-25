@@ -290,39 +290,43 @@ DeviceWindowsWASAPI::read(Buffer& buffer) {
     DWORD flags = 0;
     uint32_t packetLength;
     uint32_t numFramesAvailable;
-    BYTE * pData;
-    std::vector< uint8_t > arr;
+    BYTE* pData;
+    std::vector<uint8_t> arr;
 
     // Each loop fills about half of the shared buffer.
     //std::this_thread::sleep_for(buffer.getDuration());
     //hrs = WaitForSingleObject(hEvent, INFINITE);
 
     hr = _captureClient->GetNextPacketSize(&packetLength);
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: "+WinUtils::HRESULTtoString(hr));
+    if (hr != S_OK)
+        throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: " + WinUtils::HRESULTtoString(hr));
 
-    while (packetLength!=0) {
+    while (packetLength != 0) {
         // get the available data in the shared buffer.
         hr = _captureClient->GetBuffer(&pData, &numFramesAvailable, &flags, nullptr, nullptr);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
+        if (hr != S_OK)
+            throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: " + WinUtils::HRESULTtoString(hr));
 
         if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
-            pData = nullptr;  // Tell CopyData to write silence.
+            pData = nullptr; // Tell CopyData to write silence.
         }
 
         // each frame contains number of bytes equal to block align
         // TODO: return true or false?
-        buffer.write(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
+        buffer.write(pData, numFramesAvailable * _streamWaveProperties.getBlockAlign());
 
         // release data
         hr = _captureClient->ReleaseBuffer(numFramesAvailable);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
+        if (hr != S_OK)
+            throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: " + WinUtils::HRESULTtoString(hr));
 
         // start next capture
         hr = _captureClient->GetNextPacketSize(&packetLength);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: "+WinUtils::HRESULTtoString(hr));
+        if (hr != S_OK)
+            throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: " + WinUtils::HRESULTtoString(hr));
     }
 
-    return true;
+    return BufferStatus::BufferFilled;
 }
 
 

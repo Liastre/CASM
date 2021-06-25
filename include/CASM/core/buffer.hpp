@@ -28,12 +28,10 @@ public:
     Buffer(WaveProperties const & waveProperties, Duration const & duration);
     ~Buffer();
 
-    // getters
     WaveProperties getWaveProperties() const;
     std::size_t getSize() const;
     std::chrono::duration< double > getDuration() const;
 
-    // methods
     void read(std::fstream &stream) const;
     void read(void *arrayPtr, uint32_t sizeInBytes) const;
     BufferStatus write(std::fstream &stream);
@@ -58,6 +56,7 @@ public:
 private:
     void init(WaveProperties const & waveProperties, uint32_t framesCount);
 
+private:
     std::shared_ptr< BufferStorage > _storage;
     WaveProperties _waveProperties;
     /// @brief approximate duration in time units

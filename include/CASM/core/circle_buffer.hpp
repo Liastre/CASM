@@ -192,7 +192,7 @@ CircleBuffer<T>::clear() {
 
 template <typename T>
 std::size_t
-CircleBuffer<T>::size() const {
+CircleBuffer<T>::size() const noexcept {
     return _currentSize;
 }
 
