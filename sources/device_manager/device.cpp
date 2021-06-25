@@ -70,7 +70,8 @@ void Device::closeRenderStream() {
 }
 
 
-bool Device::read(Buffer & buffer) {
+BufferStatus
+Device::read(Buffer& buffer) {
     return _device->read(buffer);
 }
 

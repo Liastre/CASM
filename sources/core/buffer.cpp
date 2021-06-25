@@ -64,7 +64,8 @@ void Buffer::read(void *arrayPtr, uint32_t sizeInBytes) const {
 }
 
 
-bool Buffer::write(std::fstream &stream) {
+BufferStatus
+Buffer::write(std::fstream& stream) {
     return _storage->write(stream);
 }
 

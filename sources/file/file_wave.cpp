@@ -23,6 +23,7 @@ FileWave::read(Buffer& buffer) {
 
 bool FileWave::write(Buffer const & buffer) {
     buffer.read(*_stream);
+    return true;
 }
 
 
@@ -102,6 +103,8 @@ bool FileWave::finalize() {
     little_endian::write< uint32_t >(*_stream, (uint32_t) (posFileLength-8));
 
     finalized = true;
+
+    return true;
 }
 
 } // namespace CASM
