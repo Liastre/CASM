@@ -32,10 +32,9 @@ public:
     bool pop(T& data) const;
     bool pop(T* data, std::size_t size) const;
     bool pop(std::vector<T>& data) const;
-
-    std::size_t size() const;
-    bool empty() const;
     void clear();
+    std::size_t size() const noexcept;
+    bool empty() const noexcept;
 
     T operator[](std::size_t index) const;
 
@@ -185,27 +184,27 @@ CircleBuffer<T>::pop(std::vector<T>& data) const {
 }
 
 template <typename T>
-std::size_t
-CircleBuffer<T>::size() const {
-    return _currentSize;
-}
-
-template <typename T>
 void
 CircleBuffer<T>::clear() {
     _tailIndex = _headIndex = _currentSize = 0;
 }
 
 template <typename T>
-T
-CircleBuffer<T>::operator[](std::size_t index) const {
-    return _buffer[_headIndex + index];
+std::size_t
+CircleBuffer<T>::size() const {
+    return _currentSize;
 }
 
 template <typename T>
 bool
-CircleBuffer<T>::empty() const {
+CircleBuffer<T>::empty() const noexcept {
     return _currentSize == 0;
+}
+
+template <typename T>
+T
+CircleBuffer<T>::operator[](std::size_t index) const {
+    return _buffer[_headIndex + index];
 }
 
 } // namespace CASM
