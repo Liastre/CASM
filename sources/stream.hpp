@@ -1,8 +1,7 @@
 /// @file stream.hpp
 /// @brief class Stream for transferring data in between audio end points
 
-#ifndef CASM_STREAM_HPP
-#define CASM_STREAM_HPP
+#pragma once
 
 #include <CASM/device.hpp>
 #include <CASM/file.hpp>
@@ -12,66 +11,62 @@
 #include <atomic>
 #include <future>
 
-
 namespace CASM {
 
 class Stream {
 public:
-    Stream() = delete;
-    Stream(const Stream &) = delete;
+    template <class TEndPointIn, class TEndPointOut>
+    Stream(TEndPointIn const& endPointIn, TEndPointOut const& endPointOut, Duration const& bufferDuration = Duration::zero()) {
+        static_assert(std::is_base_of<EndPointInterface, TEndPointIn>::value,
+          "TEndPointIn is not derived from EndPointInterface");
+        static_assert(std::is_base_of<EndPointInterface, TEndPointOut>::value,
+          "TEndPointOut is not derived from EndPointInterface");
+        static_assert(!(std::is_same<File, TEndPointIn>::value && std::is_same<File, TEndPointOut>::value),
+          "You cannot create stream between File and File");
 
-
-    template < class TEndPointIn, class TEndPointOut >
-    Stream(TEndPointIn endPointIn, TEndPointOut endPointOut,
-            std::chrono::duration< double > bufferDuration = std::chrono::duration< double >::zero()) {
-        static_assert(std::is_base_of< EndPointInterface, TEndPointIn >::value, "TEndPointIn is not derived from EndPointInterface");
-        static_assert(std::is_base_of< EndPointInterface, TEndPointOut >::value, "TEndPointOut is not derived from EndPointInterface");
-        static_assert(!(
-                        std::is_same< File, TEndPointIn >::value && std::is_same< File, TEndPointOut >::value),
-                "You cannot create stream between File and File");
-
-        Stream::_endPointIn = std::make_unique<TEndPointIn>(endPointIn);
-        Stream::_endPointOut = std::make_unique<TEndPointOut>(endPointOut);
-        Stream::_requestedBufferDuration = bufferDuration;
-        _onCopyCallback = [](Buffer &) {};
+        _endPointIn = std::make_unique<TEndPointIn>(endPointIn);
+        _endPointOut = std::make_unique<TEndPointOut>(endPointOut);
+        _requestedBufferDuration = bufferDuration;
+        _onCopyCallback = [](Buffer&) {};
     };
+    Stream(Stream const&) = delete;
+    Stream(Stream&& stream) noexcept;
+    Stream& operator=(Stream const&) = delete;
+    Stream& operator=(Stream&& stream) noexcept;
     ~Stream();
-    // methods
+
     /// @return true if succeed, false if some errors appeared
-    bool start(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
-    void stop(std::chrono::duration< double > delay = std::chrono::duration< double >::zero());
+    bool start(Duration const& delay = Duration::zero());
+    bool stop(Duration const& delay = Duration::zero());
     void join();
-    // getters
-    std::chrono::duration< double > getUptime() const;
-    // setters
+
+    bool isActive() const;
+    Duration getUptime() const;
+
     /// @brief set bufferDuration (it is minimal by default)
-    void setBufferDuration(std::chrono::duration< double > bufferDuration);
+    void setBufferDuration(Duration bufferDuration);
     /// @brief callback to change buffer data with requested way
-    void setCopyCallback(void (*onCopyCallbackPtr)(Buffer &));
+    void setCopyCallback(void (*onCopyCallbackPtr)(Buffer&));
 
 private:
     /// @brief clock thread
     void _doDataReadThread();
     /// @brief stream thread
-    void _doTransferThread(std::chrono::duration< double > delay);
+    void _doTransferThread(Duration delay);
     /// @brief delayed stop
-    void _doStopCallbackThread(std::chrono::duration< double > delay);
+    void _doStopCallbackThread(Duration delay);
 
-    // fields
-    std::unique_ptr< EndPointInterface > _endPointIn;
-    std::unique_ptr< EndPointInterface > _endPointOut;
-    std::unique_ptr< Buffer > _buffer;
-    std::chrono::duration< double > _requestedBufferDuration;
+private:
+    std::unique_ptr<EndPointInterface> _endPointIn;
+    std::unique_ptr<EndPointInterface> _endPointOut;
+    std::unique_ptr<Buffer> _buffer;
+    Duration _requestedBufferDuration;
     std::chrono::steady_clock::time_point _startTime;
-    std::atomic< bool > _isActive;
-    std::atomic< bool > _isCopying;
-
-    std::thread _doTransferThreadId;
-    std::thread _doDataReadThreadId;
-    std::thread _doStopCallbackThreadId;
-    void (*_onCopyCallback)(Buffer &);
+    std::atomic<bool> _isActive = { false };
+    std::mutex _isCopying;
+    std::unique_ptr<std::thread> _transferThread = nullptr;
+    std::unique_ptr<std::thread> _dataReadThread = nullptr;
+    void (*_onCopyCallback)(Buffer&) = nullptr;
 };
 
-}
-
-#endif //CASM_STREAM_HPP
+} // namespace CASM

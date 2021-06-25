@@ -2,104 +2,147 @@
 /// @brief definition of Stream class
 
 #include <CASM/file.hpp>
+#include <iostream>
 #include "stream.hpp"
-
 
 namespace CASM {
 
+Stream::Stream(Stream&& stream) noexcept {
+    this->operator=(std::move(stream));
+}
+
+Stream&
+Stream::operator=(Stream&& stream) noexcept {
+    _endPointIn = std::move(stream._endPointIn);
+    _endPointOut = std::move(stream._endPointOut);
+    _buffer = std::move(stream._buffer);
+    _requestedBufferDuration = std::move(stream._requestedBufferDuration);
+    _startTime = std::move(stream._startTime);
+    _isActive = stream._isActive.load();
+    _transferThread = std::move(stream._transferThread);
+    _dataReadThread = std::move(stream._dataReadThread);
+    _onCopyCallback = stream._onCopyCallback;
+    return *this;
+}
+
 Stream::~Stream() {
+    join();
     _endPointIn.reset();
     _endPointOut.reset();
 }
 
+bool
+Stream::start(Duration const& delay) {
+    if (isActive())
+        return false;
 
-bool Stream::start(std::chrono::duration< double > delay) {
-    // initialisation
-    _isActive = true;
-    _buffer = std::make_unique<Buffer>(_endPointIn->openCaptureStream(_requestedBufferDuration));
-    _endPointOut->openRenderStream(*_buffer);
+    _buffer = std::make_unique<Buffer>();
+    // TODO: refactor, do not init buffer inside
+    if (!_endPointIn->openCaptureStream(_requestedBufferDuration, *_buffer)) {
+        return false;
+    }
+    if (!_endPointOut->openRenderStream(*_buffer)) {
+        return false;
+    }
     // this should never be happen, since StreamManager cares about to pass correct data
-    if (Stream::_endPointIn->getStreamWaveProperties() != Stream::_endPointOut->getStreamWaveProperties()) {
+    auto inputWaveProperties = Stream::_endPointIn->getStreamWaveProperties();
+    auto outputWaveProperties = Stream::_endPointOut->getStreamWaveProperties();
+    if (inputWaveProperties != outputWaveProperties) {
         // TODO: add some logger
-        throw std::runtime_error("Unable to connect two points with different WaveProperties");
-        //return false;
+        // Unable to connect two points with different WaveProperties
+        // Implement converter
+        return false;
     }
 
     _startTime = std::chrono::steady_clock::now();
-    _doTransferThreadId = std::thread(_doTransferThread, this, delay);
-    _doDataReadThreadId = std::thread(_doDataReadThread, this);
+    _transferThread = std::make_unique<std::thread>(&CASM::Stream::_doTransferThread, this, delay);
+    _dataReadThread = std::make_unique<std::thread>(&CASM::Stream::_doDataReadThread, this);
+    _isActive = true;
 
     return true;
 }
 
+bool
+Stream::stop(Duration const& delay) {
+    if (!_isActive)
+        return false;
 
-void Stream::stop(const std::chrono::duration< double > delay) {
-    // TODO: check if thread already launched
-    _doStopCallbackThreadId = std::thread(_doStopCallbackThread, this, delay);
+    _doStopCallbackThread(delay);
+    //_stopCallbackThread = std::make_unique<std::thread>(&CASM::Stream::_doStopCallbackThread, this, delay);
 }
 
+void
+Stream::join() {
+    if (!_isActive)
+        return;
 
-void Stream::_doTransferThread(std::chrono::duration< double > delay) {
-    // TODO: wrap with try catch
-    std::this_thread::sleep_for(delay);
-    auto bufferDuration = _buffer->getDuration();
-    // write data
-    while (_endPointIn->isAvailable() && _endPointOut->isAvailable() && _isActive) {
-        _isCopying = true;
-        std::this_thread::sleep_for(bufferDuration);
-        if(_isCopying) {
-            throw std::runtime_error("Execution of CopyDataThread exceeded await time");
-        }
-
-        _endPointOut->write(*_buffer);
+    if (_transferThread && _transferThread->joinable()) {
+        _transferThread->join();
     }
-
-    // close endpoints
-    _endPointIn->closeCaptureStream();
-    _endPointOut->closeRenderStream();
-    _isActive = false;
-}
-
-
-void Stream::_doStopCallbackThread(std::chrono::duration< double > delay) {
-    std::this_thread::sleep_for(delay);
-    if (_isActive) {
-        _isActive = false;
+    if (_dataReadThread && _dataReadThread->joinable()) {
+        _dataReadThread->join();
     }
 }
 
-
-std::chrono::duration<double> Stream::getUptime() const {
-    return (_startTime-std::chrono::steady_clock::now());
+bool
+Stream::isActive() const {
+    return _isActive;
 }
 
-
-void Stream::join() {
-    // TODO: check if stop thread exist
-    if (_doStopCallbackThreadId.joinable()) {
-        _doStopCallbackThreadId.join();
-    }
-    if (_doTransferThreadId.joinable()) {
-        _doTransferThreadId.join();
-    }
+Duration
+Stream::getUptime() const {
+    return (_startTime - std::chrono::steady_clock::now());
 }
 
-
-void Stream::setCopyCallback(void (*onCopyCallbackPtr)(Buffer&)) {
+void
+Stream::setCopyCallback(void (*onCopyCallbackPtr)(Buffer&)) {
     _onCopyCallback = onCopyCallbackPtr;
 }
 
-
-void Stream::_doDataReadThread() {
-    while(_isActive) {
-        if(_isCopying) {
-            bool status(true);
-            _buffer->clear();
+void
+Stream::_doDataReadThread() {
+    try {
+        BufferStatus status(CASM::BufferStatus::BufferFilled);
+        // waiting till stream or data become over
+        while (_isActive && status != CASM::BufferStatus::DataEmpty) {
+            std::lock_guard<std::mutex> lock(_isCopying);
             status = _endPointIn->read(*_buffer);
+            // TODO: rework data tresspass callback
             _onCopyCallback(*_buffer);
-            _isCopying = false;
+            std::this_thread::yield();
         }
-        std::this_thread::yield();
+        _endPointIn->closeCaptureStream();
+        _isActive = false;
+    } catch (std::exception& e) {
+        // TODO: log
+        std::cout << e.what();
+    }
+}
+
+void
+Stream::_doTransferThread(Duration delay) {
+    try {
+        auto bufferDuration = _buffer->getDuration();
+        // write data
+        while (_endPointOut->isAvailable() && _isActive) {
+            std::this_thread::sleep_for(delay);
+            std::lock_guard<std::mutex> lock(_isCopying);
+            _endPointOut->write(*_buffer);
+        }
+
+        _endPointOut->closeRenderStream();
+        _isActive = false;
+    } catch (std::exception& e) {
+        // TODO: log
+        std::cout << e.what();
+    }
+}
+
+void
+Stream::_doStopCallbackThread(Duration delay) {
+    std::this_thread::sleep_for(delay);
+    if (_isActive) {
+        _isActive = false;
     }
 }
 
