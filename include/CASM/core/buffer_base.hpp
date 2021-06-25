@@ -37,12 +37,12 @@ public:
      * from buffer to fstream.
      * @param[in,out] stream
      */
-    void read(std::fstream &stream) const;
-    void read(void *arrayPtr, std::size_t sizeInBytes) const;
-    BufferStatus write(std::fstream & stream);
-    void write(BufferStorage const & data);
-    void write(void *arrayPtr, std::size_t sizeInBytes);
-    void copy(BufferStorage const & data);
+    void read(std::fstream& stream) const;
+    void read(void* arrayPtr, std::size_t sizeInBytes) const;
+    BufferStatus write(std::fstream& stream);
+    void write(BufferStorage const& data);
+    void write(void* arrayPtr, std::size_t sizeInBytes);
+    void copy(BufferStorage const& data);
     void clear();
     std::size_t getSize();
 
