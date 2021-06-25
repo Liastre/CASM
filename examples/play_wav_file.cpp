@@ -8,6 +8,8 @@
 #include <io.h>
 #include <fcntl.h>
 
+#define CASM_MANUAL 0
+
 int
 main(int argc, char** argv) {
     try {
@@ -49,30 +51,33 @@ main(int argc, char** argv) {
             return 0;
         }
 
+#if !CASM_MANUAL
         // Way 1: using audio Stream
         CASM::Stream streamFromFile(inputFile, outputDevice, std::chrono::milliseconds{ 500 });
         streamFromFile.start();
-        // We are not forcing stop, just waiting for end of file
+        // We are not forcing stop, just waiting for end of input endpoint
+        // in our case it's the same with file end
         streamFromFile.join();
         std::wcout << L"Stream uptime is: " << std::chrono::duration_cast<std::chrono::seconds>(streamFromFile.getUptime()).count();
-
+#else
         // Way 2: manual streaming
         // Open endpoints
-        /*
         CASM::Buffer fileBuffer;
         inputFile.openCaptureStream(std::chrono::milliseconds{ 500 }, fileBuffer);
         outputDevice.openRenderStream(fileBuffer);
         CASM::BufferStatus status(CASM::BufferStatus::BufferFilled);
         int counter(0);
+        // Manual read-write
         while (status != CASM::BufferStatus::DataEmpty) {
             status = inputFile.read(fileBuffer);
             counter += fileBuffer.getSize();
             outputDevice.write(fileBuffer);
         }
         std::wcout << L"Counter: " << counter;
+        // Close devices
         inputFile.closeRenderStream();
         outputDevice.closeCaptureStream();
-        */
+#endif
     } catch (std::exception& e) {
         std::wcout << e.what();
     } catch (...) {
