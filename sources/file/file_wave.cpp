@@ -61,7 +61,12 @@ bool FileWave::readHeader() {
     little_endian::read< uint32_t >(*_stream, wavHeader.dataSize);
 
     // TODO: set bits type depending on wavHeader.fmtAudioFormat
-    _streamWaveProperties = WaveProperties(wavHeader.fmtNumChannels, wavHeader.fmtSampleRate, wavHeader.fmtBitsPerSample, true);
+    _streamWaveProperties = WaveProperties(
+        wavHeader.fmtNumChannels,
+        wavHeader.fmtSampleRate,
+        wavHeader.fmtBitsPerSample,
+        wavHeader.fmtBitsPerSample,
+        true);
 
     return true;
 }

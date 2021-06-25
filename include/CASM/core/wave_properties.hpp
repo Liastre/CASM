@@ -13,11 +13,11 @@ namespace CASM {
 class WaveProperties {
 public:
     WaveProperties() = default;
-    WaveProperties(std::uint16_t channelsCount,
+    explicit WaveProperties(std::uint16_t channelsCount,
       std::uint32_t samplesPerSecond,
       std::uint16_t bitsPerSample,
       std::uint16_t bitsPerSampleContainerSize,
-      bool paramIsSigned = true);
+      bool isSigned);
 
     std::uint16_t getChannelsCount() const;
     std::uint16_t getBitsPerSample() const;

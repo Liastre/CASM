@@ -5,8 +5,39 @@
 **/
 
 #include "device_windows_wasapi.hpp"
+#include "functiondiscoverykeys_devpkey.h"
 #include <thread>
+#include <mmreg.h>
 
+
+namespace {
+
+enum class SubFormat {
+    PCM,
+    IEEE_FLOAT,
+    DRM,
+    ALAW,
+    MULAW,
+    ADPCM,
+};
+
+SubFormat
+TranslateSubformatToEnum(GUID const& subFormat) {
+    if (subFormat == KSDATAFORMAT_SUBTYPE_PCM)
+        return SubFormat::PCM;
+    if (subFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
+        return SubFormat::IEEE_FLOAT;
+    if (subFormat == KSDATAFORMAT_SUBTYPE_DRM)
+        return SubFormat::DRM;
+    if (subFormat == KSDATAFORMAT_SUBTYPE_ALAW)
+        return SubFormat::ALAW;
+    if (subFormat == KSDATAFORMAT_SUBTYPE_MULAW)
+        return SubFormat::MULAW;
+    if (subFormat == KSDATAFORMAT_SUBTYPE_ADPCM)
+        return SubFormat::ADPCM;
+}
+
+} // namespace
 
 namespace CASM {
 
@@ -49,16 +80,23 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
     if (hr!=S_OK)
         throw std::runtime_error("Unable to propertyStore->GetValue(PKEY_AudioEngine_DeviceFormat). Error code: "+WinUtils::HRESULTtoString(hr));
 
-    auto wFormatTag = ((WAVEFORMATEX *) devicePROPVARIANT.blob.pBlobData)->wFormatTag;
+    WORD wFormatTag = (reinterpret_cast<WAVEFORMATEX*>(devicePROPVARIANT.blob.pBlobData))->wFormatTag;
     if (wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
-        auto deviceWAVEFORMAT = reinterpret_cast<WAVEFORMATEXTENSIBLE *>(devicePROPVARIANT.blob.pBlobData);
-        auto sub = deviceWAVEFORMAT->SubFormat;
-        OLECHAR* guidString;
-        StringFromCLSID(sub, &guidString);
-        _deviceWaveProperties = WaveProperties(deviceWAVEFORMAT->Format.nChannels, deviceWAVEFORMAT->Format.nSamplesPerSec, deviceWAVEFORMAT->Samples.wValidBitsPerSample);
+        auto deviceWaveFormat = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(devicePROPVARIANT.blob.pBlobData);
+        _deviceWaveProperties = WaveProperties(
+          deviceWaveFormat->Format.nChannels,
+          deviceWaveFormat->Format.nSamplesPerSec,
+          deviceWaveFormat->Samples.wValidBitsPerSample,
+          deviceWaveFormat->Format.wBitsPerSample,
+          true);
     } else {
-        auto deviceWAVEFORMAT = reinterpret_cast<WAVEFORMATEX *>(devicePROPVARIANT.blob.pBlobData);
-        _deviceWaveProperties = WaveProperties(deviceWAVEFORMAT->nChannels, deviceWAVEFORMAT->nSamplesPerSec, deviceWAVEFORMAT->wBitsPerSample);
+        auto deviceWaveFormat = reinterpret_cast<WAVEFORMATEX*>(devicePROPVARIANT.blob.pBlobData);
+        _deviceWaveProperties = WaveProperties(
+          deviceWaveFormat->nChannels,
+          deviceWaveFormat->nSamplesPerSec,
+          deviceWaveFormat->wBitsPerSample,
+          deviceWaveFormat->wBitsPerSample,
+          true);
     }
 
     // valid device
@@ -86,8 +124,10 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
     _bufferDuration = duration;
 
     // checks
-    if (_bufferDuration==Duration::zero())throw std::logic_error("Buffer duration is zero");
-    if (_handler==nullptr) throw std::logic_error("Device _handler is nullptr");
+    if (_bufferDuration==Duration::zero())
+        throw std::logic_error("Buffer duration is zero");
+    if (_handler==nullptr)
+        throw std::logic_error("Device _handler is nullptr");
 
     // variables
     HRESULT hr;
@@ -109,12 +149,36 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
 
     // creates COM object
     hr = _handler->Activate(IID_IAudioClient, CLSCTX_ALL, nullptr, (void **) &_captureStream);
-    if (hr!=S_OK) throw std::runtime_error("Unable to _handler->Activate(). Error code: "+WinUtils::HRESULTtoString(hr));
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to _handler->Activate(). Error code: "+WinUtils::HRESULTtoString(hr));
+    hr = _captureStream->GetMixFormat(&deviceMixFormat);
+    if (hr != S_OK)
+        throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code:" + WinUtils::HRESULTtoString(hr));
 
-
-    hr = captureStream->GetMixFormat(&deviceMixFormat);
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code:"+WinUtils::HRESULTtoString(hr));
-    _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    if (deviceMixFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+        WAVEFORMATEXTENSIBLE* deviceMixFormatEx = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(deviceMixFormat);
+        /*hr = captureStream->Initialize(
+                AUDCLNT_SHAREMODE_SHARED,
+                streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
+                fragmentDurationRequested,
+                0,
+                wf,
+                nullptr
+        );*/
+        _streamWaveProperties = WaveProperties(
+          deviceMixFormatEx->Format.nChannels,
+          deviceMixFormatEx->Format.nSamplesPerSec,
+          deviceMixFormatEx->Samples.wValidBitsPerSample,
+          deviceMixFormatEx->Format.wBitsPerSample,
+          false);
+    } else {
+        _streamWaveProperties = WaveProperties(
+          deviceMixFormat->nChannels,
+          deviceMixFormat->nSamplesPerSec,
+          deviceMixFormat->wBitsPerSample,
+          deviceMixFormat->wBitsPerSample,
+          false);
+    }
 
     hr = _captureStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
@@ -124,10 +188,11 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
             deviceMixFormat,
             nullptr
     );
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Initialize(). Error code: "+WinUtils::HRESULTtoString(hr));
-
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to captureStream->Initialize(). Error code: "+WinUtils::HRESULTtoString(hr));
     hr = _captureStream->GetService(IID_IAudioCaptureClient, (void **) &_captureClient);
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetService(). Error code: "+WinUtils::HRESULTtoString(hr));
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to captureStream->GetService(). Error code: "+WinUtils::HRESULTtoString(hr));
 
     /*hEvent = CreateEvent(nullptr, false, false, nullptr);
     //hEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -140,7 +205,8 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
 
     // get the actual size of the allocated buffer
     hr = _captureStream->GetBufferSize(&tmpBufferFramesCount);
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: "+WinUtils::HRESULTtoString(hr));
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: "+WinUtils::HRESULTtoString(hr));
     _bufferFramesCount = tmpBufferFramesCount;
 
     /*=======
@@ -158,7 +224,8 @@ bool DeviceWindowsWASAPI::openCaptureStream(Duration const & duration, Buffer & 
 
     // start device playing/recording
     hr = _captureStream->Start();
-    if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->Start(). Error code: "+WinUtils::HRESULTtoString(hr));
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to captureStream->Start(). Error code: "+WinUtils::HRESULTtoString(hr));
     _active = true;
 
     buffer = Buffer(_streamWaveProperties, duration);
@@ -206,7 +273,13 @@ bool DeviceWindowsWASAPI::openRenderStream(Buffer const & buffer) {
     hr = _renderStream->GetMixFormat(&deviceMixFormat);
     if (hr!=S_OK)
         throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code: " + WinUtils::HRESULTtoString(hr));
-    _streamWaveProperties = WaveProperties(deviceMixFormat->nChannels, deviceMixFormat->nSamplesPerSec, deviceMixFormat->wBitsPerSample, false);
+    // TODO: handle WAVEFORMATEX
+    _streamWaveProperties = WaveProperties(
+        deviceMixFormat->nChannels,
+        deviceMixFormat->nSamplesPerSec,
+        deviceMixFormat->wBitsPerSample,
+        deviceMixFormat->wBitsPerSample,
+        false);
     hr = _renderStream->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
             0,
