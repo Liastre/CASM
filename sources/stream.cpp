@@ -2,8 +2,8 @@
 /// @brief definition of Stream class
 
 #include <CASM/file.hpp>
+#include <CASM/stream.hpp>
 #include <iostream>
-#include "stream.hpp"
 
 namespace CASM {
 
@@ -73,9 +73,6 @@ Stream::stop(Duration const& delay) {
 
 void
 Stream::join() {
-    if (!_isActive)
-        return;
-
     if (_transferThread && _transferThread->joinable()) {
         _transferThread->join();
     }

@@ -83,7 +83,7 @@ bool File::writeHeader() {
 
 
 bool File::isAvailable() const {
-    return true;
+    return _file->isAvailable();
 }
 
 
