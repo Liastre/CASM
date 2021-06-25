@@ -19,6 +19,10 @@ class Device final : public DeviceInterface {
 public:
     Device();
     Device(void * deviceHandler, DeviceType deviceType);
+    Device(Device const& device);
+    Device(Device&& device) noexcept;
+    Device& operator=(Device const& device);
+    Device& operator=(Device&& device);
     ~Device() override;
 
     /// EndPointInterface interface

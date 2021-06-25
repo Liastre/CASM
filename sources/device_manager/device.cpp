@@ -19,6 +19,28 @@ Device::Device(void * deviceHandler, DeviceType deviceType) {
 }
 
 
+Device::Device(Device const& device) {
+    this->operator=(device);
+}
+
+
+Device::Device(Device&& device) noexcept {
+    this->operator=(std::move(device));
+}
+
+
+Device& Device::operator=(Device const& device) {
+    _device = device._device;
+    return *this;
+}
+
+
+Device& Device::operator=(Device&& device) {
+    _device = std::move(device._device);
+    return *this;
+}
+
+
 Device::~Device() {
     _device.reset();
 }
