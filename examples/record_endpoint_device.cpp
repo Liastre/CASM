@@ -25,6 +25,7 @@ main() {
         unsigned int deviceIndex;
         std::wcout << L"Choose device index ...";
         std::cin >> deviceIndex;
+        std::wcout << std::endl;
 
         // init endpoints
         CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
@@ -33,8 +34,8 @@ main() {
         ss << endPoint.getDescription()
            << '_' << endPointProperties.getSamplesPerSecond() << L"Hz"
            << '_' << endPointProperties.getBitsPerSample() << L"bit"
-           << '_' << endPointProperties.getChannelsCount() << L"ch";
-        auto filename = ss.str();
+           << '_' << endPointProperties.getChannelsCount() << L"ch"
+           << ".wav";
         //250Hz_48000Hz_32bit_2ch_30sec.wav
         CASM::File outputFile("endPointDevice.wav");
         //if (!file) {
