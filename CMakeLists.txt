@@ -26,6 +26,15 @@ option(CASM_STATIC "Build shared library" OFF)
 option(CASM_BUILD_EXAMPLES "Build examples" ON)
 option(CASM_BUILD_DOC "Build documentation" ON)
 
+# detect build definitions
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(CASM_BUILD_ENV_MSBUILD TRUE)
+    message(STATUS "That's visual studio")
+elseif(MINGW)
+    set(CASM_BUILD_ENV_MINGW TRUE)
+    message(STATUS "Build environment is set to MinGW")
+endif()
+
 # detect system definitions
 if(WIN32) # windows (32 and 64 bit)
     if(${CMAKE_SYSTEM_VERSION} LESS 5.0)

@@ -23,6 +23,7 @@ file(GLOB library_sources
     device_manager/windows/windows_utilities.cpp
     device_manager/windows/device_windows_wasapi.cpp
     device_manager/windows/device_manager_windows_wasapi.cpp
+    device_manager/windows/initguid.cpp
     )
 
 #===================================
@@ -35,3 +36,8 @@ else()
 endif()
 
 add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${library_sources} ${library_headers})
+target_link_libraries(${CASM_LIBRARY} uuid.lib ole32.lib)
+
+if(CASM_BUILD_ENV_MSBUILD)
+    target_compile_definitions(${CASM_LIBRARY} PRIVATE CASM_BUILD_ENV_MSBUILD=1)
+endif()
