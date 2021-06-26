@@ -403,35 +403,50 @@ DeviceWindowsWASAPI::read(Buffer& buffer) {
 }
 
 
-//TODO: pass buffer by const ref
 bool DeviceWindowsWASAPI::write(Buffer const & buffer) {
+    if (buffer.getSize() == 0)
+        return true;
+
     HRESULT hr;
     DWORD flags(0);
     uint32_t bufferFramesPadding(0);
     uint32_t numFramesAvailable(0);
-    uint8_t * pData;
+    uint8_t * pData = nullptr;
 
-    if (flags!=AUDCLNT_BUFFERFLAGS_SILENT) {
-        // See how much buffer space is available.
-        hr = _renderStream->GetCurrentPadding(&bufferFramesPadding);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetCurrentPadding(). Error code: "+WinUtils::HRESULTtoString(hr));
+    // TODO: rework
+    if (flags == AUDCLNT_BUFFERFLAGS_SILENT)
+        return true;
 
-        numFramesAvailable = _bufferFramesCount-bufferFramesPadding;
+    // See how much buffer space is available.
+    hr = _renderStream->GetCurrentPadding(&bufferFramesPadding);
+    if (hr!=S_OK)
+        throw std::runtime_error("Unable to captureStream->GetCurrentPadding(). Error code: "+WinUtils::HRESULTtoString(hr));
 
-        // Grab all the available space in the shared buffer.
-        hr = _renderClient->GetBuffer(numFramesAvailable, &pData);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
+    numFramesAvailable = _bufferFramesCount-bufferFramesPadding;
 
-        // Get next 1/2-second of data from the audio source.
-        //hr = pMySource->LoadData(numFramesAvailable, pData, &flags);
-        //assert(hr==S_OK);
-        //std::fill( pData, pData + numFramesAvailable, 3 );
-        //std::copy(buffer.begin(), src.begin()+count, dest);
-        buffer.read(pData, numFramesAvailable*_streamWaveProperties.getBlockAlign());
-
-        hr = _renderClient->ReleaseBuffer(numFramesAvailable, flags);
-        if (hr!=S_OK) throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
+    // Grab all the available space in the shared buffer.
+    //AUDCLNT_E_BUFFER_ERROR
+    hr = _renderClient->GetBuffer(numFramesAvailable, &pData);
+    if (hr != S_OK) {
+        auto errorText = WinUtils::HRESULTtoString(hr);
+        throw std::runtime_error("Unable to captureStream->GetBuffer(). Error code: "+WinUtils::HRESULTtoString(hr));
     }
+
+    // tmp solution
+    std::size_t bufferSize = (buffer.getSize() / _streamWaveProperties.getBlockAlign()) * _streamWaveProperties.getBlockAlign();
+    std::size_t availableSize = numFramesAvailable * _streamWaveProperties.getBlockAlign();
+    std::size_t takeoverSize = 0;
+    if (availableSize > bufferSize)
+        takeoverSize = bufferSize;
+    else
+        takeoverSize = availableSize;
+    buffer.read(pData, takeoverSize);
+    numFramesAvailable = takeoverSize / _streamWaveProperties.getBlockAlign();
+    // end of tmp solution
+
+    hr = _renderClient->ReleaseBuffer(numFramesAvailable, flags);
+    if (hr != S_OK)
+        throw std::runtime_error("Unable to captureStream->ReleaseBuffer(). Error code: " + WinUtils::HRESULTtoString(hr));
 
     return true;
 }
