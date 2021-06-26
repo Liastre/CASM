@@ -12,6 +12,9 @@
 
 namespace {
 
+/*
+// Temp methods, not used anywhere
+// TODO: fix mingw build
 enum class SubFormat {
     PCM,
     IEEE_FLOAT,
@@ -35,16 +38,16 @@ TranslateSubformatToEnum(GUID const& subFormat) {
         return SubFormat::MULAW;
     if (subFormat == KSDATAFORMAT_SUBTYPE_ADPCM)
         return SubFormat::ADPCM;
-}
+}*/
 
 } // namespace
 
 namespace CASM {
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
-    /*HRESULT hr;
+    HRESULT hr = S_OK;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    assert(hr==S_OK);*/
+    assert(hr==S_OK);
 }
 
 

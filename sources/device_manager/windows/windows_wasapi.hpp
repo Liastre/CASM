@@ -7,7 +7,6 @@
 #ifndef CASM_WINDOWS_WASAPI_HPP
 #define CASM_WINDOWS_WASAPI_HPP
 
-#include <initguid.h>
 #include <mmdeviceapi.h>
 #include <audioclient.h>
 #include "functiondiscoverykeys_devpkey.h"

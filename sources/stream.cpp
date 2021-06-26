@@ -69,6 +69,8 @@ Stream::stop(Duration const& delay) {
 
     _doStopCallbackThread(delay);
     //_stopCallbackThread = std::make_unique<std::thread>(&CASM::Stream::_doStopCallbackThread, this, delay);
+    // TODO: use proper check
+    return true;
 }
 
 void
