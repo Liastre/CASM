@@ -13,10 +13,10 @@ file(GLOB library_headers
 
 file(GLOB library_sources
     file.cpp
+    core/*.cpp
+    stream.cpp
     file/file_base.cpp
     file/file_wave.cpp
-    stream.cpp
-    core/*.cpp
     device_manager/device.cpp
     device_manager/device_manager.cpp
     device_manager/device_manager_base.cpp
