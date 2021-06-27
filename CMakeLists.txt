@@ -24,7 +24,7 @@ set(CASM_LIBRARY ${PROJECT_NAME})
 # options
 option(CASM_SHARED "Build shared library" OFF)
 option(CASM_BUILD_EXAMPLES "Build examples" ON)
-option(CASM_BUILD_DOC "Build documentation" ON)
+option(CASM_BUILD_DOC "Build documentation" OFF)
 
 # detect build definitions
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
