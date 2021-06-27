@@ -6,12 +6,12 @@ set(CMAKE_DEBUG_POSTFIX d)
 #===================================
 #======== LIBRARY SOURCES ==========
 #===================================
-file(GLOB library_headers
+file(GLOB casm_headers
     ${PROJECT_SOURCE_DIR}/include/CASM/*.hpp
     ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
     )
 
-file(GLOB library_sources
+file(GLOB casm_sources
     file.cpp
     core/*.cpp
     stream.cpp
@@ -26,18 +26,24 @@ file(GLOB library_sources
     device_manager/windows/initguid.cpp
     )
 
+file(GLOB ssrc_sources
+        wave_transform/*.cpp
+        wave_transform/SSRC/*.c
+        wave_transform/SSRC/*.cpp)
+
 #===================================
 #============== BUILD ==============
 #===================================
-if(CASM_STATIC)
-    set(CASM_BUILD_FLAG STATIC)
-else()
+if(CASM_SHARED)
     set(CASM_BUILD_FLAG SHARED)
+else()
+    set(CASM_BUILD_FLAG STATIC)
 endif()
 
-add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${library_sources} ${library_headers})
+add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${casm_sources} ${ssrc_sources} ${casm_headers})
 target_link_libraries(${CASM_LIBRARY} uuid.lib ole32.lib)
 
 if(CASM_BUILD_ENV_MSBUILD)
+    source_group("SSRC" FILES ${ssrc_sources})
     target_compile_definitions(${CASM_LIBRARY} PRIVATE CASM_BUILD_ENV_MSBUILD=1)
 endif()

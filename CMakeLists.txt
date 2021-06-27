@@ -22,7 +22,7 @@ set(CASM_LIBRARY ${PROJECT_NAME})
 #=========== CONFIGURE =============
 #===================================
 # options
-option(CASM_STATIC "Build shared library" OFF)
+option(CASM_SHARED "Build shared library" OFF)
 option(CASM_BUILD_EXAMPLES "Build examples" ON)
 option(CASM_BUILD_DOC "Build documentation" ON)
 
