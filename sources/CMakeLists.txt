@@ -9,6 +9,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 file(GLOB casm_headers
     ${PROJECT_SOURCE_DIR}/include/CASM/*.hpp
     ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
+    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.inl
     )
 
 file(GLOB casm_sources
