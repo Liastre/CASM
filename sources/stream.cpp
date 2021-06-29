@@ -1,6 +1,3 @@
-/// @file stream.cpp
-/// @brief definition of Stream class
-
 #include <CASM/file.hpp>
 #include <CASM/stream.hpp>
 #include <iostream>

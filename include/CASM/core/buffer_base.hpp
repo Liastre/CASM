@@ -1,5 +1,4 @@
 /**
-    @file buffer_base.hpp
     @copyright LGPLv3
     @brief declaration of BufferStorage class
 **/

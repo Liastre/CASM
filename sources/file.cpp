@@ -1,13 +1,8 @@
-/// @file file.cpp
-/// @brief definition of File class
-
 #include "CASM/file.hpp"
 #include "file/file_wave.hpp"
-
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
-
 
 namespace {
 
@@ -17,24 +12,23 @@ constexpr char kSplitPathSymbol = '/';
 
 namespace CASM {
 
-File::File(std::string const & path, bool shouldForceWriting) {
+File::File(std::string const& path, bool shouldForceWriting) {
     std::string resPath(path);
     _formatPath(resPath);
-    if(_parsePath(resPath)) {
+    if (_parsePath(resPath)) {
         _shouldForceWriting = shouldForceWriting;
-        _file = std::make_shared< FileWave >(_path);
+        _file = std::make_shared<FileWave>(_path);
     } else {
         // report no extension
     }
 }
 
-
 File::~File() {
     _file.reset();
 }
 
-
-bool File::openCaptureStream(Duration const & bufferDuration, Buffer & buffer) {
+bool
+File::openCaptureStream(Duration const& bufferDuration, Buffer& buffer) {
     if (!_isExist()) {
         return false;
     }
@@ -42,70 +36,70 @@ bool File::openCaptureStream(Duration const & bufferDuration, Buffer & buffer) {
     return _file->openCaptureStream(bufferDuration, buffer);
 }
 
-
-bool File::openRenderStream(Buffer const & buffer) {
+bool
+File::openRenderStream(Buffer const& buffer) {
     if (_isExist() && !_shouldForceWriting) {
         _generateName();
     }
     return _file->openRenderStream(buffer);
 }
 
-
-void File::closeRenderStream() {
+void
+File::closeRenderStream() {
     _file->closeRenderStream();
 }
 
-
-void File::closeCaptureStream() {
+void
+File::closeCaptureStream() {
     _file->closeCaptureStream();
 }
-
 
 BufferStatus
 File::read(Buffer& buffer) {
     return _file->read(buffer);
 }
 
-
-bool File::write(Buffer const & buffer) {
+bool
+File::write(Buffer const& buffer) {
     return _file->write(buffer);
 }
 
-
-bool File::readHeader() {
+bool
+File::readHeader() {
     return _file->readHeader();
 }
 
-
-bool File::writeHeader() {
+bool
+File::writeHeader() {
     return _file->writeHeader();
 }
 
-
-bool File::isAvailable() const {
+bool
+File::isAvailable() const {
     return _file->isAvailable();
 }
 
-
-bool File::_isExist() const {
+bool
+File::_isExist() const {
     std::ifstream file(_path);
     return file.good();
 }
 
-
-void File::_formatPath(std::string & path) {
+void
+File::_formatPath(std::string& path) {
     std::replace(path.begin(), path.end(), '\\', kSplitPathSymbol);
 }
 
-bool File::_parsePath(std::string const & path) {
+bool
+File::_parsePath(std::string const& path) {
     std::string::size_type extensionIndex = path.rfind('.');
-    if (extensionIndex==std::string::npos) {
+    if (extensionIndex == std::string::npos) {
         // TODO: logger message no extension
         return false;
     }
 
     std::string::size_type destinationIndex = path.rfind(kSplitPathSymbol);
-    if (destinationIndex!=std::string::npos) {
+    if (destinationIndex != std::string::npos) {
         _destination = path.substr(0, destinationIndex);
         ++destinationIndex; // escape split character
     } else {
@@ -119,8 +113,8 @@ bool File::_parsePath(std::string const & path) {
     return true;
 }
 
-
-void File::_generateName() {
+void
+File::_generateName() {
     std::string tmpName;
     uint32_t i(0);
 
@@ -133,38 +127,37 @@ void File::_generateName() {
     _file->setPath(_path);
 }
 
-
-bool File::finalize() {
+bool
+File::finalize() {
     return _file->finalize();
 }
 
-
-void File::setPath(std::string const & path) {
+void
+File::setPath(std::string const& path) {
     // TODO: implementation
 }
 
-
-WaveProperties File::getStreamWaveProperties() const {
+WaveProperties
+File::getStreamWaveProperties() const {
     return _file->getStreamWaveProperties();
 }
 
-
-bool File::isInUsage() const {
+bool
+File::isInUsage() const {
     return _file->isInUsage();
 }
 
-
-std::string File::getName() const {
+std::string
+File::getName() const {
     return _name;
 }
-
 
 File::operator bool() const {
     return _isExist();
 }
 
-
-bool File::isValid() const {
+bool
+File::isValid() const {
     return _file->isValid();
 }
 

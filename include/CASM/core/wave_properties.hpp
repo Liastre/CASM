@@ -1,5 +1,4 @@
 /**
-    @file wave_properties.hpp
     @copyright LGPLv3
     @brief class WaveProperties for storing wave properties
 **/

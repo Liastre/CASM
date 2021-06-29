@@ -3,12 +3,10 @@
     @copyright LGPLv3
 **/
 
-#ifndef CASM_DEVICE_HPP
-#define CASM_DEVICE_HPP
+#pragma once
 
 #include <CASM/device_manager/device_base.hpp>
 #include <CASM/core/end_point.hpp>
-
 
 namespace CASM {
 
@@ -18,7 +16,7 @@ namespace CASM {
 class Device final : public DeviceInterface {
 public:
     Device();
-    Device(void * deviceHandler, DeviceType deviceType);
+    Device(void* deviceHandler, DeviceType deviceType);
     Device(Device const& device);
     Device(Device&& device) noexcept;
     Device& operator=(Device const& device);
@@ -26,12 +24,12 @@ public:
     ~Device() override;
 
     /// EndPointInterface interface
-    bool openCaptureStream(Duration const & duration, Buffer & buffer) final;
-    bool openRenderStream(Buffer const & buffer) final;
+    bool openCaptureStream(Duration const& duration, Buffer& buffer) final;
+    bool openRenderStream(Buffer const& buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
-    BufferStatus read(Buffer & buffer) final;
-    bool write(Buffer const & buffer) final;
+    BufferStatus read(Buffer& buffer) final;
+    bool write(Buffer const& buffer) final;
 
     // TODO: add getState method
     bool isAvailable() const final;
@@ -49,6 +47,4 @@ private:
     std::shared_ptr<DeviceInterface> _device;
 };
 
-}
-
-#endif //CASM_DEVICE_HPP
+} // namespace CASM

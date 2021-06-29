@@ -1,10 +1,8 @@
-/// @file device_manager.hpp
 /// @brief class DeviceManager stores collection of devices
 
 #pragma once
 
 #include <CASM/device_manager/device_manager_base.hpp>
-
 
 namespace CASM {
 

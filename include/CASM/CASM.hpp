@@ -1,14 +1,11 @@
-/// @file CASM.hpp
 /// @brief main header of library
 
-#ifndef CASM_CASM_HPP
-#define CASM_CASM_HPP
+#pragma once
 
 #include "CASMconfig.hpp"
 #include <cstdint>
 #include <array>
 #include <chrono>
-
 
 namespace CASM {
 
@@ -29,5 +26,3 @@ enum class DeviceType {
 typedef std::chrono::duration<double> Duration;
 
 } // end of namespace CASM
-
-#endif //CASM_CASM_HPP

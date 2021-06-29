@@ -4,13 +4,11 @@
     @brief declaration for DeviceInterface and DeviceBase classes
 **/
 
-#ifndef CASM_DEVICE_BASE_HPP
-#define CASM_DEVICE_BASE_HPP
+#pragma once
 
 #include <CASM/CASM.hpp>
 #include <CASM/core/end_point.hpp>
 #include <string>
-
 
 namespace CASM {
 
@@ -21,15 +19,15 @@ public:
     DeviceInterface() = default;
     ~DeviceInterface() override = default;
 
-    virtual WaveProperties getDeviceWaveProperties()=0;
-    virtual std::wstring getDescription()=0;
+    virtual WaveProperties getDeviceWaveProperties() = 0;
+    virtual std::wstring getDescription() = 0;
 };
 
 // TODO: add << overload with description
 
 /// @class DeviceBase
 /// @brief base class for Device object.
-template < class TDeviceHandler >
+template <class TDeviceHandler>
 class DeviceBase : public virtual DeviceInterface, public EndPointBase {
 public:
     DeviceBase();
@@ -54,6 +52,3 @@ protected:
 } // namespace CASM
 
 #include "device_base.inl"
-
-
-#endif //CASM_DEVICE_BASE_HPP

@@ -1,15 +1,13 @@
-// =============== DESCRIPTION ===============
-// Created on 22 May.
-// ===========================================
+/**
+ * Base class for DeviceManager
+ */
 
-#ifndef CASM_BASEDEVICEMANAGER_HPP
-#define CASM_BASEDEVICEMANAGER_HPP
+#pragma once
 
 #include <CASM/device.hpp>
 #include "CASM/core/wave_properties.hpp"
 #include <vector>
 #include <string>
-
 
 namespace CASM {
 
@@ -28,6 +26,4 @@ protected:
     std::size_t _deviceCount;
 };
 
-}
-
-#endif //CASM_BASEDEVICEMANAGER_HPP
+} // namespace CASM
