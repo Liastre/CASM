@@ -30,7 +30,7 @@ int DeviceManagerWindowsWASAPI::update() {
     IMMDevice *device = nullptr;
     uint32_t deviceCollectionSize;
 
-    deviceList.clear();
+    _deviceList.clear();
 
     //CLSID_MMDeviceEnumerator or __uuidof(IMMDeviceEnumerator)
     hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
@@ -43,7 +43,7 @@ int DeviceManagerWindowsWASAPI::update() {
     if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, CASM::CAPTURE));
+        _deviceList.emplace_back(Device(device, DeviceType::CAPTURE));
     }
     deviceCollection->Release();
 
@@ -54,13 +54,12 @@ int DeviceManagerWindowsWASAPI::update() {
     if (hr!=S_OK) throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, CASM::RENDER));
+        _deviceList.emplace_back(Device(device, DeviceType::RENDER));
     }
     deviceCollection->Release();
 
-    deviceCount = (uint_fast32_t) deviceList.size();
+    _deviceCount = _deviceList.size();
     deviceEnumerator->Release();
-    device->Release();
 
     return 0;
 }

@@ -1,4 +1,9 @@
+## IDE and build artifacts
+# Visual Studio
+.idea/
+.vs/
+out/
+
+# Clion
 cmake-build-release/
 cmake-build-debug/
-docs/
-.idea/

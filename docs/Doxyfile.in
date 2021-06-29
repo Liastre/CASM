@@ -1,0 +1,2 @@
+INPUT                  = @CMAKE_SOURCE_DIR@/include/CASM/ @CMAKE_SOURCE_DIR@/sources
+RECURSIVE              = YES

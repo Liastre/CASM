@@ -2,7 +2,7 @@
 #============= SYSTEM ==============
 #===================================
 cmake_minimum_required(VERSION 3.7)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 #===================================
 #============ COMPILER =============
@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 11)
 #===================================
 project(CASM) # Crossplatform Audio Stream Manager
 set(CASM_VERSION_MAJOR "0")
-set(CASM_VERSION_MINOR "1")
+set(CASM_VERSION_MINOR "2")
 set(CASM_VERSION_PATCH "0")
 set(CASM_VERSION_EXTRA "")
 set(CASM_LIBRARY ${PROJECT_NAME})
@@ -22,8 +22,18 @@ set(CASM_LIBRARY ${PROJECT_NAME})
 #=========== CONFIGURE =============
 #===================================
 # options
-option(CASM_STATIC "Build shared library" OFF)
+option(CASM_SHARED "Build shared library" OFF)
 option(CASM_BUILD_EXAMPLES "Build examples" ON)
+option(CASM_BUILD_DOC "Build documentation" OFF)
+
+# detect build definitions
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(CASM_BUILD_ENV_MSBUILD TRUE)
+    message(STATUS "That's visual studio")
+elseif(MINGW)
+    set(CASM_BUILD_ENV_MINGW TRUE)
+    message(STATUS "Build environment is set to MinGW")
+endif()
 
 # detect system definitions
 if(WIN32) # windows (32 and 64 bit)
@@ -47,7 +57,8 @@ endif()
 #============= OUTPUT ==============
 #===================================
 set(casm_build_output_dir          ${CMAKE_BINARY_DIR})
-set(casm_binary_output_dir         ${CMAKE_BINARY_DIR}/binary)
+set(casm_binary_output_dir         ${casm_build_output_dir}/binary)
+set(casm_doc_output_dir            ${casm_build_output_dir}/docs)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${casm_binary_output_dir})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${casm_binary_output_dir})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casm_binary_output_dir})
@@ -62,4 +73,9 @@ add_subdirectory(sources)
 # examples
 if(CASM_BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+# documentation
+if(CASM_BUILD_DOC)
+    add_subdirectory(docs)
 endif()

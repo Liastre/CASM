@@ -6,6 +6,7 @@
     shared_ptr is used for storage.
     To copy, use Buffer.copy(Buffer) method, it copies data
     of passed buffer to this.
+    Don't forget to clear buffer before fill with new data
 **/
 
 #ifndef CASM_BUFFER_HPP
@@ -23,19 +24,17 @@ namespace CASM {
 class Buffer {
 public:
     Buffer();
-    Buffer(WaveProperties waveProperties, uint32_t framesCount);
-    Buffer(WaveProperties waveProperties, std::chrono::duration< double > duration);
+    Buffer(WaveProperties const & waveProperties, uint32_t framesCount);
+    Buffer(WaveProperties const & waveProperties, Duration const & duration);
     ~Buffer();
 
-    // getters
-    const WaveProperties &getWaveProperties() const;
-    uint32_t getSize() const;
+    WaveProperties getWaveProperties() const;
+    std::size_t getSize() const;
     std::chrono::duration< double > getDuration() const;
 
-    // methods
-    void read(std::fstream &stream);
-    void read(void *arrayPtr, uint32_t sizeInBytes);
-    bool write(std::fstream &stream);
+    void read(std::fstream &stream) const;
+    void read(void *arrayPtr, uint32_t sizeInBytes) const;
+    BufferStatus write(std::fstream &stream);
 
     /// @brief writes data from input buffer to current
     /// @param [in] data - copying from
@@ -45,35 +44,25 @@ public:
     /// @param [in] arrayPtr - pointer to begin of array
     /// @param [in] arraySize - actual array size
     /// @param [in] sizeOfTypeInBytes
-    void write(void *arrayPtr, uint32_t arraySize, uint8_t sizeOfTypeInBytes);
-
-
-    /// @brief template method that writes raw data into the buffer
-    /// @tparam PassedType - type of passed array
-    /// @param [in] arrayPtr - pointer to begin of array
-    /// @param [in] arraySize - actual array size
-    template < typename PassedType >
-    void write(void *arrayPtr, const uint32_t arraySize) {
-        // static checks
-        static_assert(std::is_integral< PassedType >::value, "Only integer types are allowed");
-
-        write(arrayPtr, arraySize, sizeof(PassedType));
-    }
-
+    void write(void *arrayPtr, uint32_t sizeInBytes);
 
     /// @brief copy data to the new storage allocated in memory
     /// @param [in] data - data where we copying
     void copy(Buffer data);
 
-private:
-    void init(WaveProperties waveProperties, uint32_t framesCount);
+    /// @brief clear the buffer
+    void clear();
 
-    std::shared_ptr< BufferStorage > storage;
-    WaveProperties waveProperties;
+private:
+    void init(WaveProperties const & waveProperties, uint32_t framesCount);
+
+private:
+    std::shared_ptr< BufferStorage > _storage;
+    WaveProperties _waveProperties;
     /// @brief approximate duration in time units
-    std::chrono::duration< double > duration;
+    Duration _duration;
     /// @brief frames needed for requested duration
-    uint32_t framesCount;
+    uint32_t _framesCount;
 };
 
 }

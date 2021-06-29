@@ -1,52 +1,53 @@
-/// @file wave_properties.hpp
-/// @brief class WaveProperties for storing wave properties
+/**
+    @file wave_properties.hpp
+    @copyright LGPLv3
+    @brief class WaveProperties for storing wave properties
+**/
 
-#ifndef CASM_WAVE_PROPERTIES_HPP
-#define CASM_WAVE_PROPERTIES_HPP
+#pragma once
 
 #include <cstdint>
-
-
-enum BitsType {
-    PCM_16BIT_SIGNED,
-    PCM_16BIT_UNSIGNED,
-    PCM_32BIT_SIGNED,
-    PCM_32BIT_UNSIGNED
-};
 
 namespace CASM {
 
 class WaveProperties {
 public:
-    WaveProperties();
-    // TODO: rewrite using single init method
-    WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, BitsType bitsType);
-    WaveProperties(std::uint16_t channelsCount, std::uint32_t samplesPerSecond, uint32_t bitsPerSample, bool paramIsSigned = true);
-    ~WaveProperties();
+    WaveProperties() = default;
+    explicit WaveProperties(std::uint16_t channelsCount,
+      std::uint32_t samplesPerSecond,
+      std::uint16_t bitsPerSample,
+      std::uint16_t bitsPerSampleContainerSize,
+      bool isSigned);
 
-    // getters
-    uint16_t getChannelsCount() const;
-    uint16_t getBitsPerSample() const;
-    uint32_t getSamplesPerSecond() const;
-    uint32_t getBytesPerSecond() const;
-    uint16_t getBlockAlign() const;
-    BitsType getBitsType() const;
-    bool getSigned() const;
+    std::uint16_t getChannelsCount() const;
+    std::uint16_t getBitsPerSample() const;
+    std::uint16_t getBitsPerSampleContainerSize() const;
+    std::uint32_t getSamplesPerSecond() const;
+    std::uint32_t getBytesPerSecond() const;
+    std::uint16_t getBlockAlign() const;
+    /**
+     * @return true if signed, false if not
+     */
+    bool getSign() const;
 
-    // operators
-    bool operator==(WaveProperties waveProperties) const;
-    bool operator!=(WaveProperties waveProperties) const;
+    bool operator==(WaveProperties const& waveProperties) const;
+    bool operator!=(WaveProperties const& waveProperties) const;
 
 private:
-    uint16_t channelsCount;     // channels count
-    uint16_t bitsPerSample;     // bits per sample
-    uint16_t blockAlign;        // frame size (size of two integer samples, one for each channel, in bytes)
-    uint32_t samplesPerSecond;  // samples per second (Hz)
-    uint32_t bytesPerSecond;    // bytes per second
-    bool isSigned;
-    BitsType bitsType;
+    /// @brief channels count
+    std::uint16_t _channelsCount = 0;
+    /// @brief bits per sample
+    std::uint8_t _bitsPerSample = 0;
+    /// Container size for sample bits
+    std::uint8_t _bitsPerSampleContainerSize = 0;
+    /// @brief frame size (size of two integer samples, one for each channel, in bytes)
+    std::uint16_t _blockAlign = 0;
+    /// @brief samples per second (Hz)
+    std::uint32_t _samplesPerSecond = 0;
+    /// @brief bytes per second
+    std::uint32_t _bytesPerSecond = 0;
+    /// @brief true if signed, false if not
+    bool _isSigned = false;
 };
 
-}
-
-#endif //CASM_WAVE_PROPERTIES_HPP
+} // namespace CASM

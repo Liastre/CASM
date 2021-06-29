@@ -1,10 +1,6 @@
-/// @file Device.hpp
-/// @brief class Device
 /**
-    Description:
-    Class Device represent end point device
-    Details:
-    Not copyable (copy will contain same instance)
+    @file device.hpp
+    @copyright LGPLv3
 **/
 
 #ifndef CASM_DEVICE_HPP
@@ -18,27 +14,39 @@ namespace CASM {
 
 /// @class Device
 /// @brief wrapper under Device fabric
+/// @details not copyable (copy will contain same instance)
 class Device final : public DeviceInterface {
 public:
     Device();
-    Device(void *deviceHandler, CASM::DeviceType deviceType);
+    Device(void * deviceHandler, DeviceType deviceType);
+    Device(Device const& device);
+    Device(Device&& device) noexcept;
+    Device& operator=(Device const& device);
+    Device& operator=(Device&& device);
     ~Device() override;
 
     /// EndPointInterface interface
-    Buffer open(std::chrono::duration< double > duration) override;
+    bool openCaptureStream(Duration const & duration, Buffer & buffer) final;
+    bool openRenderStream(Buffer const & buffer) final;
+    void closeCaptureStream() final;
+    void closeRenderStream() final;
+    BufferStatus read(Buffer & buffer) final;
+    bool write(Buffer const & buffer) final;
 
-    bool open(Buffer buffer) final;
-    void close() final;
-    bool read(Buffer &buffer) final;
-    bool write(Buffer buffer) final;
-    bool isAvailable() final;
+    // TODO: add getState method
+    bool isAvailable() const final;
+    bool isInUsage() const final;
+    bool isValid() const final;
 
     WaveProperties getDeviceWaveProperties() final;
-    WaveProperties getStreamWaveProperties() final;
+    WaveProperties getStreamWaveProperties() const final;
     std::wstring getDescription() final;
 
+    // operators
+    operator bool() const;
+
 private:
-    std::shared_ptr< DeviceInterface > device;
+    std::shared_ptr<DeviceInterface> _device;
 };
 
 }

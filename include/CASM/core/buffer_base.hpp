@@ -1,40 +1,56 @@
-/// @file buffer_base.hpp
-/// @brief class BufferStorage for storing bits
+/**
+    @file buffer_base.hpp
+    @copyright LGPLv3
+    @brief declaration of BufferStorage class
+**/
 
-#ifndef CASM_BUFFER_BASE_HPP
-#define CASM_BUFFER_BASE_HPP
+#pragma once
 
+#include <CASM/CASM.hpp>
+#include <CASM/core/circle_buffer.hpp>
 #include <atomic>
 #include <chrono>
 #include <vector>
 #include <fstream>
 
+// TODO: rename file to buffer_storage
+namespace CASM {
 
-union bitsRep {
-    int32_t int32;
-    int16_t int16[2];
-    int8_t int8[4];
+enum class BufferStatus {
+    BufferFilled,
+    BufferEmpty,
+    DataEmpty,
+    DataFilled,
 };
 
+/**
+ * Storage for sequence of bytes
+ */
 class BufferStorage {
 public:
     BufferStorage();
-    explicit BufferStorage(uint32_t size);
+    explicit BufferStorage(std::size_t size);
     ~BufferStorage() = default;
 
-    void read(std::fstream &stream);
-    void read(void *arrayPtr, uint32_t sizeInBytes);
-    bool write(std::fstream &stream);
-    void write(BufferStorage *data);
-    void write(void *arrayPtr, uint32_t sizeInBytes);
-    void copy(BufferStorage *data);
+    /**
+     * Read buffer to fstream. Copies all the data
+     * from buffer to fstream.
+     * @param[in,out] stream
+     */
+    void read(std::fstream& stream) const;
+    void read(void* arrayPtr, std::size_t sizeInBytes) const;
+    BufferStatus write(std::fstream& stream);
+    void write(BufferStorage const& data);
+    void write(void* arrayPtr, std::size_t sizeInBytes);
+    void copy(BufferStorage const& data);
     void clear();
-    uint32_t getSize();
+    std::size_t getSize();
 
 protected:
-    std::vector< uint8_t > buffer;
-    std::atomic<uint32_t> filled;
-    std::atomic<uint32_t> size;
+    using Byte = std::uint8_t;
+    using ByteBuffer = CircleBuffer<Byte>;
+
+    ByteBuffer _buffer;
 };
 
-#endif //CASM_BUFFER_BASE_HPP
+} // namespace CASM

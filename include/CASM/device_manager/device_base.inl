@@ -2,17 +2,17 @@ namespace CASM {
 
 template < class TDeviceHandler >
 DeviceBase< TDeviceHandler >::DeviceBase() {
-    bufferDuration = std::chrono::duration< double >::zero();
-    handler = nullptr;
-    name = L"";
-    description = L"";
+    _bufferDuration = std::chrono::duration<double>::zero();
+    _handler = nullptr;
+    _name = L"";
+    _description = L"";
 }
 
 
 template < class TDeviceHandler >
 DeviceBase< TDeviceHandler >::DeviceBase(void *deviceHandler, CASM::DeviceType deviceType) :DeviceBase() {
-    handler = static_cast<TDeviceHandler *>(deviceHandler);
-    type = deviceType;
+    _handler = static_cast<TDeviceHandler *>(deviceHandler);
+    _type = deviceType;
 }
 
 
@@ -23,13 +23,13 @@ DeviceBase< TDeviceHandler >::~DeviceBase() {
 
 template < class TDeviceHandler >
 WaveProperties DeviceBase< TDeviceHandler >::getDeviceWaveProperties() {
-    return deviceWaveProperties;
+    return _deviceWaveProperties;
 }
 
 
 template < class TDeviceHandler >
 std::wstring DeviceBase< TDeviceHandler >::getDescription() {
-    return description;
+    return _description;
 }
 
 }

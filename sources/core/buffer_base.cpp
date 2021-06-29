@@ -1,115 +1,83 @@
-/// @file buffer_base.cpp
-/// @brief definition for BufferStorage class
-
-#ifndef CASM_BUFFER_BASE_INL
-#define CASM_BUFFER_BASE_INL
+/**
+    @file buffer_base.cpp
+    @copyright LGPLv3
+    @brief definition for BufferStorage class
+**/
 
 #include <CASM/core/buffer_base.hpp>
+#include <string>
+#include <exception>
 
+namespace CASM {
 
 BufferStorage::BufferStorage() {
-    size = 0;
-    filled = 0;
-};
-
-
-BufferStorage::BufferStorage(uint32_t size) :BufferStorage() {
-    BufferStorage::size = size;
-    buffer.reserve(size);
+    _buffer = ByteBuffer();
 }
 
-
-void BufferStorage::read(std::fstream &stream) {
-    for (uint32_t i = 0; i < filled; i++) {
-        stream.write((const char *) &buffer[i], 1);
-    }
-    clear();
+BufferStorage::BufferStorage(std::size_t size)
+    : BufferStorage() {
+    _buffer = ByteBuffer(size);
 }
 
+// TODO: const fstream?
+void
+BufferStorage::read(std::fstream& stream) const {
+    Byte byte;
 
-void BufferStorage::read(void *arrayPtr, const uint32_t sizeInBytes) {
-    if (sizeInBytes > filled) {
-        // buffer overflow
-        throw std::runtime_error("Buffer read overflow!");
+    while (_buffer.pop(byte)) {
+        stream.write(reinterpret_cast<const char*>(&byte), 1);
     }
-
-    auto array = static_cast<uint8_t *>(arrayPtr);
-    for (uint32_t i = 0; i < sizeInBytes; i++) {
-        array[i] = buffer[i];
-    }
-    clear();
 }
 
-
-bool BufferStorage::write(std::fstream &stream) {
-    uint32_t i;
-    for (i = filled; i < size; i++) {
-        if (stream.eof()) {
-            return false;
-        }
-        stream.read((char *) &buffer[i], 1);
-        filled++;
+void
+BufferStorage::read(void* arrayPtr, const std::size_t sizeInBytes) const {
+    auto array = static_cast<uint8_t*>(arrayPtr);
+    if (!_buffer.pop(array, sizeInBytes)) {
+        throw std::runtime_error("Buffer doesn't have " + std::to_string(sizeInBytes) + " bytes");
     }
-    return true;
 }
 
+BufferStatus
+BufferStorage::write(std::fstream& stream) {
+    Byte byte;
+    while (true) {
+        if (stream.eof())
+            return BufferStatus::DataEmpty;
+        if (_buffer.full())
+            return BufferStatus::BufferFilled;
 
-void BufferStorage::write(BufferStorage *data) {
-    uint32_t dataSize = data->getSize();
-    if (dataSize > (size-filled)) {
-        return;
+        stream.read(reinterpret_cast<char*>(&byte), 1);
+        _buffer.push(byte);
     }
-    for (int i = 0; i < dataSize; i++) {
-        buffer.emplace_back(data->buffer[i]);
-    }
-    filled += data->filled;
 }
 
-
-void BufferStorage::write(void *arrayPtr, const uint32_t sizeInBytes) {
-    if (filled+sizeInBytes > size) {
-        // buffer overflow
-        return;
-    }
-
-    if (arrayPtr==nullptr) {
-        for (uint32_t i = 0; i < sizeInBytes; i++) {
-            buffer.emplace_back(0);
-        }
-    }
-    else {
-        auto array = static_cast<uint8_t *>(arrayPtr);
-        for (uint32_t i = 0; i < sizeInBytes; i++) {
-            buffer.emplace_back(array[i]);
-        }
-    }
-
-    filled += sizeInBytes;
+void
+BufferStorage::write(BufferStorage const& data) {
+    _buffer.push(data._buffer);
 }
 
-
-void BufferStorage::copy(BufferStorage *data) {
-    if (data->getSize()!=size) {
-        buffer.reserve(data->getSize());
-        size = data->getSize();
+void
+BufferStorage::write(void* arrayPtr, std::size_t const sizeInBytes) {
+    auto array = static_cast<uint8_t*>(arrayPtr);
+    if (!_buffer.push(array, sizeInBytes)) {
+        throw std::runtime_error("Buffer doesn't have " + std::to_string(sizeInBytes) + " bytes");
     }
-    clear();
-    for (int i = 0; i < size; i++) {
-        buffer.emplace_back(data->buffer[i]);
-    }
-    filled += data->filled;
 }
 
-
-void BufferStorage::clear() {
-    buffer.clear();
-    filled = 0;
+void
+BufferStorage::copy(BufferStorage const& data) {
+    _buffer.clear();
+    _buffer.push(data._buffer);
 }
 
-
-uint32_t BufferStorage::getSize() {
-    return size;
+void
+BufferStorage::clear() {
+    _buffer.clear();
 }
 
+std::size_t
+BufferStorage::getSize() {
+    return _buffer.size();
+}
 
-#endif //CASM_BUFFER_BASE_INL
+} // namespace CASM

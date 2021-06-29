@@ -1,39 +1,37 @@
 /// @file device_windows_wasapi.hpp
 /// @brief class DeviceWindowsWASAPI derived from DeviceBase
 
-#ifndef CASM_DEVICE_WINDOWS_WASAPI_HPP
-#define CASM_DEVICE_WINDOWS_WASAPI_HPP
+#pragma once
 
 #include "windows_wasapi.hpp"
 #include "CASM/device_manager/device_base.hpp"
 #include <cassert>
 
-
 namespace CASM {
 
 typedef IMMDevice DeviceHandler;
 
-class DeviceWindowsWASAPI final : public DeviceBase< IMMDevice > {
+class DeviceWindowsWASAPI final : public DeviceBase<IMMDevice> {
 public:
     DeviceWindowsWASAPI();
-    DeviceWindowsWASAPI(void *device, CASM::DeviceType deviceType);
+    DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);
     ~DeviceWindowsWASAPI() final;
 
     /// EndPointInterface
-    Buffer open(std::chrono::duration< double > duration) final;
-    bool open(Buffer buffer) final;
-    void close() final;
-    bool read(Buffer &buffer) final;
-    bool write(Buffer buffer) final;
-    bool isAvailable() final;
+    bool openCaptureStream(Duration const& duration, Buffer& buffer) final;
+    bool openRenderStream(Buffer const& buffer) final;
+    void closeCaptureStream() final;
+    void closeRenderStream() final;
+    BufferStatus read(Buffer& buffer) final;
+    bool write(Buffer const& buffer) final;
+    bool isAvailable() const final;
 
 private:
-    IAudioClient *stream;
-    HANDLE hEvent;
-    IAudioCaptureClient *captureClient;
-    IAudioRenderClient *renderClient;
+    IAudioClient* _captureStream = nullptr;
+    IAudioClient* _renderStream = nullptr;
+    IAudioCaptureClient* _captureClient = nullptr;
+    IAudioRenderClient* _renderClient = nullptr;
+    HANDLE _hEvent = nullptr;
 };
 
-}
-
-#endif //CASM_DEVICE_WINDOWS_WASAPI_HPP
+} // namespace CASM

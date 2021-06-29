@@ -1,39 +1,89 @@
 #include <CASM/CASM.hpp>
 #include <CASM/device_manager.hpp>
+#include <CASM/stream.hpp>
 #include <CASM/file.hpp>
 #include <iostream>
 #include <thread>
+#include <string>
+#include <io.h>
+#include <fcntl.h>
 
+#define CASM_MANUAL 0
 
-int main() {
-    // choose device
-    CASM::DeviceManager deviceManager;
-    deviceManager.update();
-    int deviceCount = deviceManager.getDeviceCount();
-    for (unsigned int i = 0; i < deviceCount; i++) {
-        std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
+int
+main(int argc, char** argv) {
+    try {
+        // TODO temp solution for cmd
+        _setmode(_fileno(stdout), _O_U16TEXT);
+
+        // choose device
+        CASM::DeviceManager deviceManager;
+        deviceManager.update();
+        std::size_t deviceCount = deviceManager.getDeviceCount();
+        for (std::size_t i = 0; i < deviceCount; i++) {
+            auto deviceName = deviceManager.getDevice(i).getDescription();
+            std::wcout << i << ": " << deviceName << std::endl;
+        }
+
+        // get device index
+        std::size_t deviceIndex;
+        std::wcout << L"Choose device index ...";
+        std::wcin >> deviceIndex;
+        std::wcout << std::endl;
+
+        // init endpoints
+        CASM::Device outputDevice = deviceManager.getDevice(deviceIndex);
+        if (!outputDevice) {
+            std::wcout << L"Output device is not valid!" << std::endl;
+            return 0;
+        } else {
+            auto deviceWaveProp = outputDevice.getStreamWaveProperties();
+            std::wcout << L"Device properties of " << outputDevice.getDescription()
+                       << L"\nChannels count: " << deviceWaveProp.getChannelsCount()
+                       << L"\nSamples per second: " << deviceWaveProp.getSamplesPerSecond()
+                       << L"\nBits per sample: " << deviceWaveProp.getBitsPerSample()
+                       << std::endl;
+        }
+
+        CASM::File inputFile("D:\\Development\\projects\\Application_CrossplatformAudioStreamManager\\data\\250Hz_48000Hz_32bit_2ch_30sec.wav");
+        if (!inputFile) {
+            std::wcout << L"Input file is not valid!" << std::endl;
+            return 0;
+        }
+
+#if !CASM_MANUAL
+        // Way 1: using audio Stream
+        CASM::Stream streamFromFile(inputFile, outputDevice, std::chrono::milliseconds{ 500 });
+        streamFromFile.start();
+        // We are not forcing stop, just waiting for end of input endpoint
+        // in our case it's the same with file end
+        streamFromFile.join();
+        std::wcout << L"Stream uptime is: " << std::chrono::duration_cast<std::chrono::seconds>(streamFromFile.getUptime()).count();
+#else
+        // Way 2: manual streaming
+        // Open endpoints
+        CASM::Buffer fileBuffer;
+        inputFile.openCaptureStream(std::chrono::milliseconds{ 500 }, fileBuffer);
+        outputDevice.openRenderStream(fileBuffer);
+        CASM::BufferStatus status(CASM::BufferStatus::BufferFilled);
+        int counter(0);
+        // Manual read-write
+        while (status != CASM::BufferStatus::DataEmpty) {
+            status = inputFile.read(fileBuffer);
+            counter += fileBuffer.getSize();
+            outputDevice.write(fileBuffer);
+        }
+        std::wcout << L"Counter: " << counter;
+        // Close devices
+        inputFile.closeRenderStream();
+        outputDevice.closeCaptureStream();
+#endif
+    } catch (std::exception& e) {
+        std::wcout << e.what();
+    } catch (...) {
+        // unexpected errors
+        std::wcout << L"Unexpected error has occurred. Program forced to quit." << std::endl;
     }
-    unsigned int deviceIndex;
-    std::cin >> deviceIndex;
-
-    // init endpoints
-    CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
-    CASM::File file("endPointDevice(8).wav");
-
-    // open endpoints
-    CASM::Buffer buffer = file.open(std::chrono::seconds(1));
-    endPoint.open(buffer);
-
-    // write data
-    for (int i = 0; i < 8; i++) {
-        std::this_thread::sleep_for(buffer.getDuration());
-        file.read(buffer);
-        endPoint.write(buffer);
-    }
-
-    // close endpoints
-    file.close();
-    endPoint.close();
 
     return 0;
 }

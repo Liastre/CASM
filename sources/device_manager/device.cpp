@@ -1,7 +1,10 @@
-/// @file device.cpp
-/// @brief definition of Device class
+/**
+    @file device.cpp
+    @copyright LGPLv3
+    @brief definition of Device class
+**/
 
-#include "CASM/device.hpp"
+#include <CASM/device.hpp>
 #include "windows/device_windows_wasapi.hpp"
 
 
@@ -11,58 +14,106 @@ Device::Device() {
 }
 
 
-Device::Device(void *deviceHandler, CASM::DeviceType deviceType) {
-    device = std::make_shared< DeviceWindowsWASAPI >(deviceHandler, deviceType);
+Device::Device(void * deviceHandler, DeviceType deviceType) {
+    _device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
+}
+
+
+Device::Device(Device const& device) {
+    this->operator=(device);
+}
+
+
+Device::Device(Device&& device) noexcept {
+    this->operator=(std::move(device));
+}
+
+
+Device& Device::operator=(Device const& device) {
+    _device = device._device;
+    return *this;
+}
+
+
+Device& Device::operator=(Device&& device) {
+    _device = std::move(device._device);
+    return *this;
 }
 
 
 Device::~Device() {
-    device.reset();
-};
-
-
-Buffer Device::open(std::chrono::duration< double > duration) {
-    return device->open(duration);
+    _device.reset();
 }
 
 
-bool Device::open(Buffer buffer) {
-    return device->open(buffer);
+bool Device::openCaptureStream(Duration const & duration, Buffer & buffer) {
+    //if (_device->isInUsage()) throw std::logic_error("Device already in use");
+
+    return _device->openCaptureStream(duration, buffer);
 }
 
 
-void Device::close() {
-    device->close();
+bool Device::openRenderStream(Buffer const & buffer) {
+    if (_device->isInUsage()) throw std::logic_error("Device already in use");
+
+    return _device->openRenderStream(buffer);
 }
 
 
-bool Device::read(Buffer &buffer) {
-    return device->read(buffer);
+void Device::closeCaptureStream() {
+    _device->closeCaptureStream();
 }
 
 
-bool Device::write(Buffer buffer) {
-    device->write(buffer);
+void Device::closeRenderStream() {
+    _device->closeRenderStream();
+}
+
+
+BufferStatus
+Device::read(Buffer& buffer) {
+    return _device->read(buffer);
+}
+
+
+bool Device::write(Buffer const & buffer) {
+    _device->write(buffer);
+    return true;
 }
 
 
 WaveProperties Device::getDeviceWaveProperties() {
-    return device->getDeviceWaveProperties();
+    return _device->getDeviceWaveProperties();
 }
 
 
-WaveProperties Device::getStreamWaveProperties() {
-    return device->getStreamWaveProperties();
+WaveProperties Device::getStreamWaveProperties() const {
+    return _device->getStreamWaveProperties();
 }
 
 
 std::wstring Device::getDescription() {
-    return device->getDescription();
+    return _device->getDescription();
 }
 
 
-bool Device::isAvailable() {
+bool Device::isAvailable() const {
     return true;
 }
 
+
+bool Device::isInUsage() const {
+    return _device->isInUsage();
 }
+
+
+bool Device::isValid() const {
+    return _device->isValid();
+}
+
+
+Device::operator bool() const {
+    return isValid();
+}
+
+} // namespace CASM
