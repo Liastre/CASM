@@ -10,9 +10,10 @@
 
 namespace CASM {
 
-/// @class Device
-/// @brief wrapper under Device fabric
-/// @details not copyable (copy will contain same instance)
+/**
+ * Wrapper under Device fabric
+ * not copyable (copy will contain same instance)
+ */
 class Device final : public DeviceInterface {
 public:
     Device();
@@ -40,7 +41,6 @@ public:
     WaveProperties getStreamWaveProperties() const final;
     std::wstring getDescription() final;
 
-    // operators
     operator bool() const;
 
 private:

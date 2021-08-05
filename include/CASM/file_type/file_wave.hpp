@@ -1,5 +1,4 @@
-#ifndef CASM_FILE_WAVE_HPP
-#define CASM_FILE_WAVE_HPP
+#pragma once
 
 #include <CASM/core/file_base.hpp>
 
@@ -45,5 +44,3 @@ private:
 };
 
 }
-
-#endif //CASM_FILE_WAVE_HPP
