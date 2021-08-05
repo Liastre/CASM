@@ -9,7 +9,9 @@ FileBase::FileBase(std::string const& filePath) {
 bool
 FileBase::openCaptureStream(Duration const& bufferDuration, Buffer& buffer) {
     _stream->open(_path, std::ios::in | std::ios::binary);
-    if (readHeader()) {
+    // TODO: use result
+    _streamWaveProperties = readHeader();
+    if (_streamWaveProperties.getBitsPerSample() != 0) {
         buffer = Buffer(_streamWaveProperties, bufferDuration);
         return true;
     }
@@ -22,7 +24,7 @@ FileBase::openRenderStream(Buffer const& buffer) {
     _stream->open(_path, std::ios::out | std::ios::binary);
     _streamWaveProperties = buffer.getWaveProperties();
 
-    return writeHeader();
+    return writeHeader(_streamWaveProperties);
 }
 
 void

@@ -24,7 +24,7 @@ FileWave::write(Buffer const& buffer) {
     return true;
 }
 
-bool
+WaveProperties
 FileWave::readHeader() {
     little_endian::read<std::array<char, 4>>(*_stream, wavHeader.chunkID); // RIFF chunk
     little_endian::read<uint32_t>(*_stream, wavHeader.chunkSize); // RIFF chunk size in bytes
@@ -54,23 +54,22 @@ FileWave::readHeader() {
         little_endian::read<std::array<char, 4>>(*_stream, wavHeader.dataID);
     }
     if (wavHeader.dataID != dataID) {
-        return false;
+        // TODO: add result
+        return WaveProperties();
     }
     little_endian::read<uint32_t>(*_stream, wavHeader.dataSize);
 
     // TODO: set bits type depending on wavHeader.fmtAudioFormat
-    _streamWaveProperties = WaveProperties(
+    return WaveProperties(
       wavHeader.fmtNumChannels,
       wavHeader.fmtSampleRate,
       wavHeader.fmtBitsPerSample,
       wavHeader.fmtBitsPerSample,
       true);
-
-    return true;
 }
 
 bool
-FileWave::writeHeader() {
+FileWave::writeHeader(WaveProperties const& waveProperties) {
     little_endian::write<char[4]>(*_stream, { 'R', 'I', 'F', 'F' }); // RIFF chunk
     little_endian::write<uint32_t>(*_stream, 0); // RIFF chunk size in bytes
     little_endian::write<char[4]>(*_stream, { 'W', 'A', 'V', 'E' }); // file type
@@ -79,11 +78,11 @@ FileWave::writeHeader() {
     little_endian::write<uint32_t>(*_stream, 16); // size of fmt chunk 16 + extra format bytes
     little_endian::write<uint16_t>(*_stream, 3); // format (compression code)
 
-    little_endian::write<uint16_t>(*_stream, _streamWaveProperties.getChannelsCount());
-    little_endian::write<uint32_t>(*_stream, _streamWaveProperties.getSamplesPerSecond());
-    little_endian::write<uint32_t>(*_stream, _streamWaveProperties.getBytesPerSecond());
-    little_endian::write<uint16_t>(*_stream, _streamWaveProperties.getBlockAlign());
-    little_endian::write<uint16_t>(*_stream, _streamWaveProperties.getBitsPerSample());
+    little_endian::write<uint16_t>(*_stream, waveProperties.getChannelsCount());
+    little_endian::write<uint32_t>(*_stream, waveProperties.getSamplesPerSecond());
+    little_endian::write<uint32_t>(*_stream, waveProperties.getBytesPerSecond());
+    little_endian::write<uint16_t>(*_stream, waveProperties.getBlockAlign());
+    little_endian::write<uint16_t>(*_stream, waveProperties.getBitsPerSample());
 
     // Write the data chunk header
     posDataChunk = _stream->tellp();

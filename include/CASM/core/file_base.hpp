@@ -46,8 +46,8 @@ public:
     FileInterface() = default;
     ~FileInterface() override = default;
 
-    virtual bool readHeader() = 0;
-    virtual bool writeHeader() = 0;
+    virtual WaveProperties readHeader() = 0;
+    virtual bool writeHeader(WaveProperties const&) = 0;
     virtual bool finalize() = 0;
     virtual void setPath(std::string const& path) = 0;
 };

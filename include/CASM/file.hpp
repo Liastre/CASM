@@ -35,8 +35,8 @@ public:
     operator bool() const;
 
 private:
-    bool readHeader() final;
-    bool writeHeader() final;
+    WaveProperties readHeader() final;
+    bool writeHeader(WaveProperties const& waveProperties) final;
     bool finalize() final;
     void setPath(std::string const& path) final;
     bool _isExist() const;

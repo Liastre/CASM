@@ -33,8 +33,8 @@ public:
     // FileBase interface
     BufferStatus read(Buffer & buffer) final;
     bool write(Buffer const & buffer) final;
-    bool readHeader() final;
-    bool writeHeader() final;
+    WaveProperties readHeader() final;
+    bool writeHeader(WaveProperties const& waveProperties) final;
     bool finalize() final;
 
 private:

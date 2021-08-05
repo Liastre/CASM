@@ -64,14 +64,14 @@ File::write(Buffer const& buffer) {
     return _file->write(buffer);
 }
 
-bool
+WaveProperties
 File::readHeader() {
     return _file->readHeader();
 }
 
 bool
-File::writeHeader() {
-    return _file->writeHeader();
+File::writeHeader(WaveProperties const& waveProperties) {
+    return _file->writeHeader(waveProperties);
 }
 
 bool
