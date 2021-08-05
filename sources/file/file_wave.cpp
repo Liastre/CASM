@@ -4,6 +4,7 @@ namespace CASM {
 
 FileWave::FileWave(std::string& filePath)
     : FileBase(filePath) {
+    _isValid = { true };
 }
 
 FileWave::~FileWave() {

@@ -153,7 +153,7 @@ File::getName() const {
 }
 
 File::operator bool() const {
-    return _isExist();
+    return isValid();
 }
 
 bool

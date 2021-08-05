@@ -27,21 +27,21 @@ main() {
         std::cin >> deviceIndex;
         std::wcout << std::endl;
 
-        // init endpoints
+        // Init endpoints
         CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
         auto endPointProperties = endPoint.getDeviceWaveProperties();
-        std::wstringstream ss;
-        ss << endPoint.getDescription()
-           << '_' << endPointProperties.getSamplesPerSecond() << L"Hz"
-           << '_' << endPointProperties.getBitsPerSample() << L"bit"
-           << '_' << endPointProperties.getChannelsCount() << L"ch"
+        std::stringstream ss;
+        // TODO: fix char encoding
+        ss /*<< endPoint.getDescription()
+           << '_' */<< endPointProperties.getSamplesPerSecond() << "Hz"
+           << '_' << endPointProperties.getBitsPerSample() << "bit"
+           << '_' << endPointProperties.getChannelsCount() << "ch"
            << ".wav";
-        //250Hz_48000Hz_32bit_2ch_30sec.wav
-        CASM::File outputFile("endPointDevice.wav");
-        //if (!file) {
-        //    std::wcout << L"Unable to create file" << std::endl;
-        //    return 1;
-        //}
+        CASM::File outputFile(ss.str());
+        if (!outputFile) {
+            std::wcout << L"Unable to create file" << std::endl;
+            return 1;
+        }
 
 
 #if !CASM_MANUAL
