@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CASM/file.hpp>
 #include <CASM/core/end_point.hpp>
 
 namespace CASM {
@@ -31,44 +32,14 @@ read(std::fstream& stream, const T& data, uint32_t dataSize = 0) {
 // TODO: remake, switch bits?
 namespace big_endian {
 
-template <typename Word>
+template <typename T>
 std::ostream&
-write(std::ostream& outs, Word value, unsigned size = sizeof(Word)) {
+write(std::ostream& stream, T value, unsigned size = sizeof(T)) {
     for (; size; --size, value >>= 8)
-        outs.put(static_cast<char>(value & 0xFF));
-    return outs;
+        stream.put(static_cast<char>(value & 0xFF));
+    return stream;
 }
 
 } // namespace big_endian
-
-class FileInterface : public virtual EndPointInterface {
-public:
-    FileInterface() = default;
-    ~FileInterface() override = default;
-
-    virtual WaveProperties readHeader() = 0;
-    virtual bool writeHeader(WaveProperties const&) = 0;
-    virtual bool finalize() = 0;
-    virtual void setPath(std::string const& path) = 0;
-};
-
-class FileBase : public virtual FileInterface, public EndPointBase {
-public:
-    FileBase() = default;
-    FileBase(std::string const& filePath);
-    ~FileBase() override = default;
-
-    bool openCaptureStream(Duration const& bufferDuration, Buffer& buffer) final;
-    bool openRenderStream(Buffer const& buffer) final;
-    void closeCaptureStream() final;
-    void closeRenderStream() final;
-    bool isAvailable() const final;
-    void setPath(std::string const& path) final;
-
-protected:
-    // TODO: fix memory leak
-    std::fstream* _stream = new std::fstream();
-    std::string _path = "";
-};
 
 } // namespace CASM

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CASM/core/file_base.hpp>
+#include <CASM/file.hpp>
 
 
 namespace CASM {
@@ -23,17 +23,20 @@ typedef struct {
     uint32_t dataSize                   {0};
 } WavHeader;
 
-class FileWave : public FileBase {
+class FileWave : public FileInterface {
 public:
     FileWave() = default;
-    explicit FileWave(std::string &filePath);
-    ~FileWave() final;
+    explicit FileWave(std::string const& filePath);
 
-    // FileBase interface
-    BufferStatus read(Buffer & buffer) final;
-    bool write(Buffer const & buffer) final;
+    // FileInterface
+    bool open(Access access) final;
+    bool close() final;
+    bool isGood() const final;
+
     WaveProperties readHeader() final;
     bool writeHeader(WaveProperties const& waveProperties) final;
+    BufferStatus readData(Buffer& buffer) final;
+    bool writeData(Buffer const& buffer) final;
     bool finalize() final;
 
 private:
@@ -41,6 +44,10 @@ private:
     int64_t posDataChunk = 0;
     int64_t posFileLength = 0;
     bool finalized = false;
+
+    // TODO: fix memory leak
+    std::fstream* _stream = new std::fstream();
+    std::string _path = "";
 };
 
 }

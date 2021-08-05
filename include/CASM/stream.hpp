@@ -21,7 +21,7 @@ public:
           "TEndPointIn is not derived from EndPointInterface");
         static_assert(std::is_base_of<EndPointInterface, TEndPointOut>::value,
           "TEndPointOut is not derived from EndPointInterface");
-        static_assert(!(std::is_same<File, TEndPointIn>::value && std::is_same<File, TEndPointOut>::value),
+        static_assert(!(IsFile<TEndPointIn>::value && IsFile<TEndPointOut>::value),
           "You cannot create stream between File and File");
 
         _endPointIn = std::make_unique<TEndPointIn>(endPointIn);

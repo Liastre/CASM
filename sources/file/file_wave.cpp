@@ -2,25 +2,44 @@
 
 namespace CASM {
 
-FileWave::FileWave(std::string& filePath)
-    : FileBase(filePath) {
-    _isValid = { true };
+FileWave::FileWave(std::string const& filePath) {
+    _path = filePath;
 }
 
-FileWave::~FileWave() {
-    // TODO: check if fstream exist, or create base class
-    if (!finalized) {
-        closeRenderStream();
+bool
+FileWave::open(Access access) {
+    switch (access) {
+    case Access::WRITE:
+        _stream->open(_path, std::ios::out | std::ios::binary);
+        break;
+    case Access::READ:
+        _stream->open(_path, std::ios::in | std::ios::binary);
+        break;
+    default:
+        return false;
     }
+
+    return true;
+}
+
+bool
+FileWave::close() {
+    _stream->close();
+    return !_stream->good();
+}
+
+bool
+FileWave::isGood() const {
+    return _stream->good();
 }
 
 BufferStatus
-FileWave::read(Buffer& buffer) {
+FileWave::readData(Buffer& buffer) {
     return buffer.write(*_stream);
 }
 
 bool
-FileWave::write(Buffer const& buffer) {
+FileWave::writeData(Buffer const& buffer) {
     buffer.read(*_stream);
     return true;
 }
