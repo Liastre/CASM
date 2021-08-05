@@ -66,7 +66,27 @@ public:
 class EndPointBase : public virtual EndPointInterface {
 public:
     EndPointBase() = default;
-    ~EndPointBase() override = default;
+    EndPointBase(EndPointBase const& endpoint) {
+        this->operator=(endpoint);
+    }
+    EndPointBase(EndPointBase&& endpoint) noexcept {
+        this->operator=(std::move(endpoint));
+    }
+    EndPointBase& operator=(EndPointBase const& endpoint) {
+        _isValid = endpoint._isValid.load();
+        _active = endpoint._active.load();
+        _streamWaveProperties = endpoint._streamWaveProperties;
+        return *this;
+    }
+
+    EndPointBase& operator=(EndPointBase&& endpoint) noexcept {
+        _isValid = endpoint._isValid.load();
+        _active = endpoint._active.load();
+        _streamWaveProperties = std::move(endpoint._streamWaveProperties);
+        return *this;
+    }
+
+    virtual ~EndPointBase() = default;
 
     WaveProperties getStreamWaveProperties() const final {
         return _streamWaveProperties;
@@ -83,7 +103,7 @@ public:
 protected:
     std::atomic<bool> _isValid = { false };
     std::atomic<bool> _active = { false };
-    WaveProperties _streamWaveProperties = WaveProperties();
+    WaveProperties _streamWaveProperties = {};
 };
 
 } // namespace CASM
