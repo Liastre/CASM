@@ -1,4 +1,4 @@
-#include "file_wave.hpp"
+#include "CASM/file_type/file_wave.hpp"
 
 namespace CASM {
 

@@ -1,5 +1,5 @@
 #include "CASM/file.hpp"
-#include "file/file_wave.hpp"
+#include "CASM/file_type/file_wave.hpp"
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
