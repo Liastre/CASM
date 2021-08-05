@@ -2,12 +2,14 @@
 
 namespace CASM {
 
-FileWave::FileWave(std::string const& filePath) {
+namespace Codec {
+
+Wave::Wave(std::string const& filePath) {
     _path = filePath;
 }
 
 bool
-FileWave::open(Access access) {
+Wave::open(Access access) {
     switch (access) {
     case Access::WRITE:
         _stream->open(_path, std::ios::out | std::ios::binary);
@@ -23,29 +25,29 @@ FileWave::open(Access access) {
 }
 
 bool
-FileWave::close() {
+Wave::close() {
     _stream->close();
     return !_stream->good();
 }
 
 bool
-FileWave::isGood() const {
+Wave::isGood() const {
     return _stream->good();
 }
 
 BufferStatus
-FileWave::readData(Buffer& buffer) {
+Wave::readData(Buffer& buffer) {
     return buffer.write(*_stream);
 }
 
 bool
-FileWave::writeData(Buffer const& buffer) {
+Wave::writeData(Buffer const& buffer) {
     buffer.read(*_stream);
     return true;
 }
 
 WaveProperties
-FileWave::readHeader() {
+Wave::readHeader() {
     little_endian::read<std::array<char, 4>>(*_stream, wavHeader.chunkID); // RIFF chunk
     little_endian::read<uint32_t>(*_stream, wavHeader.chunkSize); // RIFF chunk size in bytes
     little_endian::read<std::array<char, 4>>(*_stream, wavHeader.chunkFormat); // file type
@@ -89,7 +91,7 @@ FileWave::readHeader() {
 }
 
 bool
-FileWave::writeHeader(WaveProperties const& waveProperties) {
+Wave::writeHeader(WaveProperties const& waveProperties) {
     little_endian::write<char[4]>(*_stream, { 'R', 'I', 'F', 'F' }); // RIFF chunk
     little_endian::write<uint32_t>(*_stream, 0); // RIFF chunk size in bytes
     little_endian::write<char[4]>(*_stream, { 'W', 'A', 'V', 'E' }); // file type
@@ -112,7 +114,7 @@ FileWave::writeHeader(WaveProperties const& waveProperties) {
 }
 
 bool
-FileWave::finalize() {
+Wave::finalize() {
     // (We'll need the final file size to fix the chunk sizes above)
     posFileLength = _stream->tellp();
 
@@ -128,5 +130,7 @@ FileWave::finalize() {
 
     return true;
 }
+
+} // namespace Codec
 
 } // namespace CASM

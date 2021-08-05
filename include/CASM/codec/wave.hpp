@@ -1,9 +1,11 @@
 #pragma once
 
-#include <CASM/file.hpp>
+#include <CASM/codec/codec_interface.hpp>
 
 
 namespace CASM {
+
+namespace Codec {
 
 typedef struct {
     std::array< char, 4 > chunkID       {'R','I','F','F'};  // chunk
@@ -23,10 +25,10 @@ typedef struct {
     uint32_t dataSize                   {0};
 } WavHeader;
 
-class FileWave : public FileInterface {
+class Wave : public CodecInterface {
 public:
-    FileWave() = default;
-    explicit FileWave(std::string const& filePath);
+    Wave() = default;
+    explicit Wave(std::string const& filePath);
 
     // FileInterface
     bool open(Access access) final;
@@ -47,7 +49,9 @@ private:
 
     // TODO: fix memory leak
     std::fstream* _stream = new std::fstream();
-    std::string _path = "";
+    std::string _path;
 };
 
-}
+} // namespace Codec
+
+} // namespace CASM
