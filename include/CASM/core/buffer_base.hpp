@@ -1,7 +1,8 @@
 /**
-    @copyright LGPLv3
-    @brief declaration of BufferStorage class
-**/
+ * Declaration of BufferStorage class
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

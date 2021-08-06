@@ -1,7 +1,8 @@
 /**
-    @copyright LGPLv3
-    @brief class WaveProperties for storing wave properties
-**/
+ * Class WaveProperties for storing wave properties
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

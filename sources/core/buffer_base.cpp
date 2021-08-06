@@ -1,8 +1,8 @@
 /**
-    @file buffer_base.cpp
-    @copyright LGPLv3
-    @brief definition for BufferStorage class
-**/
+ * Definition for BufferStorage class
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #include <CASM/core/buffer_base.hpp>
 #include <string>

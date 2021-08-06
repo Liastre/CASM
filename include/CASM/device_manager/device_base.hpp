@@ -1,8 +1,8 @@
 /**
-    @file device_base.hpp
-    @copyright LGPLv3
-    @brief declaration for DeviceInterface and DeviceBase classes
-**/
+ * Declaration for DeviceInterface and DeviceBase classes
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

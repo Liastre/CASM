@@ -1,8 +1,8 @@
 /**
-    @file device.cpp
-    @copyright LGPLv3
-    @brief definition of Device class
-**/
+ * Definition of Device class
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #include <CASM/device.hpp>
 #include "windows/device_windows_wasapi.hpp"

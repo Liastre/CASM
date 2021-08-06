@@ -1,4 +1,9 @@
-/// @brief class DeviceManager stores collection of devices
+/**
+ * DeviceManager for recieving and storing
+ * collection of system devices
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 
@@ -6,6 +11,7 @@
 
 namespace CASM {
 
+// TODO: rework for using different APIs
 class DeviceManager {
 public:
     DeviceManager();

@@ -1,7 +1,8 @@
 /**
-    @copyright LGPLv3
-    @brief declaration for EndPointInterface and EndPointBase classes
-**/
+ * Declaration for EndPointInterface and EndPointBase classes
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

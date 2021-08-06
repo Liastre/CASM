@@ -1,3 +1,9 @@
+/**
+ * PCM codec implementation
+ * @author Liastre
+ * @copyright MIT
+ */
+
 #pragma once
 
 #include <CASM/codec/codec.hpp>

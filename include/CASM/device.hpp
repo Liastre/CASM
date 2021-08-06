@@ -1,7 +1,7 @@
 /**
-    @file device.hpp
-    @copyright LGPLv3
-**/
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

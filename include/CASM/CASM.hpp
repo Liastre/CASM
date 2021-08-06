@@ -1,4 +1,8 @@
-/// @brief main header of library
+/**
+ * Main header of library
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

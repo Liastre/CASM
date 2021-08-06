@@ -1,6 +1,8 @@
 /**
-    @copyright LGPLv3
-**/
+ * Generic File endpoint implementation
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

@@ -1,4 +1,8 @@
-/// @brief OS configuration header
+/**
+ * OS configuration header
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

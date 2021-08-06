@@ -1,5 +1,7 @@
 /**
  * BufferStream class to storage stream data
+ * @author Liastre
+ * @copyright MIT
  */
 
 #pragma once
