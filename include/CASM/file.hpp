@@ -157,13 +157,7 @@ File<TCodec, TDataStream>::_formatPath(std::string& path) {
 template <class TCodec, class TDataStream>
 bool
 File<TCodec, TDataStream>::_parsePath(std::string const& path) {
-    // TODO: there might be no extension
     std::string::size_type extensionIndex = path.rfind('.');
-    if (extensionIndex == std::string::npos) {
-        // TODO: logger message no extension
-        return false;
-    }
-
     std::string::size_type destinationIndex = path.rfind(kSplitPathSymbol);
     if (destinationIndex != std::string::npos) {
         _destination = path.substr(0, destinationIndex);
