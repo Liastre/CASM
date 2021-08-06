@@ -1,6 +1,7 @@
 #include <CASM/CASM.hpp>
 #include <CASM/device_manager.hpp>
 #include <CASM/file.hpp>
+#include <CASM/codec/pcm.hpp>
 #include <CASM/stream.hpp>
 #include <iostream>
 #include <thread>
@@ -20,10 +21,10 @@ main() {
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
-            std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
+            std::wcout << i << ") " << deviceManager.getDevice(i).getDescription() << std::endl;
         }
         unsigned int deviceIndex;
-        std::wcout << L"Choose device index ...";
+        std::wcout << L"Choose device index: ";
         std::cin >> deviceIndex;
         std::wcout << std::endl;
 
@@ -37,7 +38,7 @@ main() {
            << '_' << endPointProperties.getBitsPerSample() << "bit"
            << '_' << endPointProperties.getChannelsCount() << "ch"
            << ".wav";
-        CASM::File outputFile(ss.str());
+        CASM::File<CASM::Codec::Pcm> outputFile(ss.str());
         if (!outputFile) {
             std::wcout << L"Unable to create file" << std::endl;
             return 1;

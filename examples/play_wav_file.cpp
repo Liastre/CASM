@@ -2,6 +2,7 @@
 #include <CASM/device_manager.hpp>
 #include <CASM/stream.hpp>
 #include <CASM/file.hpp>
+#include <CASM/codec/pcm.hpp>
 #include <iostream>
 #include <thread>
 #include <string>
@@ -22,12 +23,12 @@ main(int argc, char** argv) {
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
             auto deviceName = deviceManager.getDevice(i).getDescription();
-            std::wcout << i << ": " << deviceName << std::endl;
+            std::wcout << i << ") " << deviceName << std::endl;
         }
 
         // get device index
         std::size_t deviceIndex;
-        std::wcout << L"Choose device index ...";
+        std::wcout << L"Choose device index: ";
         std::wcin >> deviceIndex;
         std::wcout << std::endl;
 
@@ -45,7 +46,7 @@ main(int argc, char** argv) {
                        << std::endl;
         }
 
-        CASM::File inputFile("D:\\Development\\projects\\Application_CrossplatformAudioStreamManager\\data\\250Hz_48000Hz_32bit_2ch_30sec.wav");
+        CASM::File<CASM::Codec::Pcm> inputFile("D:\\Development\\projects\\Application_CrossplatformAudioStreamManager\\data\\250Hz_48000Hz_32bit_2ch_30sec.wav");
         if (!inputFile) {
             std::wcout << L"Input file is not valid!" << std::endl;
             return 0;
