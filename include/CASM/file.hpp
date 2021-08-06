@@ -18,7 +18,7 @@ namespace CASM {
  * File wrapper, wraps existing or
  * user defined File type class
  */
-template <class TFileType>
+template <class TCodec, class TDataStream = DataStream::Fstream>
 class File final : public EndPointBase {
 public:
     File() = default;
@@ -55,8 +55,8 @@ private:
     char kSplitPathSymbol = '/';
 };
 
-template <class TFileType>
-File<TFileType>::File(std::string const& path, bool doCreateNewFileOnWrite) {
+template <class TCodec, class TDataStream>
+File<TCodec, TDataStream>::File(std::string const& path, bool doCreateNewFileOnWrite) {
     _doCreateNewFileOnWrite = doCreateNewFileOnWrite;
     std::string resPath(path);
     _formatPath(resPath);
@@ -66,20 +66,20 @@ File<TFileType>::File(std::string const& path, bool doCreateNewFileOnWrite) {
     _isValid = { true };
 };
 
-template <class TFileType>
-File<TFileType>::~File() {
+template <class TCodec, class TDataStream>
+File<TCodec, TDataStream>::~File() {
     _codec.reset();
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool // TODO: redo with result
-File<TFileType>::openCaptureStream(Duration const& bufferDuration, Buffer& buffer) {
+File<TCodec, TDataStream>::openCaptureStream(Duration const& bufferDuration, Buffer& buffer) {
     if (!_isExist()) {
         return false;
     }
 
-    _codec = std::make_shared<TFileType>();
-    _file = std::make_shared<DataStream::Fstream>(_path);
+    _codec = std::make_shared<TCodec>();
+    _file = std::make_shared<TDataStream>(_path);
     _file->open(Access::READ);
     _streamWaveProperties = _codec->readHeader(*_file);
     buffer = Buffer(_streamWaveProperties, bufferDuration);
@@ -87,15 +87,15 @@ File<TFileType>::openCaptureStream(Duration const& bufferDuration, Buffer& buffe
     return true;
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool
-File<TFileType>::openRenderStream(Buffer const& buffer) {
+File<TCodec, TDataStream>::openRenderStream(Buffer const& buffer) {
     if (_isExist() && _doCreateNewFileOnWrite) {
         _generateName();
     }
 
-    _codec = std::make_shared<TFileType>();
-    _file = std::make_shared<DataStream::Fstream>(_path);
+    _codec = std::make_shared<TCodec>();
+    _file = std::make_shared<TDataStream>(_path);
     if (!_file->open(Access::WRITE)) {
         return false;
     }
@@ -104,59 +104,59 @@ File<TFileType>::openRenderStream(Buffer const& buffer) {
     return _codec->writeHeader(*_file, _streamWaveProperties);
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 void
-File<TFileType>::closeRenderStream() {
+File<TCodec, TDataStream>::closeRenderStream() {
     _codec->finalize(*_file);
     _file->close();
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 void
-File<TFileType>::closeCaptureStream() {
+File<TCodec, TDataStream>::closeCaptureStream() {
     _file->close();
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 BufferStatus
-File<TFileType>::read(Buffer& buffer) {
+File<TCodec, TDataStream>::read(Buffer& buffer) {
     return _codec->readData(*_file, buffer);
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool
-File<TFileType>::write(Buffer const& buffer) {
+File<TCodec, TDataStream>::write(Buffer const& buffer) {
     return _codec->writeData(*_file, buffer);
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 std::string
-File<TFileType>::getName() const {
+File<TCodec, TDataStream>::getName() const {
     return _name;
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool
-File<TFileType>::isAvailable() const {
+File<TCodec, TDataStream>::isAvailable() const {
     return _isExist();
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool
-File<TFileType>::_isExist() const {
+File<TCodec, TDataStream>::_isExist() const {
     std::ifstream file(_path);
     return file.good();
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 void
-File<TFileType>::_formatPath(std::string& path) {
+File<TCodec, TDataStream>::_formatPath(std::string& path) {
     std::replace(path.begin(), path.end(), '\\', kSplitPathSymbol);
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 bool
-File<TFileType>::_parsePath(std::string const& path) {
+File<TCodec, TDataStream>::_parsePath(std::string const& path) {
     // TODO: there might be no extension
     std::string::size_type extensionIndex = path.rfind('.');
     if (extensionIndex == std::string::npos) {
@@ -179,9 +179,9 @@ File<TFileType>::_parsePath(std::string const& path) {
     return true;
 }
 
-template <class TFileType>
+template <class TCodec, class TDataStream>
 void
-File<TFileType>::_generateName() {
+File<TCodec, TDataStream>::_generateName() {
     std::string tmpName;
     uint32_t i(0);
     while (_isExist()) {
@@ -194,8 +194,8 @@ File<TFileType>::_generateName() {
     _name = tmpName;
 }
 
-template <class TFileType>
-File<TFileType>::operator bool() const {
+template <class TCodec, class TDataStream>
+File<TCodec, TDataStream>::operator bool() const {
     return isValid();
 }
 
