@@ -7,7 +7,7 @@
 #include <CASM/CASM.hpp>
 #include <CASM/core/file_base.hpp>
 #include <CASM/core/buffer.hpp>
-#include <CASM/codec/codec_interface.hpp>
+#include <CASM/codec/codec.hpp>
 #include <CASM/data_stream/fstream.hpp>
 #include <string>
 #include <fstream>

@@ -1,23 +1,22 @@
-#include "CASM/codec/wave.hpp"
-#include "CASM/utility/io.hpp"
+#include "CASM/codec/pcm.hpp"
 
 namespace CASM {
 
 namespace Codec {
 
 BufferStatus
-Wave::readData(DataStream& dataStream, Buffer& buffer) {
+Pcm::readData(DataStream& dataStream, Buffer& buffer) {
     return buffer.write(dataStream);
 }
 
 bool
-Wave::writeData(DataStream& dataStream, Buffer const& buffer) {
+Pcm::writeData(DataStream& dataStream, Buffer const& buffer) {
     buffer.read(dataStream);
     return true;
 }
 
 WaveProperties
-Wave::readHeader(DataStream& dataStream) {
+Pcm::readHeader(DataStream& dataStream) {
     dataStream.read<std::array<char, 4>>(wavHeader.chunkID);
     dataStream.read<std::uint32_t>(wavHeader.chunkSize);
     dataStream.read<std::array<char, 4>>(wavHeader.chunkFormat);
@@ -59,7 +58,7 @@ Wave::readHeader(DataStream& dataStream) {
 }
 
 bool
-Wave::writeHeader(DataStream& dataStream, WaveProperties const& waveProperties) {
+Pcm::writeHeader(DataStream& dataStream, WaveProperties const& waveProperties) {
     dataStream.write<char[4]>({ 'R', 'I', 'F', 'F' });
     dataStream.write<std::uint32_t>(0);
     dataStream.write<char[4]>({ 'W', 'A', 'V', 'E' });
@@ -81,7 +80,7 @@ Wave::writeHeader(DataStream& dataStream, WaveProperties const& waveProperties) 
 }
 
 bool
-Wave::finalize(DataStream& dataStream) {
+Pcm::finalize(DataStream& dataStream) {
     // We'll need the final file size to fix the chunk sizes above
     _posFileLength = dataStream.tellPos();
 

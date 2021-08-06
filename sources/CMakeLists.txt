@@ -16,7 +16,7 @@ file(GLOB casm_sources
     file.cpp
     core/*.cpp
     stream.cpp
-    codec/wave.cpp
+    codec/pcm.cpp
     file/file_base.cpp
     data_stream/fstream.cpp
     device_manager/device.cpp

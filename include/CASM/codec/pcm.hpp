@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CASM/codec/codec_interface.hpp>
+#include <CASM/codec/codec.hpp>
 #include <array>
 
 
@@ -16,7 +16,7 @@ using WavHeader = struct {
     std::uint32_t fmtSize           {0};                // size of fmt chunk 16 + extra format bytes
     std::uint16_t fmtAudioFormat    {0};                // format (compression code)
     std::uint16_t fmtNumChannels    {0};
-    std::uint32_t fmtSampleRat      {0};
+    std::uint32_t fmtSampleRate     {0};
     std::uint32_t fmtByteRate       {0};
     std::uint16_t fmtBlockAlign     {0};
     std::uint16_t fmtBitsPerSample  {0};
@@ -26,7 +26,7 @@ using WavHeader = struct {
     std::uint32_t dataSize          {0};
 };
 
-class Wave : public CodecInterface {
+class Pcm : public CodecInterface {
 public:
     WaveProperties readHeader(DataStream& fileHandler) final;
     bool writeHeader(DataStream& fileHandler, WaveProperties const& waveProperties) final;
