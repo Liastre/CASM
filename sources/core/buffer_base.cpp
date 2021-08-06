@@ -19,7 +19,6 @@ BufferStorage::BufferStorage(std::size_t size)
     _buffer = ByteBuffer(size);
 }
 
-// TODO: const fstream?
 void
 BufferStorage::read(DataStream::DataStreamInterface& dataStream) const {
     Byte byte;

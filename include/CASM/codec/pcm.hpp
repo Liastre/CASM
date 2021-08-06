@@ -35,10 +35,10 @@ public:
     bool finalize(DataStream& fileHandler) final;
 
 private:
-    WavHeader wavHeader;
+    WavHeader _wavHeader;
     std::size_t _posDataChunk = 0;
     std::size_t _posFileLength = 0;
-    bool finalized = false;
+    bool _isFinalized = false;
 };
 
 } // namespace Codec

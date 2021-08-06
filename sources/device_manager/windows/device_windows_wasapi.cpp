@@ -364,10 +364,6 @@ DeviceWindowsWASAPI::read(Buffer& buffer) {
     BYTE* pData;
     std::vector<uint8_t> arr;
 
-    // Each loop fills about half of the shared buffer.
-    //std::this_thread::sleep_for(buffer.getDuration());
-    //hrs = WaitForSingleObject(hEvent, INFINITE);
-
     hr = _captureClient->GetNextPacketSize(&packetLength);
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->GetNextPacketSize(). Error code: " + WinUtils::HRESULTtoString(hr));

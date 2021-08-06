@@ -17,43 +17,43 @@ Pcm::writeData(DataStream& dataStream, Buffer const& buffer) {
 
 WaveProperties
 Pcm::readHeader(DataStream& dataStream) {
-    dataStream.read<std::array<char, 4>>(wavHeader.chunkID);
-    dataStream.read<std::uint32_t>(wavHeader.chunkSize);
-    dataStream.read<std::array<char, 4>>(wavHeader.chunkFormat);
-    dataStream.read<std::array<char, 4>>(wavHeader.fmtID);
-    dataStream.read<std::uint32_t>(wavHeader.fmtSize);
-    dataStream.read<std::uint16_t>(wavHeader.fmtAudioFormat);
-    dataStream.read<std::uint16_t>(wavHeader.fmtNumChannels);
-    dataStream.read<std::uint32_t>(wavHeader.fmtSampleRate);
-    dataStream.read<std::uint32_t>(wavHeader.fmtByteRate);
-    dataStream.read<std::uint16_t>(wavHeader.fmtBlockAlign);
-    dataStream.read<std::uint16_t>(wavHeader.fmtBitsPerSample);
+    dataStream.read<std::array<char, 4>>(_wavHeader.chunkID);
+    dataStream.read<std::uint32_t>(_wavHeader.chunkSize);
+    dataStream.read<std::array<char, 4>>(_wavHeader.chunkFormat);
+    dataStream.read<std::array<char, 4>>(_wavHeader.fmtID);
+    dataStream.read<std::uint32_t>(_wavHeader.fmtSize);
+    dataStream.read<std::uint16_t>(_wavHeader.fmtAudioFormat);
+    dataStream.read<std::uint16_t>(_wavHeader.fmtNumChannels);
+    dataStream.read<std::uint32_t>(_wavHeader.fmtSampleRate);
+    dataStream.read<std::uint32_t>(_wavHeader.fmtByteRate);
+    dataStream.read<std::uint16_t>(_wavHeader.fmtBlockAlign);
+    dataStream.read<std::uint16_t>(_wavHeader.fmtBitsPerSample);
 
     _posDataChunk = dataStream.tellPos();
-    dataStream.read<std::array<char, 4>>(wavHeader.dataID);
+    dataStream.read<std::array<char, 4>>(_wavHeader.dataID);
     std::array<char, 4> dataID = { 'd', 'a', 't', 'a' };
-    if (wavHeader.dataID != dataID) {
+    if (_wavHeader.dataID != dataID) {
         dataStream.seekPos(_posDataChunk);
-        dataStream.read<uint16_t>(wavHeader.fmtExtraParamSize);
-        if (wavHeader.fmtExtraParamSize > 0) {
+        dataStream.read<uint16_t>(_wavHeader.fmtExtraParamSize);
+        if (_wavHeader.fmtExtraParamSize > 0) {
             // TODO: fix memory leak
-            wavHeader.fmtExtraParams = new char(wavHeader.fmtExtraParamSize);
-            dataStream.read<char*>(wavHeader.fmtExtraParams, wavHeader.fmtExtraParamSize);
+            _wavHeader.fmtExtraParams = new char(_wavHeader.fmtExtraParamSize);
+            dataStream.read<char*>(_wavHeader.fmtExtraParams, _wavHeader.fmtExtraParamSize);
         }
-        dataStream.read<std::array<char, 4>>(wavHeader.dataID);
+        dataStream.read<std::array<char, 4>>(_wavHeader.dataID);
     }
-    if (wavHeader.dataID != dataID) {
+    if (_wavHeader.dataID != dataID) {
         // TODO: add result
         return WaveProperties();
     }
-    dataStream.read<uint32_t>(wavHeader.dataSize);
+    dataStream.read<uint32_t>(_wavHeader.dataSize);
 
-    // TODO: set bits type depending on wavHeader.fmtAudioFormat
+    // TODO: set bits type depending on _wavHeader.fmtAudioFormat
     return WaveProperties(
-      wavHeader.fmtNumChannels,
-      wavHeader.fmtSampleRate,
-      wavHeader.fmtBitsPerSample,
-      wavHeader.fmtBitsPerSample,
+      _wavHeader.fmtNumChannels,
+      _wavHeader.fmtSampleRate,
+      _wavHeader.fmtBitsPerSample,
+      _wavHeader.fmtBitsPerSample,
       true);
 }
 
@@ -83,16 +83,13 @@ bool
 Pcm::finalize(DataStream& dataStream) {
     // We'll need the final file size to fix the chunk sizes above
     _posFileLength = dataStream.tellPos();
-
     // Fix the data chunk header to contain the data size
     dataStream.seekPos(_posDataChunk + 4);
     dataStream.write<uint32_t>((uint32_t)(_posFileLength - _posDataChunk + 8));
-
     // Fix the file header to contain the proper RIFF chunk size, which is (file size - 8) bytes
     dataStream.seekPos(0 + 4);
     dataStream.write<uint32_t>((uint32_t)(_posFileLength - 8));
-
-    finalized = true;
+    _isFinalized = true;
 
     return true;
 }

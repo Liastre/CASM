@@ -47,14 +47,20 @@ Device::~Device() {
 
 
 bool Device::openCaptureStream(Duration const & duration, Buffer & buffer) {
-    //if (_device->isInUsage()) throw std::logic_error("Device already in use");
+    // TODO: check exclusive mode
+    if (_device->isInUsage()) {
+        throw std::logic_error("Device in exclusive use");
+    }
 
     return _device->openCaptureStream(duration, buffer);
 }
 
 
 bool Device::openRenderStream(Buffer const & buffer) {
-    if (_device->isInUsage()) throw std::logic_error("Device already in use");
+    // TODO: check exclusive mode
+    if (_device->isInUsage()) {
+        throw std::logic_error("Device in exclusive use");
+    }
 
     return _device->openRenderStream(buffer);
 }
