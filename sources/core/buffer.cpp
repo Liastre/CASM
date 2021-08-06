@@ -50,8 +50,8 @@ Buffer::getWaveProperties() const {
 }
 
 void
-Buffer::read(std::fstream& stream) const {
-    _storage->read(stream);
+Buffer::read(DataStream::DataStreamInterface& dataStream) const {
+    _storage->read(dataStream);
 }
 
 void
@@ -60,8 +60,8 @@ Buffer::read(void* arrayPtr, uint32_t sizeInBytes) const {
 }
 
 BufferStatus
-Buffer::write(std::fstream& stream) {
-    return _storage->write(stream);
+Buffer::write(DataStream::DataStreamInterface& dataStream) {
+    return _storage->write(dataStream);
 }
 
 void

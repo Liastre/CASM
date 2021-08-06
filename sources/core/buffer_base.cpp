@@ -21,11 +21,11 @@ BufferStorage::BufferStorage(std::size_t size)
 
 // TODO: const fstream?
 void
-BufferStorage::read(std::fstream& stream) const {
+BufferStorage::read(DataStream::DataStreamInterface& dataStream) const {
     Byte byte;
 
     while (_buffer.pop(byte)) {
-        stream.write(reinterpret_cast<const char*>(&byte), 1);
+        dataStream.write(reinterpret_cast<const char*>(&byte), 1);
     }
 }
 
@@ -38,15 +38,15 @@ BufferStorage::read(void* arrayPtr, const std::size_t sizeInBytes) const {
 }
 
 BufferStatus
-BufferStorage::write(std::fstream& stream) {
+BufferStorage::write(DataStream::DataStreamInterface& dataStream) {
     Byte byte;
     while (true) {
-        if (stream.eof())
+        if (dataStream.isEof())
             return BufferStatus::DataEmpty;
         if (_buffer.full())
             return BufferStatus::BufferFilled;
 
-        stream.read(reinterpret_cast<char*>(&byte), 1);
+        dataStream.read(reinterpret_cast<char*>(&byte), 1);
         _buffer.push(byte);
     }
 }

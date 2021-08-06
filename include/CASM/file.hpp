@@ -7,7 +7,8 @@
 #include <CASM/CASM.hpp>
 #include <CASM/core/file_base.hpp>
 #include <CASM/core/buffer.hpp>
-
+#include <CASM/codec/codec_interface.hpp>
+#include <CASM/data_stream/fstream.hpp>
 #include <string>
 #include <fstream>
 
@@ -48,7 +49,8 @@ private:
     std::string _name;
     std::string _extension;
     bool _doCreateNewFileOnWrite = false;
-    std::shared_ptr<FileInterface> _file;
+    std::shared_ptr<Codec::CodecInterface> _codec;
+    std::shared_ptr<DataStream::DataStreamInterface> _file;
     // TODO: replace with library
     char kSplitPathSymbol = '/';
 };
@@ -66,7 +68,7 @@ File<TFileType>::File(std::string const& path, bool doCreateNewFileOnWrite) {
 
 template <class TFileType>
 File<TFileType>::~File() {
-    _file.reset();
+    _codec.reset();
 }
 
 template <class TFileType>
@@ -76,9 +78,10 @@ File<TFileType>::openCaptureStream(Duration const& bufferDuration, Buffer& buffe
         return false;
     }
 
-    _file = std::make_shared<TFileType>(_path);
+    _codec = std::make_shared<TFileType>();
+    _file = std::make_shared<DataStream::Fstream>(_path);
     _file->open(Access::READ);
-    _streamWaveProperties = _file->readHeader();
+    _streamWaveProperties = _codec->readHeader(*_file);
     buffer = Buffer(_streamWaveProperties, bufferDuration);
     // TODO: add readHeader check
     return true;
@@ -91,19 +94,20 @@ File<TFileType>::openRenderStream(Buffer const& buffer) {
         _generateName();
     }
 
-    _file = std::make_shared<TFileType>(_path);
+    _codec = std::make_shared<TFileType>();
+    _file = std::make_shared<DataStream::Fstream>(_path);
     if (!_file->open(Access::WRITE)) {
         return false;
     }
 
     _streamWaveProperties = buffer.getWaveProperties();
-    return _file->writeHeader(_streamWaveProperties);
+    return _codec->writeHeader(*_file, _streamWaveProperties);
 }
 
 template <class TFileType>
 void
 File<TFileType>::closeRenderStream() {
-    _file->finalize();
+    _codec->finalize(*_file);
     _file->close();
 }
 
@@ -116,13 +120,13 @@ File<TFileType>::closeCaptureStream() {
 template <class TFileType>
 BufferStatus
 File<TFileType>::read(Buffer& buffer) {
-    return _file->readData(buffer);
+    return _codec->readData(*_file, buffer);
 }
 
 template <class TFileType>
 bool
 File<TFileType>::write(Buffer const& buffer) {
-    return _file->writeData(buffer);
+    return _codec->writeData(*_file, buffer);
 }
 
 template <class TFileType>

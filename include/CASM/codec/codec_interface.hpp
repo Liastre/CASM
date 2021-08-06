@@ -1,4 +1,7 @@
+#pragma once
+
 #include <CASM/core/Buffer.hpp>
+#include <CASM/data_stream/data_stream.hpp>
 
 namespace CASM {
 
@@ -6,16 +9,16 @@ namespace Codec {
 
 class CodecInterface {
 public:
+    using DataStream = DataStream::DataStreamInterface;
+
+public:
     virtual ~CodecInterface() = default;
 
-    virtual bool open(Access access) = 0;
-    virtual bool close() = 0;
-    virtual WaveProperties readHeader() = 0;
-    virtual bool writeHeader(WaveProperties const& waveProperties) = 0;
-    virtual BufferStatus readData(Buffer& buffer) = 0;
-    virtual bool writeData(Buffer const& buffer) = 0;
-    virtual bool finalize() = 0;
-    virtual bool isGood() const = 0;
+    virtual WaveProperties readHeader(DataStream&) = 0;
+    virtual bool writeHeader(DataStream&, WaveProperties const&) = 0;
+    virtual BufferStatus readData(DataStream&, Buffer&) = 0;
+    virtual bool writeData(DataStream&, Buffer const&) = 0;
+    virtual bool finalize(DataStream&) = 0;
 };
 
 } // namespace Codec

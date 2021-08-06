@@ -30,9 +30,9 @@ public:
     std::size_t getSize() const;
     std::chrono::duration<double> getDuration() const;
 
-    void read(std::fstream& stream) const;
+    void read(DataStream::DataStreamInterface& dataStream) const;
     void read(void* arrayPtr, uint32_t sizeInBytes) const;
-    BufferStatus write(std::fstream& stream);
+    BufferStatus write(DataStream::DataStreamInterface& dataStream);
 
     /// @brief writes data from input buffer to current
     /// @param [in] data - copying from
