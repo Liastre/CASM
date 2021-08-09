@@ -12,7 +12,7 @@
 namespace CASM {
 
 // TODO: rework for using different APIs
-class DeviceManager {
+class DeviceManager final {
 public:
     DeviceManager();
     ~DeviceManager();
@@ -22,7 +22,7 @@ public:
     Device& getDevice(std::size_t index);
 
 private:
-    std::shared_ptr<DeviceManagerBase> deviceManager;
+    std::unique_ptr<DeviceManagerBase> deviceManager;
 };
 
 } // namespace CASM

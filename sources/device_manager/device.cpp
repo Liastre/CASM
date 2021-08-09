@@ -87,13 +87,14 @@ bool Device::write(Buffer const & buffer) {
     return true;
 }
 
-
+// TODO: delete
 WaveProperties Device::getDeviceWaveProperties() {
     return _device->getDeviceWaveProperties();
 }
 
-
+// TODO: rename to getWaveProperties
 WaveProperties Device::getStreamWaveProperties() const {
+    // TODO: use inbuilt getStreamWaveProperties
     return _device->getStreamWaveProperties();
 }
 
@@ -101,7 +102,6 @@ String
 Device::getDescription() {
     return _device->getDescription();
 }
-
 
 bool Device::isAvailable() const {
     return true;

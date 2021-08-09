@@ -45,7 +45,7 @@ protected:
     /// @brief actual device wave properties
     WaveProperties _deviceWaveProperties;
     CASM::DeviceType _type;
-    uint32_t _bufferFramesCount;
+    std::uint32_t _bufferFramesCount;
     std::chrono::duration<double> _bufferDuration;
 };
 

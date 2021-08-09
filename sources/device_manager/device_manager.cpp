@@ -1,10 +1,10 @@
-#include <CASM/device_manager.hpp>
+#include "CASM/device_manager.hpp"
 #include "windows/device_manager_windows_wasapi.hpp"
 
 namespace CASM {
 
 DeviceManager::DeviceManager() {
-    deviceManager = std::make_shared<DeviceManagerWindowsWASAPI>();
+    deviceManager = std::make_unique<DeviceManagerWindowsWASAPI>();
 }
 
 DeviceManager::~DeviceManager() {
