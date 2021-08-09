@@ -146,7 +146,7 @@ File<TCodec, TDataStream>::isAvailable() const {
 template <class TCodec, class TDataStream>
 bool
 File<TCodec, TDataStream>::_isExist() const {
-    std::ifstream file(_path);
+    std::ifstream file(Util::String::utf8ToWide(_path));
     return file.good();
 }
 

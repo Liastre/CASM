@@ -59,14 +59,18 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
         throw std::runtime_error("Unable to handler->OpenPropertyStore(). Error code: " + WinUtils::HRESULTtoString(hr));
 
     // retrieve device name
-    propertyStore->GetValue(PKEY_Device_DeviceDesc, &devicePROPVARIANT);
-    _name = devicePROPVARIANT.pwszVal;
+    hr = propertyStore->GetValue(PKEY_Device_DeviceDesc, &devicePROPVARIANT);
+    if (hr != S_OK) {
+        throw std::runtime_error("Unable to propertyStore->GetValue(PKEY_Device_DeviceDesc). Error code: " + WinUtils::HRESULTtoString(hr));
+    }
+    _name = Util::String::wideToUtf8(devicePROPVARIANT.pwszVal);
 
     // retrieve device description
     hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &devicePROPVARIANT);
-    if (hr != S_OK)
+    if (hr != S_OK) {
         throw std::runtime_error("Unable to propertyStore->GetValue(PKEY_Device_FriendlyName). Error code: " + WinUtils::HRESULTtoString(hr));
-    _description = devicePROPVARIANT.pwszVal;
+    }
+    _description = Util::String::wideToUtf8(devicePROPVARIANT.pwszVal);
 
     // device id
     hr = _handler->GetId(&deviceId);

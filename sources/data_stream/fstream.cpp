@@ -1,4 +1,5 @@
 #include "CASM/data_stream/fstream.hpp"
+#include "CASM/utility/windows_utilities.hpp"
 
 namespace CASM {
 
@@ -11,12 +12,13 @@ Fstream::Fstream(std::string const& filePath) {
 bool
 Fstream::open(Access access) {
     _access = access;
+    auto path = Util::String::utf8ToWide(_path);
     switch (access) {
     case Access::WRITE:
-        _stream.open(_path, std::ios::out | std::ios::binary);
+        _stream.open(path, std::ios::out | std::ios::binary);
         break;
     case Access::READ:
-        _stream.open(_path, std::ios::in | std::ios::binary);
+        _stream.open(path, std::ios::in | std::ios::binary);
         break;
     default:
         return false;
