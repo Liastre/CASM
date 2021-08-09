@@ -9,8 +9,8 @@
 
 #include <mmdeviceapi.h>
 #include <audioclient.h>
+#include "CASM/utility/windows_utilities.hpp"
 #include "functiondiscoverykeys_devpkey.h"
-#include "windows_utilities.hpp"
 
 
 #endif //CASM_WINDOWS_WASAPI_HPP
