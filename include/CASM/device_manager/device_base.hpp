@@ -20,7 +20,7 @@ public:
     ~DeviceInterface() override = default;
 
     virtual WaveProperties getDeviceWaveProperties() = 0;
-    virtual std::wstring getDescription() = 0;
+    virtual String getDescription() = 0;
 };
 
 // TODO: add << overload with description
@@ -36,12 +36,12 @@ public:
 
     // getters
     WaveProperties getDeviceWaveProperties() final;
-    std::wstring getDescription() final;
+    String getDescription() final;
 
 protected:
     TDeviceHandler* _handler;
-    std::wstring _name;
-    std::wstring _description;
+    String _name;
+    String _description;
     /// @brief actual device wave properties
     WaveProperties _deviceWaveProperties;
     CASM::DeviceType _type;

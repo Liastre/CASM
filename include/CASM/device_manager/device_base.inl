@@ -4,8 +4,6 @@ template <class TDeviceHandler>
 DeviceBase<TDeviceHandler>::DeviceBase() {
     _bufferDuration = std::chrono::duration<double>::zero();
     _handler = nullptr;
-    _name = L"";
-    _description = L"";
 }
 
 template <class TDeviceHandler>
@@ -26,7 +24,7 @@ DeviceBase<TDeviceHandler>::getDeviceWaveProperties() {
 }
 
 template <class TDeviceHandler>
-std::wstring
+String
 DeviceBase<TDeviceHandler>::getDescription() {
     return _description;
 }

@@ -97,8 +97,8 @@ WaveProperties Device::getStreamWaveProperties() const {
     return _device->getStreamWaveProperties();
 }
 
-
-std::wstring Device::getDescription() {
+String
+Device::getDescription() {
     return _device->getDescription();
 }
 

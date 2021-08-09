@@ -8,8 +8,8 @@
 
 #include "CASMconfig.hpp"
 #include <cstdint>
-#include <array>
 #include <chrono>
+#include <string>
 
 namespace CASM {
 
@@ -27,6 +27,7 @@ enum class DeviceType {
 };
 
 // Base typedefs
-typedef std::chrono::duration<double> Duration;
+using Duration = std::chrono::duration<double>;
+using String = std::string;
 
 } // end of namespace CASM

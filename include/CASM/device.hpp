@@ -39,7 +39,7 @@ public:
 
     WaveProperties getDeviceWaveProperties() final;
     WaveProperties getStreamWaveProperties() const final;
-    std::wstring getDescription() final;
+    String getDescription() final;
 
     operator bool() const;
 
