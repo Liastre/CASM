@@ -3,47 +3,42 @@
 #include <CASM/file.hpp>
 #include <CASM/codec/pcm.hpp>
 #include <CASM/stream.hpp>
+#include <windows.h>
 #include <iostream>
-#include <thread>
-#include <io.h>
-#include <fcntl.h>
 
 #define CASM_MANUAL 0
 
 int
 main() {
+    SetConsoleOutputCP(65001);
     try {
-        // TODO temp solution for cmd
-        _setmode(_fileno(stdout), _O_U16TEXT);
-
         // Choose device
         CASM::DeviceManager deviceManager;
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
-            std::wcout << i << ") " << deviceManager.getDevice(i).getDescription() << std::endl;
+            std::cout << i << ") " << deviceManager.getDevice(i).getDescription() << std::endl;
         }
-        unsigned int deviceIndex;
-        std::wcout << L"Choose device index: ";
+        std::size_t deviceIndex(0);
+        std::cout << "Choose device index: ";
         std::cin >> deviceIndex;
-        std::wcout << std::endl;
+        std::cout << std::endl;
 
         // Init endpoints
         CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
         auto endPointProperties = endPoint.getDeviceWaveProperties();
         std::stringstream ss;
-        // TODO: fix char encoding
-        ss /*<< endPoint.getDescription()
-           << '_' */<< endPointProperties.getSamplesPerSecond() << "Hz"
+        ss << endPoint.getDescription()
+           << '_' << endPointProperties.getSamplesPerSecond() << "Hz"
            << '_' << endPointProperties.getBitsPerSample() << "bit"
            << '_' << endPointProperties.getChannelsCount() << "ch"
            << ".wav";
+        auto str = ss.str();
         CASM::File<CASM::Codec::Pcm> outputFile(ss.str());
         if (!outputFile) {
-            std::wcout << L"Unable to create file" << std::endl;
+            std::cout << "Unable to create file" << std::endl;
             return 1;
         }
-
 
 #if !CASM_MANUAL
         CASM::Stream streamToFile(endPoint, outputFile, std::chrono::milliseconds{ 500 });
@@ -68,7 +63,7 @@ main() {
         endPoint.closeCaptureStream();
 #endif
     } catch (std::exception& e) {
-        std::wcout << e.what();
+        std::cout << e.what();
     }
 
     return 0;
