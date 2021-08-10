@@ -1,5 +1,6 @@
-/// @file device_manager_windows_wasapi.hpp
-/// @brief class DeviceManagerWindowsWASAPI derived from DeviceManagerBase
+/**
+ * DeviceManager WASAPI implementation
+ */
 
 #pragma once
 
