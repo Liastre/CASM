@@ -18,6 +18,13 @@ std::wstring utf8ToWide(std::string const& narrowString);
 
 } // namespace String
 
+namespace Filesystem {
+
+bool isExist(char const* narrowPath);
+bool isExist(std::string const& narrowPath);
+
+} // namespace Filesystem
+
 } // namespace Util
 
 class WinUtils {

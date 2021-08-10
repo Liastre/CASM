@@ -1,6 +1,7 @@
 #include "CASM/utility/windows_utilities.hpp"
 #include <windows.h>
 #include <sstream>
+#include <fstream>
 
 namespace CASM {
 
@@ -37,6 +38,17 @@ String::utf8ToWide(char const* narrowString, std::size_t size) {
 std::wstring
 String::utf8ToWide(std::string const& narrowString) {
     return utf8ToWide(narrowString.c_str(), narrowString.size());
+}
+
+bool
+Filesystem::isExist(char const* narrowPath) {
+    std::ifstream file(String::utf8ToWide(narrowPath));
+    return file.good();
+}
+
+bool
+Filesystem::isExist(std::string const& narrowPath) {
+    return isExist(narrowPath.c_str());
 }
 
 } // namespace Util
