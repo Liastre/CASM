@@ -13,7 +13,6 @@ String::wideToUtf8(wchar_t* wideString) {
     std::size_t stringSize = ::WideCharToMultiByte(CP_UTF8, NULL, wideString, -1, NULL, 0, 0, 0) - 1;
     std::string utf8String(stringSize, '\0');
     ::WideCharToMultiByte(CP_UTF8, NULL, wideString, -1, &utf8String[0], stringSize, 0, 0);
-    utf8String.shrink_to_fit();
 
     return utf8String;
 }
@@ -31,7 +30,10 @@ std::wstring
 String::utf8ToWide(char const* narrowString, std::size_t size) {
     std::wstring wideString(size, '\0');
     ::MultiByteToWideChar(CP_UTF8, NULL, narrowString, -1, &wideString[0], size);
-    wideString.erase(wideString.find(L'\0'));
+    auto termPos = wideString.find(L'\0');
+    if (termPos != std::wstring::npos) {
+        wideString.erase(termPos);
+    }
     return wideString;
 }
 
