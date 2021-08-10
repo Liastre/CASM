@@ -11,6 +11,7 @@
 #include <CASM/core/buffer.hpp>
 #include <CASM/codec/codec.hpp>
 #include <CASM/data_stream/fstream.hpp>
+#include <CASM/utility/windows_utilities.hpp>
 #include <string>
 #include <fstream>
 
@@ -146,8 +147,7 @@ File<TCodec, TDataStream>::isAvailable() const {
 template <class TCodec, class TDataStream>
 bool
 File<TCodec, TDataStream>::_isExist() const {
-    std::ifstream file(Util::String::utf8ToWide(_path));
-    return file.good();
+    return Util::Filesystem::isExist(_path);
 }
 
 template <class TCodec, class TDataStream>
