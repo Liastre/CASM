@@ -11,6 +11,7 @@
 #include <string>
 
 namespace CASM {
+namespace DeviceApi {
 
 /// @class DeviceInterface
 /// @brief interface class for Device object
@@ -49,6 +50,7 @@ protected:
     std::chrono::duration<double> _bufferDuration;
 };
 
+} // namespace DeviceApi
 } // namespace CASM
 
 #include "device_base.inl"

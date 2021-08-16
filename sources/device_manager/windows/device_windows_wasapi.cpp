@@ -2,6 +2,7 @@
 #include "functiondiscoverykeys_devpkey.h"
 #include <thread>
 #include <mmreg.h>
+#include <cassert>
 
 namespace {
 
@@ -36,6 +37,8 @@ TranslateSubformatToEnum(GUID const& subFormat) {
 } // namespace
 
 namespace CASM {
+namespace DeviceApi {
+namespace Wasapi {
 
 DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
     HRESULT hr = S_OK;
@@ -454,4 +457,6 @@ DeviceWindowsWASAPI::isAvailable() const {
     return true;
 }
 
+} // namespace Wasapi
+} // namespace DeviceApi
 } // namespace CASM

@@ -1,29 +1,24 @@
 #include "CASM/device_manager.hpp"
-#include "windows/device_manager_windows_wasapi.hpp"
 
 namespace CASM {
 
-DeviceManager::DeviceManager() {
-    deviceManager = std::make_unique<DeviceManagerWindowsWASAPI>();
-}
-
 DeviceManager::~DeviceManager() {
-    deviceManager.reset();
+    _deviceEnumerator.reset();
 }
 
 int
 DeviceManager::update() {
-    return deviceManager->update();
+    return _deviceEnumerator->update();
 }
 
 std::size_t
 DeviceManager::getDeviceCount() {
-    return deviceManager->getDeviceCount();
+    return _deviceEnumerator->getDeviceCount();
 }
 
 Device&
 DeviceManager::getDevice(std::size_t index) {
-    return deviceManager->getDevice(index);
+    return _deviceEnumerator->getDevice(index);
 }
 
 } // namespace CASM

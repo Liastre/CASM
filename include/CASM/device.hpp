@@ -13,7 +13,7 @@ namespace CASM {
  * Wrapper under Device fabric
  * not copyable (copy will contain same instance)
  */
-class Device final : public DeviceInterface {
+class Device final : public DeviceApi::DeviceInterface {
 public:
     Device();
     Device(void* deviceHandler, DeviceType deviceType);

@@ -3,6 +3,7 @@
 #include <CASM/stream.hpp>
 #include <CASM/file.hpp>
 #include <CASM/codec/pcm.hpp>
+#include <CASM/device/device_manager_windows_wasapi.hpp>
 #include <iostream>
 #include <Windows.h>
 
@@ -13,7 +14,7 @@ main(int argc, char** argv) {
     SetConsoleOutputCP(65001);
     try {
         // choose device
-        CASM::DeviceManager deviceManager;
+        CASM::DeviceManager deviceManager(CASM::DeviceApi::Wasapi::Enumerator{ });
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {

@@ -11,10 +11,16 @@
 
 namespace CASM {
 
-// TODO: rework for using different APIs
 class DeviceManager final {
 public:
-    DeviceManager();
+    template <typename T>
+    DeviceManager(T&& deviceEnumerator) {
+        static_assert(std::is_base_of<DeviceApi::EnumeratorBase, T>::value,
+          "Passed DeviceManager is not derived from DeviceManagerBase");
+
+        _deviceEnumerator = std::make_unique<T>(std::move(deviceEnumerator));
+        _deviceEnumerator->update();
+    }
     ~DeviceManager();
 
     int update();
@@ -22,7 +28,7 @@ public:
     Device& getDevice(std::size_t index);
 
 private:
-    std::unique_ptr<DeviceManagerBase> deviceManager;
+    std::unique_ptr<DeviceApi::EnumeratorBase> _deviceEnumerator;
 };
 
 } // namespace CASM

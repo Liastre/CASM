@@ -1,4 +1,5 @@
 namespace CASM {
+namespace DeviceApi {
 
 template <class TDeviceHandler>
 DeviceBase<TDeviceHandler>::DeviceBase() {
@@ -29,4 +30,5 @@ DeviceBase<TDeviceHandler>::getDescription() {
     return _description;
 }
 
+} // namespace DeviceApi
 } // namespace CASM

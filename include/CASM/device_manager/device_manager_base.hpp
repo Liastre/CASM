@@ -10,11 +10,16 @@
 #include <string>
 
 namespace CASM {
+namespace DeviceApi {
 
-class DeviceManagerBase {
+class EnumeratorBase {
 public:
-    DeviceManagerBase();
-    virtual ~DeviceManagerBase();
+    EnumeratorBase() = default;
+    EnumeratorBase(EnumeratorBase const&) = default;
+    EnumeratorBase(EnumeratorBase&&) = default;
+    EnumeratorBase& operator=(EnumeratorBase const&) = default;
+    EnumeratorBase& operator=(EnumeratorBase&&) = default;
+    virtual ~EnumeratorBase() = default;
 
     Device& getDevice(std::size_t index);
     std::size_t getDeviceCount();
@@ -23,7 +28,8 @@ public:
 
 protected:
     std::vector<Device> _deviceList;
-    std::size_t _deviceCount;
+    std::size_t _deviceCount = { 0 };
 };
 
+} // namespace Device
 } // namespace CASM

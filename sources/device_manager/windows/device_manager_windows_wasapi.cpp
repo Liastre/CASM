@@ -1,24 +1,69 @@
-#include "device_manager_windows_wasapi.hpp"
+#include "CASM/device_api/wasapi_enumerator.hpp"
 #include "windows_wasapi.hpp"
 #include <cassert>
 
-namespace CASM {
+namespace {
 
-DeviceManagerWindowsWASAPI::DeviceManagerWindowsWASAPI() {
-    HRESULT hr;
-    hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-    if (hr != S_OK)
-        throw std::runtime_error("Unable to CoInitializeEx(). Error code: " + WinUtils::HRESULTtoString(hr));
+std::atomic<std::size_t> kIsInitialized = { 0 };
 
-    update();
+HRESULT
+comInitialize() {
+    HRESULT hr{ S_OK };
+    if (kIsInitialized == 0) {
+        hr = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    }
+    ++kIsInitialized;
+
+    return hr;
 }
 
-DeviceManagerWindowsWASAPI::~DeviceManagerWindowsWASAPI() {
-    CoUninitialize();
+void
+comUninitialize() {
+    --kIsInitialized;
+    if (kIsInitialized == 0) {
+        ::CoUninitialize();
+    }
+}
+
+} // namespace
+
+namespace CASM {
+namespace DeviceApi {
+namespace Wasapi {
+
+Enumerator::Enumerator() {
+    HRESULT hr = comInitialize();
+    if (hr != S_OK) {
+        throw std::runtime_error("Unable to CoInitializeEx(). Error code: " + WinUtils::HRESULTtoString(hr));
+    }
+}
+
+Enumerator::Enumerator(Enumerator const& enumerator) {
+    operator=(enumerator);
+}
+
+Enumerator::Enumerator(Enumerator&& enumerator) noexcept {
+    operator=(std::move(enumerator));
+}
+
+Enumerator&
+Enumerator::operator=(Enumerator&& enumerator) noexcept {
+    comInitialize();
+    return *this;
+}
+
+Enumerator&
+Enumerator::operator=(Enumerator const& enumerator) {
+    comInitialize();
+    return *this;
+}
+
+Enumerator::~Enumerator() {
+    comUninitialize();
 }
 
 int
-DeviceManagerWindowsWASAPI::update() {
+Enumerator::update() {
     HRESULT hr;
 
     IMMDeviceCollection* deviceCollection = nullptr;
@@ -65,4 +110,6 @@ DeviceManagerWindowsWASAPI::update() {
     return 0;
 }
 
+} // namespace Wasapi
+} // namespace Device
 } // namespace CASM

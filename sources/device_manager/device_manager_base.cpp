@@ -1,21 +1,17 @@
 #include <CASM/device_manager/device_manager_base.hpp>
 
 namespace CASM {
-
-DeviceManagerBase::DeviceManagerBase() {
-    _deviceCount = 0;
-};
-
-DeviceManagerBase::~DeviceManagerBase(){};
+namespace DeviceApi {
 
 Device&
-DeviceManagerBase::getDevice(std::size_t index) {
+EnumeratorBase::getDevice(std::size_t index) {
     return _deviceList[index];
 };
 
 std::size_t
-DeviceManagerBase::getDeviceCount() {
+EnumeratorBase::getDeviceCount() {
     return _deviceCount;
 }
 
+} // namespace DeviceApi
 } // namespace CASM

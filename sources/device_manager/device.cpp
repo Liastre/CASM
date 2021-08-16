@@ -15,7 +15,7 @@ Device::Device() {
 
 
 Device::Device(void * deviceHandler, DeviceType deviceType) {
-    _device = std::make_shared<DeviceWindowsWASAPI>(deviceHandler, deviceType);
+    _device = std::make_shared<DeviceApi::Wasapi::DeviceWindowsWASAPI>(deviceHandler, deviceType);
 }
 
 

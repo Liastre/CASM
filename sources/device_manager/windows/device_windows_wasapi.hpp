@@ -7,6 +7,8 @@
 #include "CASM/device_manager/device_base.hpp"
 
 namespace CASM {
+namespace DeviceApi {
+namespace Wasapi {
 
 typedef IMMDevice DeviceHandler;
 
@@ -33,4 +35,6 @@ private:
     HANDLE _hEvent = nullptr;
 };
 
+} // namespace Wasapi
+} // namespace DeviceApi
 } // namespace CASM
