@@ -1,5 +1,5 @@
 /**
- * DeviceManager for recieving and storing
+ * @brief DeviceManager for recieving and storing
  * collection of system devices
  * @author Liastre
  * @copyright MIT
@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <CASM/device_manager/device_manager_base.hpp>
+#include "device_manager/device_manager_base.hpp"
 
 namespace CASM {
 

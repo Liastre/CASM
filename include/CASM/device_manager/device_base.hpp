@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <CASM/CASM.hpp>
+#include <CASM/types.hpp>
 #include <CASM/core/end_point.hpp>
 #include <string>
 
@@ -17,7 +17,7 @@ namespace CASM {
 class DeviceInterface : public virtual EndPointInterface {
 public:
     DeviceInterface() = default;
-    ~DeviceInterface() override = default;
+    virtual ~DeviceInterface() = default;
 
     virtual WaveProperties getDeviceWaveProperties() = 0;
     virtual String getDescription() = 0;

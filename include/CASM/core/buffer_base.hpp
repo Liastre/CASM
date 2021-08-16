@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <CASM/CASM.hpp>
 #include <CASM/core/circle_buffer.hpp>
 #include <CASM/data_stream/data_stream.hpp>
 #include <atomic>

@@ -1,5 +1,4 @@
-#include <CASM/CASM.hpp>
-#include <CASM/data_stream/data_stream.hpp>
+#include "data_stream.hpp"
 #include <fstream>
 
 namespace CASM {

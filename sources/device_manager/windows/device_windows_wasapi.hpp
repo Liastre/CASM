@@ -5,7 +5,6 @@
 
 #include "windows_wasapi.hpp"
 #include "CASM/device_manager/device_base.hpp"
-#include <cassert>
 
 namespace CASM {
 

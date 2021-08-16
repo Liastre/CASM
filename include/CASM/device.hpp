@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <CASM/device_manager/device_base.hpp>
-#include <CASM/core/end_point.hpp>
+#include "device_manager/device_base.hpp"
 
 namespace CASM {
 
@@ -22,7 +21,7 @@ public:
     Device(Device&& device) noexcept;
     Device& operator=(Device const& device);
     Device& operator=(Device&& device);
-    ~Device() override;
+    ~Device();
 
     /// EndPointInterface interface
     bool openCaptureStream(Duration const& duration, Buffer& buffer) final;

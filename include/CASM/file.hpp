@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <CASM/CASM.hpp>
+#include <CASM/types.hpp>
 #include <CASM/core/file_base.hpp>
 #include <CASM/core/buffer.hpp>
 #include <CASM/codec/codec.hpp>

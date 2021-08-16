@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <CASM/CASM.hpp>
+#include <CASM/types.hpp>
 #include <CASM/core/buffer.hpp>
 
 namespace CASM {
