@@ -14,18 +14,18 @@ file(GLOB casm_headers
 
 file(GLOB casm_sources
     file.cpp
-    core/*.cpp
     stream.cpp
+    device.cpp
+    device_manager.cpp
+    core/*.cpp
     codec/pcm.cpp
     file/file_base.cpp
     data_stream/fstream.cpp
-    device_manager/device.cpp
-    device_manager/device_manager.cpp
-    device_manager/device_manager_base.cpp
-    device_manager/windows/windows_utilities.cpp
-    device_manager/windows/device_windows_wasapi.cpp
-    device_manager/windows/device_manager_windows_wasapi.cpp
-    device_manager/windows/initguid.cpp
+    device_api/enumerator_base.cpp
+    device_api/wasapi/windows_utilities.cpp
+    device_api/wasapi/device.cpp
+    device_api/wasapi/enumerator.cpp
+    device_api/wasapi/initguid.cpp
     )
 
 #===================================

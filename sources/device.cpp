@@ -4,8 +4,8 @@
  * @copyright MIT
  */
 
-#include <CASM/device.hpp>
-#include "windows/device_windows_wasapi.hpp"
+#include "CASM/device.hpp"
+#include "device_api/wasapi/device.hpp"
 
 
 namespace CASM {

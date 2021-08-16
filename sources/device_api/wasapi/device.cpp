@@ -1,4 +1,4 @@
-#include "device_windows_wasapi.hpp"
+#include "device.hpp"
 #include "functiondiscoverykeys_devpkey.h"
 #include <thread>
 #include <mmreg.h>

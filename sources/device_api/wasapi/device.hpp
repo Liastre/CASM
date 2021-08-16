@@ -4,7 +4,7 @@
 #pragma once
 
 #include "windows_wasapi.hpp"
-#include "CASM/device_manager/device_base.hpp"
+#include "CASM/device_api/device_base.hpp"
 
 namespace CASM {
 namespace DeviceApi {

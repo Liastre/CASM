@@ -1,4 +1,4 @@
-#include "CASM/device_api/wasapi_enumerator.hpp"
+#include "CASM/device_api/wasapi/enumerator.hpp"
 #include "windows_wasapi.hpp"
 #include <cassert>
 

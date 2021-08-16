@@ -1,4 +1,4 @@
-#include <CASM/device_manager/device_manager_base.hpp>
+#include "CASM/device_api/enumerator_base.hpp"
 
 namespace CASM {
 namespace DeviceApi {
