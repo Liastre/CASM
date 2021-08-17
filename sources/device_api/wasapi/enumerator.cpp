@@ -62,8 +62,8 @@ Enumerator::~Enumerator() {
     comUninitialize();
 }
 
-int
-Enumerator::update() {
+bool
+Enumerator::update(std::vector<Device>& deviceList) {
     HRESULT hr;
 
     IMMDeviceCollection* deviceCollection = nullptr;
@@ -71,7 +71,7 @@ Enumerator::update() {
     IMMDevice* device = nullptr;
     uint32_t deviceCollectionSize;
 
-    _deviceList.clear();
+    deviceList.clear();
 
     //CLSID_MMDeviceEnumerator or __uuidof(IMMDeviceEnumerator)
     hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator));
@@ -87,7 +87,7 @@ Enumerator::update() {
         throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        _deviceList.emplace_back(Device(device, DeviceType::CAPTURE));
+        deviceList.emplace_back(Device(device, DeviceType::CAPTURE));
     }
     deviceCollection->Release();
 
@@ -100,14 +100,12 @@ Enumerator::update() {
         throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        _deviceList.emplace_back(Device(device, DeviceType::RENDER));
+        deviceList.emplace_back(Device(device, DeviceType::RENDER));
     }
     deviceCollection->Release();
-
-    _deviceCount = _deviceList.size();
     deviceEnumerator->Release();
 
-    return 0;
+    return true;
 }
 
 } // namespace Wasapi

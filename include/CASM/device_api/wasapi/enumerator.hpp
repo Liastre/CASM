@@ -12,7 +12,7 @@ namespace CASM {
 namespace DeviceApi {
 namespace Wasapi {
 
-class Enumerator final : public EnumeratorBase {
+class Enumerator final : public EnumeratorInterface {
 public:
     Enumerator();
     Enumerator(Enumerator const&);
@@ -21,7 +21,7 @@ public:
     Enumerator& operator=(Enumerator&&) noexcept;
     ~Enumerator();
 
-    int update() final;
+    bool update(std::vector<Device>& deviceList) final;
 };
 
 } // namespace Wasapi
