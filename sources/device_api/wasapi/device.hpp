@@ -10,29 +10,34 @@ namespace CASM {
 namespace DeviceApi {
 namespace Wasapi {
 
-typedef IMMDevice DeviceHandler;
+class Device final : public DeviceBase {
+public:
+    using Handler = IMMDevice;
 
-class Device final : public DeviceBase<IMMDevice> {
 public:
     Device();
-    Device(void* device, CASM::DeviceType deviceType);
+    Device(Handler* device, CASM::DeviceType deviceType);
     ~Device() final;
 
-    /// EndPointInterface
-    bool openCaptureStream(Duration const& duration, Buffer& buffer) final;
-    bool openRenderStream(Buffer const& buffer) final;
-    void closeCaptureStream() final;
-    void closeRenderStream() final;
-    BufferStatus read(Buffer& buffer) final;
-    bool write(Buffer const& buffer) final;
-    bool isAvailable() const final;
+    StreamProperties openRead(Duration const& requestedDuration, bool isExclusive) final;
+    StreamProperties openWrite(Duration const& requestedDuration, bool isExclusive) final;
+    void closeRead() final;
+    void closeWrite() final;
+    BufferStatus readData(Buffer& buffer, std::uint16_t blockAlign) final;
+    bool writeData(Buffer const& buffer, std::uint16_t blockAlign) final;
+    String const& getDescription() const final;
+    String const& getName() const final;
 
 private:
+    Handler* _handler = nullptr;
     IAudioClient* _captureStream = nullptr;
     IAudioClient* _renderStream = nullptr;
     IAudioCaptureClient* _captureClient = nullptr;
     IAudioRenderClient* _renderClient = nullptr;
     HANDLE _hEvent = nullptr;
+    std::uint32_t _bufferFramesCount = 0;
+    String _description;
+    String _name;
 };
 
 } // namespace Wasapi

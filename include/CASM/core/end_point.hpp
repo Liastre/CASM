@@ -101,6 +101,10 @@ public:
         return _isValid;
     }
 
+    operator bool() const {
+        return isValid();
+    }
+
 protected:
     std::atomic<bool> _isValid = { false };
     std::atomic<bool> _active = { false };

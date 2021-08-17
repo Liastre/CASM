@@ -13,7 +13,7 @@ namespace CASM {
  * Wrapper under Device fabric
  * not copyable (copy will contain same instance)
  */
-class Device final : public EndPointInterface {
+class Device final : public EndPointBase {
 public:
     template <typename T, std::enable_if_t<!std::is_same_v<Device, typename std::decay<T>::type>>* = nullptr>
     Device(T&& deviceApi) {
@@ -21,13 +21,16 @@ public:
           "Passed Device Api is not derived from DeviceInterface");
 
         _device = std::make_shared<T>(std::move(deviceApi));
+        _isValid = true;
     }
-    Device(void* deviceHandler, DeviceType deviceType);
+    //Device(void* deviceHandler, DeviceType deviceType);
     Device(Device const& device);
     Device(Device&& device) noexcept;
     Device& operator=(Device const& device);
-    Device& operator=(Device&& device);
+    Device& operator=(Device&& device) noexcept;
     ~Device();
+
+    bool Device::open(Access access);
 
     /// EndPointInterface interface
     bool openCaptureStream(Duration const& duration, Buffer& buffer) final;
@@ -39,18 +42,15 @@ public:
 
     // TODO: add getState method
     bool isAvailable() const final;
-    bool isInUsage() const final;
-    bool isValid() const final;
 
     WaveProperties getDeviceWaveProperties();
-    WaveProperties getStreamWaveProperties() const;
-    String getDescription();
-
-    operator bool() const;
+    String const& getDescription() const;
+    String const& getName() const;
 
 private:
     // TODO: use unique_ptr
     std::shared_ptr<DeviceApi::DeviceInterface> _device;
+    Access _access;
 };
 
 } // namespace CASM

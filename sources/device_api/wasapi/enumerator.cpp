@@ -1,4 +1,5 @@
 #include "CASM/device_api/wasapi/enumerator.hpp"
+#include "device.hpp"
 #include "windows_wasapi.hpp"
 #include <cassert>
 
@@ -63,7 +64,7 @@ Enumerator::~Enumerator() {
 }
 
 bool
-Enumerator::update(std::vector<Device>& deviceList) {
+Enumerator::update(std::vector<CASM::Device>& deviceList) {
     HRESULT hr;
 
     IMMDeviceCollection* deviceCollection = nullptr;
@@ -79,7 +80,7 @@ Enumerator::update(std::vector<Device>& deviceList) {
         throw std::runtime_error("Unable to CoCreateInstance(). Error code: " + WinUtils::HRESULTtoString(hr));
 
     // include capture endpoints (eCapture) to collection
-    hr = deviceEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
+    hr = deviceEnumerator->EnumAudioEndpoints(EDataFlow::eCapture, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
     if (hr != S_OK)
         throw std::runtime_error("Unable to deviceEnumerator->EnumAudioEndpoints(). Error code: " + WinUtils::HRESULTtoString(hr));
     hr = deviceCollection->GetCount(&deviceCollectionSize);
@@ -87,12 +88,12 @@ Enumerator::update(std::vector<Device>& deviceList) {
         throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, DeviceType::CAPTURE));
+        deviceList.emplace_back(Wasapi::Device(device, DeviceType::CAPTURE));
     }
     deviceCollection->Release();
 
     // include rendering endpoints (eRender) to collection
-    hr = deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
+    hr = deviceEnumerator->EnumAudioEndpoints(EDataFlow::eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &deviceCollection);
     if (hr != S_OK)
         throw std::runtime_error("Unable to deviceEnumerator->EnumAudioEndpoints(). Error code: " + WinUtils::HRESULTtoString(hr));
     hr = deviceCollection->GetCount(&deviceCollectionSize);
@@ -100,7 +101,7 @@ Enumerator::update(std::vector<Device>& deviceList) {
         throw std::runtime_error("Unable to deviceCollection->GetCount(). Error code: " + WinUtils::HRESULTtoString(hr));
     for (uint32_t deviceIndex = 0; deviceIndex < deviceCollectionSize; deviceIndex++) {
         deviceCollection->Item(deviceIndex, &device);
-        deviceList.emplace_back(Device(device, DeviceType::RENDER));
+        deviceList.emplace_back(Wasapi::Device(device, DeviceType::RENDER));
     }
     deviceCollection->Release();
     deviceEnumerator->Release();

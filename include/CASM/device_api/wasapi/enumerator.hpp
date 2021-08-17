@@ -21,7 +21,7 @@ public:
     Enumerator& operator=(Enumerator&&) noexcept;
     ~Enumerator();
 
-    bool update(std::vector<Device>& deviceList) final;
+    bool update(std::vector<CASM::Device>& deviceList) final;
 };
 
 } // namespace Wasapi

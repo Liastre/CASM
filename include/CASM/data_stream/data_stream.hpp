@@ -3,7 +3,6 @@
 #include <CASM/types.hpp>
 
 namespace CASM {
-
 namespace DataStream {
 
 class DataStreamInterface {
@@ -41,5 +40,4 @@ public:
 };
 
 } // namespace DataStream
-
 } // namespace CASM

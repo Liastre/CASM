@@ -4,12 +4,6 @@
 
 namespace CASM {
 
-
-Device::Device(void * deviceHandler, DeviceType deviceType) {
-    _device = std::make_shared<DeviceApi::Wasapi::Device>(deviceHandler, deviceType);
-}
-
-
 Device::Device(Device const& device) {
     this->operator=(device);
 }
@@ -21,12 +15,14 @@ Device::Device(Device&& device) noexcept {
 
 
 Device& Device::operator=(Device const& device) {
+    _isValid = device._isValid.load();
     _device = device._device;
     return *this;
 }
 
 
-Device& Device::operator=(Device&& device) {
+Device& Device::operator=(Device&& device) noexcept {
+    _isValid = device._isValid.load();
     _device = std::move(device._device);
     return *this;
 }
@@ -36,45 +32,71 @@ Device::~Device() {
     _device.reset();
 }
 
+bool
+Device::open(Access access) {
+    _access = access;
+    switch (access) {
+    case Access::READ:
+    case Access::READ_EXCLUSIVE:
+        break;
+    case Access::WRITE:
+    case Access::WRITE_EXCLUSIVE:
+        break;
+    }
+
+    return true;
+}
 
 bool Device::openCaptureStream(Duration const & duration, Buffer & buffer) {
     // TODO: check exclusive mode
-    if (_device->isInUsage()) {
+    if (duration == Duration::zero()) {
+        throw std::logic_error("Buffer duration is zero");
+    }
+    if (isInUsage()) {
         throw std::logic_error("Device in exclusive use");
     }
 
-    return _device->openCaptureStream(duration, buffer);
+    auto streamProperties = _device->openRead(buffer.getDuration(), false);
+    _streamWaveProperties = std::move(streamProperties.waveProperties);
+    buffer = Buffer(_streamWaveProperties, duration);
+
+    return true;
 }
 
 
 bool Device::openRenderStream(Buffer const & buffer) {
+    if (buffer.getDuration() == Duration::zero()) {
+        throw std::logic_error("Buffer duration is zero");
+    }
     // TODO: check exclusive mode
-    if (_device->isInUsage()) {
+    if (isInUsage()) {
         throw std::logic_error("Device in exclusive use");
     }
 
-    return _device->openRenderStream(buffer);
+    auto streamProperties = _device->openWrite(buffer.getDuration(), false);
+    _streamWaveProperties = std::move(streamProperties.waveProperties);
+    return true;
 }
 
 
 void Device::closeCaptureStream() {
-    _device->closeCaptureStream();
+    _device->closeRead();
 }
 
 
 void Device::closeRenderStream() {
-    _device->closeRenderStream();
+    _device->closeWrite();
 }
 
 
 BufferStatus
 Device::read(Buffer& buffer) {
-    return _device->read(buffer);
+    return _device->readData(buffer, _streamWaveProperties.getBlockAlign());
 }
 
 
-bool Device::write(Buffer const & buffer) {
-    _device->write(buffer);
+bool Device::write(Buffer const& buffer) {
+    _device->writeData(buffer, _streamWaveProperties.getBlockAlign());
     return true;
 }
 
@@ -83,34 +105,18 @@ WaveProperties Device::getDeviceWaveProperties() {
     return _device->getDeviceWaveProperties();
 }
 
-// TODO: rename to getWaveProperties
-WaveProperties Device::getStreamWaveProperties() const {
-    // TODO: use inbuilt getStreamWaveProperties
-    return _device->getStreamWaveProperties();
+String const&
+Device::getDescription() const {
+    return _device->getDescription();
 }
 
-String
-Device::getDescription() {
-    return _device->getDescription();
+String const&
+Device::getName() const {
+    return _device->getName();
 }
 
 bool Device::isAvailable() const {
     return true;
-}
-
-
-bool Device::isInUsage() const {
-    return _device->isInUsage();
-}
-
-
-bool Device::isValid() const {
-    return _device->isValid();
-}
-
-
-Device::operator bool() const {
-    return isValid();
 }
 
 } // namespace CASM

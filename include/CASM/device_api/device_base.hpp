@@ -13,44 +13,57 @@
 namespace CASM {
 namespace DeviceApi {
 
-/// @class DeviceInterface
-/// @brief interface class for Device object
-class DeviceInterface : public virtual EndPointInterface {
+struct StreamProperties {
+    FramesCount framesCount = { 0 };
+    WaveProperties waveProperties = { };
+};
+
+/**
+ * @brief Interface class for Device object
+ */
+class DeviceInterface {
 public:
     DeviceInterface() = default;
     virtual ~DeviceInterface() = default;
 
-    virtual WaveProperties getDeviceWaveProperties() = 0;
-    virtual String getDescription() = 0;
+    virtual WaveProperties const& getDeviceWaveProperties() const = 0;
+    virtual String const& getName() const = 0;
+    virtual String const& getDescription() const = 0;
+
+    virtual StreamProperties openRead(Duration const& requestedDuration, bool isExclusive) = 0;
+    virtual StreamProperties openWrite(Duration const& requestedDuration, bool isExclusive) = 0;
+    virtual void closeRead() = 0;
+    virtual void closeWrite() = 0;
+    virtual BufferStatus readData(Buffer& buffer, std::uint16_t blockAlign) = 0;
+    virtual bool writeData(Buffer const& buffer, std::uint16_t blockAlign) = 0;
 };
 
-// TODO: add << overload with description
-
-/// @class DeviceBase
-/// @brief base class for Device object.
-template <class TDeviceHandler>
-class DeviceBase : public virtual DeviceInterface, public EndPointBase {
+/**
+ * @brief Base class for Device object.
+ */
+class DeviceBase : public virtual DeviceInterface {
 public:
-    DeviceBase();
-    DeviceBase(void* handler, CASM::DeviceType deviceType);
-    ~DeviceBase() override;
+    DeviceBase() = default;
+    DeviceBase(CASM::DeviceType deviceType) {
+        _type = deviceType;
+    }
+    virtual ~DeviceBase() = default;
 
-    // getters
-    WaveProperties getDeviceWaveProperties() final;
-    String getDescription() final;
+    WaveProperties const& getDeviceWaveProperties() const final {
+        return _deviceWaveProperties;
+    }
+
+    DeviceType getDeviceType() {
+        return _type;
+    }
 
 protected:
-    TDeviceHandler* _handler;
-    String _name;
-    String _description;
     /// @brief actual device wave properties
     WaveProperties _deviceWaveProperties;
-    CASM::DeviceType _type;
-    std::uint32_t _bufferFramesCount;
-    std::chrono::duration<double> _bufferDuration;
+
+private:
+    DeviceType _type = DeviceType::Undefined;
 };
 
 } // namespace DeviceApi
 } // namespace CASM
-
-#include "device_base.inl"

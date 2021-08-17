@@ -46,12 +46,13 @@ Device::Device() {
     assert(hr == S_OK);
 }
 
-Device::Device(void* device, CASM::DeviceType deviceType)
-    : DeviceBase<IMMDevice>::DeviceBase(device, deviceType) {
+Device::Device(Handler* device, CASM::DeviceType deviceType)
+    : DeviceBase::DeviceBase(deviceType) {
     HRESULT hr = S_OK;
-    LPWSTR deviceId;
-    IPropertyStore* propertyStore;
-    PROPVARIANT devicePROPVARIANT{};
+    LPWSTR deviceId = nullptr;
+    IPropertyStore* propertyStore = nullptr;
+    PROPVARIANT devicePROPVARIANT = {};
+    _handler = device;
 
     // active
     PropVariantInit(&devicePROPVARIANT);
@@ -62,14 +63,14 @@ Device::Device(void* device, CASM::DeviceType deviceType)
         throw std::runtime_error("Unable to handler->OpenPropertyStore(). Error code: " + WinUtils::HRESULTtoString(hr));
 
     // retrieve device name
-    hr = propertyStore->GetValue(PKEY_Device_DeviceDesc, &devicePROPVARIANT);
+    hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &devicePROPVARIANT);
     if (hr != S_OK) {
         throw std::runtime_error("Unable to propertyStore->GetValue(PKEY_Device_DeviceDesc). Error code: " + WinUtils::HRESULTtoString(hr));
     }
     _name = Util::String::wideToUtf8(devicePROPVARIANT.pwszVal);
 
     // retrieve device description
-    hr = propertyStore->GetValue(PKEY_Device_FriendlyName, &devicePROPVARIANT);
+    hr = propertyStore->GetValue(PKEY_Device_DeviceDesc, &devicePROPVARIANT);
     if (hr != S_OK) {
         throw std::runtime_error("Unable to propertyStore->GetValue(PKEY_Device_FriendlyName). Error code: " + WinUtils::HRESULTtoString(hr));
     }
@@ -104,9 +105,6 @@ Device::Device(void* device, CASM::DeviceType deviceType)
           true);
     }
 
-    // valid device
-    _isValid = { true };
-
     // clear
     PropVariantClear(&devicePROPVARIANT);
     CoTaskMemFree(deviceId);
@@ -122,25 +120,19 @@ Device::~Device() {
     }
 }
 
-bool
-Device::openCaptureStream(Duration const& duration, Buffer& buffer) {
-    // TODO: set to minimum available duration and check if lesser
-    _bufferDuration = duration;
-
-    // checks
-    if (_bufferDuration == Duration::zero())
-        throw std::logic_error("Buffer duration is zero");
-    if (_handler == nullptr)
+StreamProperties
+Device::openRead(Duration const& requestedDuration, bool isExclusive) {
+    if (_handler == nullptr) {
         throw std::logic_error("Device _handler is nullptr");
+    }
 
-    // variables
+    // TODO: set to minimum available duration and check if lesser
     HRESULT hr;
     WAVEFORMATEX* deviceMixFormat = nullptr;
     DWORD streamFlags;
-    uint32_t tmpBufferFramesCount;
-    uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(_bufferDuration).count() / 100);
+    uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(requestedDuration).count() / 100);
 
-    switch (_type) {
+    switch (getDeviceType()) {
     case DeviceType::RENDER:
         streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
         break;
@@ -159,24 +151,17 @@ Device::openCaptureStream(Duration const& duration, Buffer& buffer) {
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code:" + WinUtils::HRESULTtoString(hr));
 
+    WaveProperties streamWaveProperties;
     if (deviceMixFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
         WAVEFORMATEXTENSIBLE* deviceMixFormatEx = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(deviceMixFormat);
-        /*hr = captureStream->Initialize(
-                AUDCLNT_SHAREMODE_SHARED,
-                streamFlags, //AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST
-                fragmentDurationRequested,
-                0,
-                wf,
-                nullptr
-        );*/
-        _streamWaveProperties = WaveProperties(
+        streamWaveProperties = WaveProperties(
           deviceMixFormatEx->Format.nChannels,
           deviceMixFormatEx->Format.nSamplesPerSec,
           deviceMixFormatEx->Samples.wValidBitsPerSample,
           deviceMixFormatEx->Format.wBitsPerSample,
           false);
     } else {
-        _streamWaveProperties = WaveProperties(
+        streamWaveProperties = WaveProperties(
           deviceMixFormat->nChannels,
           deviceMixFormat->nSamplesPerSec,
           deviceMixFormat->wBitsPerSample,
@@ -207,10 +192,11 @@ Device::openCaptureStream(Duration const& duration, Buffer& buffer) {
     assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
-    hr = _captureStream->GetBufferSize(&tmpBufferFramesCount);
+    std::size_t actualBufferFramesCount = { 0 };
+    hr = _captureStream->GetBufferSize(&actualBufferFramesCount);
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: " + WinUtils::HRESULTtoString(hr));
-    _bufferFramesCount = tmpBufferFramesCount;
+    _bufferFramesCount = actualBufferFramesCount;
 
     /*=======
     // Grab the entire buffer for the initial fill operation.
@@ -229,36 +215,24 @@ Device::openCaptureStream(Duration const& duration, Buffer& buffer) {
     hr = _captureStream->Start();
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->Start(). Error code: " + WinUtils::HRESULTtoString(hr));
-    _active = true;
 
-    buffer = Buffer(_streamWaveProperties, duration);
-
-    return true;
-}
-
-bool
-Device::openRenderStream(Buffer const& buffer) {
-    _bufferDuration = buffer.getDuration();
-
-    // checks
-    if (_bufferDuration == Duration::zero()) {
-        throw std::logic_error("Buffer duration is zero");
+    return StreamProperties {
+        actualBufferFramesCount,
+        std::move(streamWaveProperties) };
     }
-    if (_active) {
-        throw std::logic_error("Device already in use");
-    }
+
+StreamProperties
+Device::openWrite(Duration const& requestedDuration, bool isExclusive) {
     if (_handler == nullptr) {
         throw std::logic_error("Device handler is nullptr");
     }
 
-    // variables
     HRESULT hr = S_OK;
     WAVEFORMATEX* deviceMixFormat = nullptr;
     DWORD streamFlags;
-    uint32_t tmpBufferFramesCount;
-    uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(_bufferDuration).count() / 100);
+    std::uint32_t fragmentDurationRequested = (uint32_t)(std::chrono::duration_cast<std::chrono::nanoseconds>(requestedDuration).count() / 100);
 
-    switch (_type) {
+    switch (getDeviceType()) {
     case DeviceType::RENDER:
         streamFlags = AUDCLNT_STREAMFLAGS_LOOPBACK;
         break;
@@ -277,12 +251,25 @@ Device::openRenderStream(Buffer const& buffer) {
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->GetMixFormat(). Error code: " + WinUtils::HRESULTtoString(hr));
     // TODO: handle WAVEFORMATEX
-    _streamWaveProperties = WaveProperties(
-      deviceMixFormat->nChannels,
-      deviceMixFormat->nSamplesPerSec,
-      deviceMixFormat->wBitsPerSample,
-      deviceMixFormat->wBitsPerSample,
-      false);
+
+    WaveProperties streamWaveProperties;
+    if (deviceMixFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+        WAVEFORMATEXTENSIBLE* deviceMixFormatEx = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(deviceMixFormat);
+        streamWaveProperties = WaveProperties(
+          deviceMixFormatEx->Format.nChannels,
+          deviceMixFormatEx->Format.nSamplesPerSec,
+          deviceMixFormatEx->Samples.wValidBitsPerSample,
+          deviceMixFormatEx->Format.wBitsPerSample,
+          false);
+    } else {
+        streamWaveProperties = WaveProperties(
+          deviceMixFormat->nChannels,
+          deviceMixFormat->nSamplesPerSec,
+          deviceMixFormat->wBitsPerSample,
+          deviceMixFormat->wBitsPerSample,
+          false);
+    }
+
     hr = _renderStream->Initialize(
       AUDCLNT_SHAREMODE_SHARED,
       0,
@@ -306,10 +293,11 @@ Device::openRenderStream(Buffer const& buffer) {
     assert(hr==S_OK);*/
 
     // get the actual size of the allocated buffer
-    hr = _renderStream->GetBufferSize(&tmpBufferFramesCount);
+    FramesCount actualBufferFramesCount = { 0 };
+    hr = _renderStream->GetBufferSize(&actualBufferFramesCount);
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->GetBufferSize(). Error code: " + WinUtils::HRESULTtoString(hr));
-    _bufferFramesCount = tmpBufferFramesCount;
+    _bufferFramesCount = actualBufferFramesCount;
 
     /*=======
     // Grab the entire buffer for the initial fill operation.
@@ -328,17 +316,14 @@ Device::openRenderStream(Buffer const& buffer) {
     hr = _renderStream->Start();
     if (hr != S_OK)
         throw std::runtime_error("Unable to captureStream->Start(). Error code: " + WinUtils::HRESULTtoString(hr));
-    _active = true;
 
-    return true;
+    return StreamProperties{
+        actualBufferFramesCount,
+        std::move(streamWaveProperties) };
 }
 
 void
-Device::closeCaptureStream() {
-    if (!_active) {
-        return;
-    }
-
+Device::closeRead() {
     HRESULT hr = S_OK;
     if (_captureStream != nullptr) {
         hr = _captureStream->Stop();
@@ -346,14 +331,11 @@ Device::closeCaptureStream() {
             throw std::runtime_error("Unable to captureStream->Stop(). Error code: " + WinUtils::HRESULTtoString(hr));
         _captureStream = nullptr;
     }
-
-    _active = false;
 }
 
 void
-Device::closeRenderStream() {
-    HRESULT hr;
-
+Device::closeWrite() {
+    HRESULT hr = S_OK;
     if (_renderStream != nullptr) {
         hr = _renderStream->Stop();
         if (hr != S_OK)
@@ -363,7 +345,7 @@ Device::closeRenderStream() {
 }
 
 BufferStatus
-Device::read(Buffer& buffer) {
+Device::readData(Buffer& buffer, std::uint16_t blockAlign) {
     HRESULT hr = S_OK;
     DWORD flags = 0;
     uint32_t packetLength;
@@ -387,7 +369,7 @@ Device::read(Buffer& buffer) {
 
         // each frame contains number of bytes equal to block align
         // TODO: return true or false?
-        buffer.write(pData, numFramesAvailable * _streamWaveProperties.getBlockAlign());
+        buffer.write(pData, numFramesAvailable * blockAlign);
 
         // release data
         hr = _captureClient->ReleaseBuffer(numFramesAvailable);
@@ -404,7 +386,7 @@ Device::read(Buffer& buffer) {
 }
 
 bool
-Device::write(Buffer const& buffer) {
+Device::writeData(Buffer const& buffer, std::uint16_t blockAlign) {
     if (buffer.getSize() == 0)
         return true;
 
@@ -434,15 +416,15 @@ Device::write(Buffer const& buffer) {
     }
 
     // tmp solution
-    std::size_t bufferSize = (buffer.getSize() / _streamWaveProperties.getBlockAlign()) * _streamWaveProperties.getBlockAlign();
-    std::size_t availableSize = numFramesAvailable * _streamWaveProperties.getBlockAlign();
+    std::size_t bufferSize = (buffer.getSize() / blockAlign) * blockAlign;
+    std::size_t availableSize = numFramesAvailable * blockAlign;
     std::size_t takeoverSize = 0;
     if (availableSize > bufferSize)
         takeoverSize = bufferSize;
     else
         takeoverSize = availableSize;
     buffer.read(pData, takeoverSize);
-    numFramesAvailable = takeoverSize / _streamWaveProperties.getBlockAlign();
+    numFramesAvailable = takeoverSize / blockAlign;
     // end of tmp solution
 
     hr = _renderClient->ReleaseBuffer(numFramesAvailable, flags);
@@ -452,9 +434,14 @@ Device::write(Buffer const& buffer) {
     return true;
 }
 
-bool
-Device::isAvailable() const {
-    return true;
+String const&
+Device::getDescription() const {
+    return _description;
+}
+
+String const&
+Device::getName() const {
+    return _name;
 }
 
 } // namespace Wasapi
