@@ -12,11 +12,11 @@ namespace Wasapi {
 
 typedef IMMDevice DeviceHandler;
 
-class DeviceWindowsWASAPI final : public DeviceBase<IMMDevice> {
+class Device final : public DeviceBase<IMMDevice> {
 public:
-    DeviceWindowsWASAPI();
-    DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType);
-    ~DeviceWindowsWASAPI() final;
+    Device();
+    Device(void* device, CASM::DeviceType deviceType);
+    ~Device() final;
 
     /// EndPointInterface
     bool openCaptureStream(Duration const& duration, Buffer& buffer) final;

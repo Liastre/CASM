@@ -13,10 +13,10 @@ namespace CASM {
 
 class DeviceManager final {
 public:
-    template <typename T>
+    template <typename T, std::enable_if_t<!std::is_same_v<DeviceManager, typename std::decay<T>::type>>* = nullptr>
     DeviceManager(T&& deviceEnumerator) {
         static_assert(std::is_base_of<DeviceApi::EnumeratorBase, T>::value,
-          "Passed DeviceManager is not derived from DeviceManagerBase");
+          "Passed Enumerator is not derived from DeviceManagerBase");
 
         _deviceEnumerator = std::make_unique<T>(std::move(deviceEnumerator));
         _deviceEnumerator->update();

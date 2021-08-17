@@ -1,21 +1,12 @@
-/**
- * Definition of Device class
- * @author Liastre
- * @copyright MIT
- */
-
 #include "CASM/device.hpp"
 #include "device_api/wasapi/device.hpp"
 
 
 namespace CASM {
 
-Device::Device() {
-}
-
 
 Device::Device(void * deviceHandler, DeviceType deviceType) {
-    _device = std::make_shared<DeviceApi::Wasapi::DeviceWindowsWASAPI>(deviceHandler, deviceType);
+    _device = std::make_shared<DeviceApi::Wasapi::Device>(deviceHandler, deviceType);
 }
 
 

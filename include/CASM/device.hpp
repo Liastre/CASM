@@ -13,9 +13,15 @@ namespace CASM {
  * Wrapper under Device fabric
  * not copyable (copy will contain same instance)
  */
-class Device final : public DeviceApi::DeviceInterface {
+class Device final : public EndPointInterface {
 public:
-    Device();
+    template <typename T, std::enable_if_t<!std::is_same_v<Device, typename std::decay<T>::type>>* = nullptr>
+    Device(T&& deviceApi) {
+        static_assert(std::is_base_of<DeviceApi::DeviceInterface, T>::value,
+          "Passed Device Api is not derived from DeviceInterface");
+
+        _device = std::make_shared<T>(std::move(deviceApi));
+    }
     Device(void* deviceHandler, DeviceType deviceType);
     Device(Device const& device);
     Device(Device&& device) noexcept;
@@ -36,14 +42,15 @@ public:
     bool isInUsage() const final;
     bool isValid() const final;
 
-    WaveProperties getDeviceWaveProperties() final;
-    WaveProperties getStreamWaveProperties() const final;
-    String getDescription() final;
+    WaveProperties getDeviceWaveProperties();
+    WaveProperties getStreamWaveProperties() const;
+    String getDescription();
 
     operator bool() const;
 
 private:
-    std::shared_ptr<DeviceInterface> _device;
+    // TODO: use unique_ptr
+    std::shared_ptr<DeviceApi::DeviceInterface> _device;
 };
 
 } // namespace CASM

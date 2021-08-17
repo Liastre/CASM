@@ -40,13 +40,13 @@ namespace CASM {
 namespace DeviceApi {
 namespace Wasapi {
 
-DeviceWindowsWASAPI::DeviceWindowsWASAPI() {
+Device::Device() {
     HRESULT hr = S_OK;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     assert(hr == S_OK);
 }
 
-DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceType)
+Device::Device(void* device, CASM::DeviceType deviceType)
     : DeviceBase<IMMDevice>::DeviceBase(device, deviceType) {
     HRESULT hr = S_OK;
     LPWSTR deviceId;
@@ -113,7 +113,7 @@ DeviceWindowsWASAPI::DeviceWindowsWASAPI(void* device, CASM::DeviceType deviceTy
     propertyStore->Release();
 }
 
-DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
+Device::~Device() {
     if (_captureClient != nullptr) {
         _captureClient->Release();
     }
@@ -123,7 +123,7 @@ DeviceWindowsWASAPI::~DeviceWindowsWASAPI() {
 }
 
 bool
-DeviceWindowsWASAPI::openCaptureStream(Duration const& duration, Buffer& buffer) {
+Device::openCaptureStream(Duration const& duration, Buffer& buffer) {
     // TODO: set to minimum available duration and check if lesser
     _bufferDuration = duration;
 
@@ -237,7 +237,7 @@ DeviceWindowsWASAPI::openCaptureStream(Duration const& duration, Buffer& buffer)
 }
 
 bool
-DeviceWindowsWASAPI::openRenderStream(Buffer const& buffer) {
+Device::openRenderStream(Buffer const& buffer) {
     _bufferDuration = buffer.getDuration();
 
     // checks
@@ -334,7 +334,7 @@ DeviceWindowsWASAPI::openRenderStream(Buffer const& buffer) {
 }
 
 void
-DeviceWindowsWASAPI::closeCaptureStream() {
+Device::closeCaptureStream() {
     if (!_active) {
         return;
     }
@@ -351,7 +351,7 @@ DeviceWindowsWASAPI::closeCaptureStream() {
 }
 
 void
-DeviceWindowsWASAPI::closeRenderStream() {
+Device::closeRenderStream() {
     HRESULT hr;
 
     if (_renderStream != nullptr) {
@@ -363,7 +363,7 @@ DeviceWindowsWASAPI::closeRenderStream() {
 }
 
 BufferStatus
-DeviceWindowsWASAPI::read(Buffer& buffer) {
+Device::read(Buffer& buffer) {
     HRESULT hr = S_OK;
     DWORD flags = 0;
     uint32_t packetLength;
@@ -404,7 +404,7 @@ DeviceWindowsWASAPI::read(Buffer& buffer) {
 }
 
 bool
-DeviceWindowsWASAPI::write(Buffer const& buffer) {
+Device::write(Buffer const& buffer) {
     if (buffer.getSize() == 0)
         return true;
 
@@ -453,7 +453,7 @@ DeviceWindowsWASAPI::write(Buffer const& buffer) {
 }
 
 bool
-DeviceWindowsWASAPI::isAvailable() const {
+Device::isAvailable() const {
     return true;
 }
 
