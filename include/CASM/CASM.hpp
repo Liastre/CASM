@@ -6,6 +6,6 @@
 
 #pragma once
 
-#include "CASMconfig.hpp"
+#include "config.hpp"
 #include "types.hpp"
 #include "device_manager.hpp"
