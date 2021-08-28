@@ -7,8 +7,8 @@ namespace DataStream {
 
 class Fstream final : public DataStreamInterface {
 public:
-    Fstream(std::string const& filePath);
-    bool open(Access access) final;
+    Fstream();
+    bool open(Access access, std::string const& dataPath) final;
     bool close() final;
     bool write(char const* data, std::size_t dataSize) final;
     bool read(char* data, std::size_t dataSize) final;

@@ -9,7 +9,7 @@ class DataStreamInterface {
 public:
     virtual ~DataStreamInterface() = default;
 
-    virtual bool open(Access) = 0;
+    virtual bool open(Access, std::string const&) = 0;
     virtual bool close() = 0;
     virtual bool write(char const* data, std::size_t dataSize) = 0;
     virtual bool read(char* data, std::size_t dataSize) = 0;

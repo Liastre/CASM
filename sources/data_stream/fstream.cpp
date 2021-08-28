@@ -5,12 +5,12 @@ namespace CASM {
 
 namespace DataStream {
 
-Fstream::Fstream(std::string const& filePath) {
-    _path = filePath;
+Fstream::Fstream() {
 }
 
 bool
-Fstream::open(Access access) {
+Fstream::open(Access access, std::string const& dataPath) {
+    _path = dataPath;
     _access = access;
     auto path = Util::String::utf8ToWide(_path);
     switch (access) {
