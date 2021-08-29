@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <CASM/device.hpp>
-#include <CASM/file.hpp>
+#include "device.hpp"
+#include "file.hpp"
 #include <type_traits>
 #include <thread>
 #include <chrono>

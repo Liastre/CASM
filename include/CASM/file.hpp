@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include <CASM/types.hpp>
-#include <CASM/core/file_base.hpp>
-#include <CASM/core/buffer.hpp>
-#include <CASM/codec/codec.hpp>
-#include <CASM/data_stream/fstream.hpp>
-#include <CASM/utility/windows_utilities.hpp>
+#include "types.hpp"
+#include "core/end_point.hpp"
+#include "core/buffer.hpp"
+#include "codec/codec.hpp"
+#include "data_stream/fstream.hpp"
+#include "utility/windows_utilities.hpp"
 #include <string>
 #include <fstream>
 

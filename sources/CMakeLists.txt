@@ -19,7 +19,6 @@ file(GLOB casm_sources
     device_manager.cpp
     core/*.cpp
     codec/pcm.cpp
-    file/file_base.cpp
     data_stream/fstream.cpp
     device_api/enumerator_base.cpp
     device_api/wasapi/windows_utilities.cpp
