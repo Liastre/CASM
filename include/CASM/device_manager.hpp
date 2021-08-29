@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "device_api/enumerator_base.hpp"
+#include "device_api/enumerator_interface.hpp"
 
 namespace CASM {
 

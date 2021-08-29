@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "device_api/device_base.hpp"
+#include "device_api/device_interface.hpp"
 
 namespace CASM {
 
