@@ -168,6 +168,7 @@
 #    define stat _stat
 #    undef min
 #    undef max
+static bool _casmOsWindowsIsCliEncodingUtf8 = (::SetConsoleOutputCP(65001)) ? true : false;
 #else
 #    include <unistd.h>
 #    include <sys/stat.h>

@@ -4,13 +4,11 @@
 #include <CASM/codec/pcm.hpp>
 #include <CASM/device_api/wasapi.hpp>
 #include <iostream>
-#include <Windows.h>
 
 #define CASM_MANUAL 0
 
 int
 main(int argc, char** argv) {
-    SetConsoleOutputCP(65001);
     try {
         // Choose device
         CASM::DeviceApi::Wasapi::Enumerator deviceEnumerator;
