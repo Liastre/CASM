@@ -1,8 +1,8 @@
 #include <CASM/CASM.hpp>
 #include <CASM/device_manager.hpp>
-#include <CASM/file.hpp>
 #include <CASM/codec/pcm.hpp>
 #include <CASM/stream.hpp>
+#include <CASM/device_api/wasapi.hpp>
 #include <windows.h>
 #include <iostream>
 
@@ -13,7 +13,8 @@ main() {
     SetConsoleOutputCP(65001);
     try {
         // Choose device
-        CASM::DeviceManager deviceManager;
+        CASM::DeviceApi::Wasapi::Enumerator deviceEnumerator;
+        CASM::DeviceManager deviceManager(std::move(deviceEnumerator));
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
@@ -34,7 +35,9 @@ main() {
            << '_' << endPointProperties.getChannelsCount() << "ch"
            << ".wav";
         auto str = ss.str();
-        CASM::File<CASM::Codec::Pcm> outputFile(ss.str());
+        CASM::Codec::Pcm codec;
+        CASM::DataStream::Fstream dataStream;
+        CASM::File outputFile(std::move(codec), std::move(dataStream), ss.str());
         if (!outputFile) {
             std::cout << "Unable to create file" << std::endl;
             return 1;
