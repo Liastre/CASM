@@ -1,13 +1,6 @@
 #include "CASM/file.hpp"
 #include <algorithm>
 
-namespace {
-
-// TODO: replace with library
-constexpr char kSplitPathSymbol = '/';
-
-}
-
 namespace CASM {
 
 File::~File() {
@@ -32,10 +25,6 @@ File::openCaptureStream(Duration const& bufferDuration, Buffer& buffer) {
 
 bool
 File::openRenderStream(Buffer const& buffer) {
-    if (_isExist() && _doCreateNewFileOnWrite) {
-        _generateName();
-    }
-
     if (!_dataStream->open(Access::WRITE, _path)) {
         return false;
     }
@@ -80,41 +69,15 @@ File::_isExist() const {
     return Util::Filesystem::isExist(_path);
 }
 
-void
-File::_formatPath(std::string& path) {
-    std::replace(path.begin(), path.end(), '\\', kSplitPathSymbol);
-}
-
 bool
 File::_parsePath(std::string const& path) {
-    std::string::size_type extensionIndex = path.rfind('.');
-    std::string::size_type destinationIndex = path.rfind(kSplitPathSymbol);
-    if (destinationIndex != std::string::npos) {
-        _destination = path.substr(0, destinationIndex);
-        ++destinationIndex; // escape split character
-    } else {
-        destinationIndex = 0;
-    }
-
+    std::string::size_type extensionIndex = Util::Filesystem::findExtensionPos(path);
+    std::string::size_type destinationIndex = Util::Filesystem::findLastPartPos(path);
     _name = path.substr(destinationIndex, extensionIndex - destinationIndex);
     _extension = path.substr(extensionIndex);
     _path = path;
 
     return true;
-}
-
-void
-File::_generateName() {
-    std::string tmpName;
-    uint32_t i(0);
-    while (_isExist()) {
-        tmpName.clear();
-        tmpName.append(_name).append("(").append(std::to_string(i)).append(")");
-        _path.clear();
-        _path.append(_destination).append(tmpName).append(_extension);
-        i++;
-    }
-    _name = tmpName;
 }
 
 File::operator bool() const {

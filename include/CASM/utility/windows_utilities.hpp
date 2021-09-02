@@ -22,6 +22,10 @@ namespace Filesystem {
 
 bool isExist(char const* narrowPath);
 bool isExist(std::string const& narrowPath);
+std::string::size_type findExtensionPos(std::string const& filepath);
+std::string::size_type findLastPartPos(std::string const& path);
+std::string generateNextNameIfExist(std::string const& originalName);
+void formatPath(std::string& path);
 
 } // namespace Filesystem
 

@@ -25,10 +25,8 @@ class File final : public EndPointBase {
 public:
     File() = default;
     template <class TCodec, class TDataStream>
-    File(TCodec&& codec, TDataStream&& dataStream, std::string const& path, bool doCreateNewFileOnWrite = true) {
-        _doCreateNewFileOnWrite = doCreateNewFileOnWrite;
+    File(TCodec&& codec, TDataStream&& dataStream, std::string const& path) {
         std::string resPath(path);
-        _formatPath(resPath);
         if (!_parsePath(resPath)) {
             // log invalid path
         }
@@ -52,16 +50,13 @@ public:
 
 private:
     bool _isExist() const;
-    void _formatPath(std::string& path);
     bool _parsePath(std::string const& path);
-    void _generateName();
 
 private:
     std::string _path;
     std::string _destination;
     std::string _name;
     std::string _extension;
-    bool _doCreateNewFileOnWrite = false;
     std::shared_ptr<Codec::CodecInterface> _codec;
     std::shared_ptr<DataStream::DataStreamInterface> _dataStream;
 };

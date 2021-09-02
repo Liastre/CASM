@@ -2,6 +2,14 @@
 #include <windows.h>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+
+namespace {
+
+constexpr char kUnixSplitPathSymbol = '/';
+constexpr char kWinSplitPathSymbol = '\\';
+
+} // namespace
 
 namespace CASM {
 
@@ -51,6 +59,69 @@ Filesystem::isExist(char const* narrowPath) {
 bool
 Filesystem::isExist(std::string const& narrowPath) {
     return isExist(narrowPath.c_str());
+}
+
+std::string::size_type
+Filesystem::findExtensionPos(std::string const& path) {
+    std::string::size_type extensionIndex = path.rfind('.');
+    std::string::size_type destinationIndex = findLastPartPos(path);
+    // no extension found
+    if (extensionIndex == std::string::npos) {
+        return std::string::npos;
+    }
+
+    // dot is part of the path
+    if (destinationIndex != std::string::npos && destinationIndex > extensionIndex) {
+        return std::string::npos;
+    }
+
+    return extensionIndex;
+}
+
+std::string::size_type
+Filesystem::findLastPartPos(std::string const& path) {
+    std::string::size_type unixDelimerIndex = path.rfind(kUnixSplitPathSymbol);
+    std::string::size_type winDelimerIndex = path.rfind(kWinSplitPathSymbol);
+    if (unixDelimerIndex == std::string::npos && winDelimerIndex == std::string::npos) {
+        return 0;
+    }
+
+    std::string::size_type delimerIndex{ 0 };
+    if (unixDelimerIndex == std::string::npos) {
+        delimerIndex = winDelimerIndex;
+    } else if (winDelimerIndex == std::string::npos) {
+        delimerIndex = unixDelimerIndex;
+    } else {
+        delimerIndex = (winDelimerIndex > unixDelimerIndex) ? winDelimerIndex : unixDelimerIndex;
+    }
+
+    return ++delimerIndex;
+}
+
+std::string
+Filesystem::generateNextNameIfExist(std::string const& originalPath) {
+    std::size_t i(0);
+    std::string tmpName(originalPath);
+    std::size_t extensionPos = findExtensionPos(originalPath);
+    std::string extension;
+    if (extensionPos != std::string::npos) {
+        extension = originalPath.substr(extensionPos);
+    }
+    while (isExist(tmpName)) {
+        tmpName.erase(extensionPos);
+        tmpName.append("(")
+            .append(std::to_string(i))
+            .append(")")
+            .append(extension);
+        i++;
+    }
+
+    return tmpName;
+}
+
+void
+Filesystem::formatPath(std::string& path) {
+    std::replace(path.begin(), path.end(), '\\', kUnixSplitPathSymbol);
 }
 
 } // namespace Util
