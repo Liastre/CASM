@@ -23,7 +23,6 @@ public:
         _device = std::make_shared<T>(std::move(deviceApi));
         _isValid = true;
     }
-    //Device(void* deviceHandler, DeviceType deviceType);
     Device(Device const& device);
     Device(Device&& device) noexcept;
     Device& operator=(Device const& device);

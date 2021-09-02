@@ -57,8 +57,8 @@ private:
     void _doStopCallbackThread(Duration delay);
 
 private:
-    std::unique_ptr<EndPointInterface> _endPointIn;
-    std::unique_ptr<EndPointInterface> _endPointOut;
+    std::unique_ptr<EndPointInterface> _endPointIn = nullptr;
+    std::unique_ptr<EndPointInterface> _endPointOut = nullptr;
     std::unique_ptr<Buffer> _buffer;
     Duration _requestedBufferDuration;
     std::chrono::steady_clock::time_point _startTime;
