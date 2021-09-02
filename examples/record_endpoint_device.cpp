@@ -34,7 +34,8 @@ main() {
         auto str = ss.str();
         CASM::Codec::Pcm codec;
         CASM::DataStream::Fstream dataStream;
-        CASM::File outputFile(std::move(codec), std::move(dataStream), ss.str());
+        auto filename = CASM::Util::Filesystem::generateNextNameIfExist(ss.str());
+        CASM::File outputFile(std::move(codec), std::move(dataStream), filename);
         if (!outputFile) {
             std::cout << "Unable to create file" << std::endl;
             return 1;
