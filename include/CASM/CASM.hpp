@@ -1,33 +1,11 @@
-/// @file CASM.hpp
-/// @brief main header of library
+/**
+ * Main header of library
+ * @author Liastre
+ * @copyright MIT
+ */
 
-#ifndef CASM_CASM_HPP
-#define CASM_CASM_HPP
+#pragma once
 
-#include "CASMconfig.hpp"
-#include <cstdint>
-#include <array>
-#include <chrono>
-
-
-namespace CASM {
-
-// TODO: handle exclusive types
-enum class Access {
-    READ,
-    READ_EXCLUSIVE,
-    WRITE,
-    WRITE_EXCLUSIVE,
-};
-
-enum class DeviceType {
-    CAPTURE,
-    RENDER,
-};
-
-// Base typedefs
-typedef std::chrono::duration<double> Duration;
-
-} // end of namespace CASM
-
-#endif //CASM_CASM_HPP
+#include "config.hpp"
+#include "types.hpp"
+#include "device_manager.hpp"

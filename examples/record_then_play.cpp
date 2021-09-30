@@ -1,56 +1,61 @@
 #include <CASM/CASM.hpp>
-#include <CASM/device_manager.hpp>
-#include <CASM/file.hpp>
 #include <CASM/stream.hpp>
+#include <CASM/codec/pcm.hpp>
+#include <CASM/device_api/wasapi.hpp>
 #include <iostream>
-#include <io.h>
-#include <fcntl.h>
+
+#define CASM_MANUAL 0
 
 int
 main() {
     try {
-        // TODO temp solution for cmd
-        _setmode(_fileno(stdout), _O_U16TEXT);
-
-        // choose device
-        CASM::DeviceManager deviceManager;
+        // Choose device
+        CASM::DeviceApi::Wasapi::Enumerator deviceEnumerator;
+        CASM::DeviceManager deviceManager(std::move(deviceEnumerator));
         deviceManager.update();
         int deviceCount = deviceManager.getDeviceCount();
         for (unsigned int i = 0; i < deviceCount; i++) {
-            std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
+            std::cout << i << ": " << deviceManager.getDevice(i).getName() << std::endl;
         }
 
         // get device index
         unsigned int deviceIndex;
-        std::wcout << L"Choose device index ...";
+        std::cout << "Choose device index: ";
         std::cin >> deviceIndex;
-        std::wcout << std::endl;
+        std::cout << std::endl;
 
-        // init endpoints
+        // Init endpoints
         CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
-        // TODO: add flag for forcing renaming
-        CASM::File file("recording.wav");
+        CASM::Codec::Pcm codec;
+        CASM::DataStream::Fstream dataStream;
+        auto filename = CASM::Util::Filesystem::generateNextNameIfExist("recording.wav");
+        CASM::File file(std::move(codec), std::move(dataStream), filename);
 
+        // Stream to file
         CASM::Stream streamToFile(endPoint, file, std::chrono::milliseconds(500));
-        std::wcout << L"Recording ..";
+        std::cout << "Recording ..";
         streamToFile.start();
-        // request audio stream waiting for timeout before closing
+        // Request audio stream waiting for timeout before stop recording
         streamToFile.stop(std::chrono::seconds(6));
-        // waiting for audio stream finished
+        // Waiting for audio stream finished
+#if !CASM_MANUAL
         // 1st way, wait in place
         streamToFile.join();
+#else
         // 2nd way, check for state
-        /*while(streamToFile.IsActive()) {
+        while(streamToFile.IsActive()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(300));
             std::cout << ".";
-        }*/
+        }
+#endif
 
+        // Play file
         CASM::Stream streamFromFile(file, endPoint, std::chrono::milliseconds(500));
         streamFromFile.start();
-        // we are not forcing stop, just waiting for end of file
+        // Waiting till the end of file
         streamFromFile.join();
     } catch (std::exception& e) {
-        std::wcout << e.what();
+        std::cout << e.what();
     }
 
     return 0;

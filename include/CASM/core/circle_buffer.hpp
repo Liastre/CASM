@@ -1,5 +1,8 @@
-/// @file buffer_array.hpp
-/// @brief class BufferStream to storage stream data
+/**
+ * BufferStream class to storage stream data
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 

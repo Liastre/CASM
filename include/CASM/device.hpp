@@ -1,54 +1,55 @@
 /**
-    @file device.hpp
-    @copyright LGPLv3
-**/
+ * @author Liastre
+ * @copyright MIT
+ */
 
-#ifndef CASM_DEVICE_HPP
-#define CASM_DEVICE_HPP
+#pragma once
 
-#include <CASM/device_manager/device_base.hpp>
-#include <CASM/core/end_point.hpp>
-
+#include "device_api/device_interface.hpp"
 
 namespace CASM {
 
-/// @class Device
-/// @brief wrapper under Device fabric
-/// @details not copyable (copy will contain same instance)
-class Device final : public DeviceInterface {
+/**
+ * Wrapper under Device fabric
+ * not copyable (copy will contain same instance)
+ */
+class Device final : public EndPointBase {
 public:
-    Device();
-    Device(void * deviceHandler, DeviceType deviceType);
+    template <typename T, std::enable_if_t<!std::is_same_v<Device, typename std::decay<T>::type>>* = nullptr>
+    Device(T&& deviceApi) {
+        static_assert(std::is_base_of<DeviceApi::DeviceInterface, T>::value,
+          "Passed Device Api is not derived from DeviceInterface");
+
+        _device = std::make_shared<T>(std::move(deviceApi));
+        _isValid = true;
+    }
     Device(Device const& device);
     Device(Device&& device) noexcept;
     Device& operator=(Device const& device);
-    Device& operator=(Device&& device);
-    ~Device() override;
+    Device& operator=(Device&& device) noexcept;
+    ~Device();
+
+    bool Device::open(Access access);
 
     /// EndPointInterface interface
-    bool openCaptureStream(Duration const & duration, Buffer & buffer) final;
-    bool openRenderStream(Buffer const & buffer) final;
+    bool openCaptureStream(Duration const& duration, Buffer& buffer) final;
+    bool openRenderStream(Buffer const& buffer) final;
     void closeCaptureStream() final;
     void closeRenderStream() final;
-    BufferStatus read(Buffer & buffer) final;
-    bool write(Buffer const & buffer) final;
+    BufferStatus read(Buffer& buffer) final;
+    bool write(Buffer const& buffer) final;
 
     // TODO: add getState method
     bool isAvailable() const final;
-    bool isInUsage() const final;
-    bool isValid() const final;
 
-    WaveProperties getDeviceWaveProperties() final;
-    WaveProperties getStreamWaveProperties() const final;
-    std::wstring getDescription() final;
-
-    // operators
-    operator bool() const;
+    WaveProperties getDeviceWaveProperties();
+    String const& getDescription() const;
+    String const& getName() const;
 
 private:
-    std::shared_ptr<DeviceInterface> _device;
+    // TODO: use unique_ptr
+    std::shared_ptr<DeviceApi::DeviceInterface> _device;
+    Access _access;
 };
 
-}
-
-#endif //CASM_DEVICE_HPP
+} // namespace CASM

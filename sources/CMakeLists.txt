@@ -9,27 +9,23 @@ set(CMAKE_DEBUG_POSTFIX d)
 file(GLOB casm_headers
     ${PROJECT_SOURCE_DIR}/include/CASM/*.hpp
     ${PROJECT_SOURCE_DIR}/include/CASM/*/*.hpp
+    ${PROJECT_SOURCE_DIR}/include/CASM/*/*.inl
     )
 
 file(GLOB casm_sources
     file.cpp
-    core/*.cpp
     stream.cpp
-    file/file_base.cpp
-    file/file_wave.cpp
-    device_manager/device.cpp
-    device_manager/device_manager.cpp
-    device_manager/device_manager_base.cpp
-    device_manager/windows/windows_utilities.cpp
-    device_manager/windows/device_windows_wasapi.cpp
-    device_manager/windows/device_manager_windows_wasapi.cpp
-    device_manager/windows/initguid.cpp
+    device.cpp
+    device_manager.cpp
+    core/*.cpp
+    codec/pcm.cpp
+    data_stream/fstream.cpp
+    device_api/enumerator_base.cpp
+    device_api/wasapi/windows_utilities.cpp
+    device_api/wasapi/device.cpp
+    device_api/wasapi/enumerator.cpp
+    device_api/wasapi/initguid.cpp
     )
-
-file(GLOB ssrc_sources
-        wave_transform/*.cpp
-        wave_transform/SSRC/*.c
-        wave_transform/SSRC/*.cpp)
 
 #===================================
 #============== BUILD ==============
@@ -40,10 +36,9 @@ else()
     set(CASM_BUILD_FLAG STATIC)
 endif()
 
-add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${casm_sources} ${ssrc_sources} ${casm_headers})
+add_library(${CASM_LIBRARY} ${CASM_BUILD_FLAG} ${casm_sources} ${casm_headers})
 target_link_libraries(${CASM_LIBRARY} uuid.lib ole32.lib)
 
 if(CASM_BUILD_ENV_MSBUILD)
-    source_group("SSRC" FILES ${ssrc_sources})
     target_compile_definitions(${CASM_LIBRARY} PRIVATE CASM_BUILD_ENV_MSBUILD=1)
 endif()

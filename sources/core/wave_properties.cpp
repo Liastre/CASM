@@ -1,6 +1,3 @@
-/// @file wave_properties.hpp
-/// @brief definition of WaveProperties class
-
 #include <CASM/core/wave_properties.hpp>
 #include <stdexcept>
 #include <cassert>

@@ -1,13 +1,13 @@
 /**
-    @file buffer_base.hpp
-    @copyright LGPLv3
-    @brief declaration of BufferStorage class
-**/
+ * Declaration of BufferStorage class
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 
-#include <CASM/CASM.hpp>
 #include <CASM/core/circle_buffer.hpp>
+#include <CASM/data_stream/data_stream.hpp>
 #include <atomic>
 #include <chrono>
 #include <vector>
@@ -37,9 +37,9 @@ public:
      * from buffer to fstream.
      * @param[in,out] stream
      */
-    void read(std::fstream& stream) const;
+    void read(DataStream::DataStreamInterface& dataStream) const;
     void read(void* arrayPtr, std::size_t sizeInBytes) const;
-    BufferStatus write(std::fstream& stream);
+    BufferStatus write(DataStream::DataStreamInterface& dataStream);
     void write(BufferStorage const& data);
     void write(void* arrayPtr, std::size_t sizeInBytes);
     void copy(BufferStorage const& data);

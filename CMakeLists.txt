@@ -13,10 +13,11 @@ set(CMAKE_CXX_STANDARD 14)
 #===================================
 project(CASM) # Crossplatform Audio Stream Manager
 set(CASM_VERSION_MAJOR "0")
-set(CASM_VERSION_MINOR "2")
+set(CASM_VERSION_MINOR "3")
 set(CASM_VERSION_PATCH "0")
 set(CASM_VERSION_EXTRA "")
 set(CASM_LIBRARY ${PROJECT_NAME})
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #===================================
 #=========== CONFIGURE =============

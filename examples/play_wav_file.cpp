@@ -1,53 +1,49 @@
-#include <CASM/CASM.hpp>
+﻿#include <CASM/CASM.hpp>
 #include <CASM/device_manager.hpp>
 #include <CASM/stream.hpp>
-#include <CASM/file.hpp>
+#include <CASM/codec/pcm.hpp>
+#include <CASM/device_api/wasapi.hpp>
 #include <iostream>
-#include <thread>
-#include <string>
-#include <io.h>
-#include <fcntl.h>
 
 #define CASM_MANUAL 0
 
 int
 main(int argc, char** argv) {
     try {
-        // TODO temp solution for cmd
-        _setmode(_fileno(stdout), _O_U16TEXT);
-
-        // choose device
-        CASM::DeviceManager deviceManager;
+        // Choose device
+        CASM::DeviceApi::Wasapi::Enumerator deviceEnumerator;
+        CASM::DeviceManager deviceManager(std::move(deviceEnumerator));
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
-            auto deviceName = deviceManager.getDevice(i).getDescription();
-            std::wcout << i << ": " << deviceName << std::endl;
+            auto deviceName = deviceManager.getDevice(i).getName();
+            std::cout << i << ") " << deviceName << std::endl;
         }
 
         // get device index
-        std::size_t deviceIndex;
-        std::wcout << L"Choose device index ...";
-        std::wcin >> deviceIndex;
-        std::wcout << std::endl;
+        std::size_t deviceIndex(0);
+        std::cout << "Choose device index: ";
+        std::cin >> deviceIndex;
+        std::cout << std::endl;
 
         // init endpoints
         CASM::Device outputDevice = deviceManager.getDevice(deviceIndex);
         if (!outputDevice) {
-            std::wcout << L"Output device is not valid!" << std::endl;
+            std::cout << "Output device is not valid!" << std::endl;
             return 0;
         } else {
             auto deviceWaveProp = outputDevice.getStreamWaveProperties();
-            std::wcout << L"Device properties of " << outputDevice.getDescription()
-                       << L"\nChannels count: " << deviceWaveProp.getChannelsCount()
-                       << L"\nSamples per second: " << deviceWaveProp.getSamplesPerSecond()
-                       << L"\nBits per sample: " << deviceWaveProp.getBitsPerSample()
+            std::cout << "Device properties of " << outputDevice.getDescription()
+                       << "\nChannels count: " << deviceWaveProp.getChannelsCount()
+                       << "\nSamples per second: " << deviceWaveProp.getSamplesPerSecond()
+                       << "\nBits per sample: " << deviceWaveProp.getBitsPerSample()
                        << std::endl;
         }
-
-        CASM::File inputFile("D:\\Development\\projects\\Application_CrossplatformAudioStreamManager\\data\\250Hz_48000Hz_32bit_2ch_30sec.wav");
+        CASM::Codec::Pcm codec;
+        CASM::DataStream::Fstream dataStream;
+        CASM::File inputFile(std::move(codec), std::move(dataStream), "D:\\Development\\projects\\Application_CrossplatformAudioStreamManager\\data\\250Hz_48000Hz_32bit_2ch_30sec.wav");
         if (!inputFile) {
-            std::wcout << L"Input file is not valid!" << std::endl;
+            std::cout << "Input file is not valid!" << std::endl;
             return 0;
         }
 
@@ -58,7 +54,7 @@ main(int argc, char** argv) {
         // We are not forcing stop, just waiting for end of input endpoint
         // in our case it's the same with file end
         streamFromFile.join();
-        std::wcout << L"Stream uptime is: " << std::chrono::duration_cast<std::chrono::seconds>(streamFromFile.getUptime()).count();
+        std::cout << "Stream uptime is: " << std::chrono::duration_cast<std::chrono::seconds>(streamFromFile.getUptime()).count();
 #else
         // Way 2: manual streaming
         // Open endpoints
@@ -79,10 +75,10 @@ main(int argc, char** argv) {
         outputDevice.closeCaptureStream();
 #endif
     } catch (std::exception& e) {
-        std::wcout << e.what();
+        std::cout << e.what();
     } catch (...) {
         // unexpected errors
-        std::wcout << L"Unexpected error has occurred. Program forced to quit." << std::endl;
+        std::cout << "Unexpected error has occurred. Program forced to quit." << std::endl;
     }
 
     return 0;

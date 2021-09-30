@@ -1,8 +1,8 @@
 /**
-    @file wave_properties.hpp
-    @copyright LGPLv3
-    @brief class WaveProperties for storing wave properties
-**/
+ * Class WaveProperties for storing wave properties
+ * @author Liastre
+ * @copyright MIT
+ */
 
 #pragma once
 
@@ -34,19 +34,19 @@ public:
     bool operator!=(WaveProperties const& waveProperties) const;
 
 private:
-    /// @brief channels count
+    /// Channels count
     std::uint16_t _channelsCount = 0;
-    /// @brief bits per sample
+    /// Bits per sample
     std::uint8_t _bitsPerSample = 0;
     /// Container size for sample bits
     std::uint8_t _bitsPerSampleContainerSize = 0;
-    /// @brief frame size (size of two integer samples, one for each channel, in bytes)
+    /// Size of two integer samples, one for each channel, in bytes (frame size)
     std::uint16_t _blockAlign = 0;
-    /// @brief samples per second (Hz)
+    /// Samples per second (Hz)
     std::uint32_t _samplesPerSecond = 0;
-    /// @brief bytes per second
+    /// Bytes per second
     std::uint32_t _bytesPerSecond = 0;
-    /// @brief true if signed, false if not
+    /// Is signed type stream. True if signed, false if not
     bool _isSigned = false;
 };
 

@@ -1,48 +1,45 @@
 #include <CASM/CASM.hpp>
-#include <CASM/device_manager.hpp>
-#include <CASM/file.hpp>
 #include <CASM/stream.hpp>
+#include <CASM/codec/pcm.hpp>
+#include <CASM/device_api/wasapi.hpp>
 #include <iostream>
-#include <thread>
-#include <io.h>
-#include <fcntl.h>
 
 #define CASM_MANUAL 0
 
 int
 main() {
     try {
-        // TODO temp solution for cmd
-        _setmode(_fileno(stdout), _O_U16TEXT);
-
         // Choose device
-        CASM::DeviceManager deviceManager;
+        CASM::DeviceApi::Wasapi::Enumerator deviceEnumerator;
+        CASM::DeviceManager deviceManager(std::move(deviceEnumerator));
         deviceManager.update();
         std::size_t deviceCount = deviceManager.getDeviceCount();
         for (std::size_t i = 0; i < deviceCount; i++) {
-            std::wcout << i << ": " << deviceManager.getDevice(i).getDescription() << std::endl;
+            std::cout << i << ") " << deviceManager.getDevice(i).getDescription() << std::endl;
         }
-        unsigned int deviceIndex;
-        std::wcout << L"Choose device index ...";
+        std::size_t deviceIndex(0);
+        std::cout << "Choose device index: ";
         std::cin >> deviceIndex;
-        std::wcout << std::endl;
+        std::cout << std::endl;
 
-        // init endpoints
+        // Init endpoints
         CASM::Device endPoint = deviceManager.getDevice(deviceIndex);
         auto endPointProperties = endPoint.getDeviceWaveProperties();
-        std::wstringstream ss;
+        std::stringstream ss;
         ss << endPoint.getDescription()
-           << '_' << endPointProperties.getSamplesPerSecond() << L"Hz"
-           << '_' << endPointProperties.getBitsPerSample() << L"bit"
-           << '_' << endPointProperties.getChannelsCount() << L"ch"
+           << '_' << endPointProperties.getSamplesPerSecond() << "Hz"
+           << '_' << endPointProperties.getBitsPerSample() << "bit"
+           << '_' << endPointProperties.getChannelsCount() << "ch"
            << ".wav";
-        //250Hz_48000Hz_32bit_2ch_30sec.wav
-        CASM::File outputFile("endPointDevice.wav");
-        //if (!file) {
-        //    std::wcout << L"Unable to create file" << std::endl;
-        //    return 1;
-        //}
-
+        auto str = ss.str();
+        CASM::Codec::Pcm codec;
+        CASM::DataStream::Fstream dataStream;
+        auto filename = CASM::Util::Filesystem::generateNextNameIfExist(ss.str());
+        CASM::File outputFile(std::move(codec), std::move(dataStream), filename);
+        if (!outputFile) {
+            std::cout << "Unable to create file" << std::endl;
+            return 1;
+        }
 
 #if !CASM_MANUAL
         CASM::Stream streamToFile(endPoint, outputFile, std::chrono::milliseconds{ 500 });
@@ -67,7 +64,7 @@ main() {
         endPoint.closeCaptureStream();
 #endif
     } catch (std::exception& e) {
-        std::wcout << e.what();
+        std::cout << e.what();
     }
 
     return 0;

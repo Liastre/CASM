@@ -1,65 +1,64 @@
 /**
-    @file file.hpp
-    @copyright LGPLv3
-**/
+ * Generic File endpoint implementation
+ * @author Liastre
+ * @copyright MIT
+ */
 
-#ifndef CASM_FILE_HPP
-#define CASM_FILE_HPP
+#pragma once
 
-#include <CASM/CASM.hpp>
-#include <CASM/core/file_base.hpp>
-
+#include "types.hpp"
+#include "core/end_point.hpp"
+#include "core/buffer.hpp"
+#include "codec/codec.hpp"
+#include "data_stream/fstream.hpp"
+#include "utility/windows_utilities.hpp"
 #include <string>
 #include <fstream>
 
-
 namespace CASM {
 
-enum FileType {
-    WAV
-};
-
-class File final : public FileInterface {
+/**
+ * File wrapper, wraps existing or
+ * user defined File type class
+ */
+class File final : public EndPointBase {
 public:
     File() = default;
-    File(std::string const & path, bool shouldForceWriting = false);
-    ~File() override;
+    template <class TCodec, class TDataStream>
+    File(TCodec&& codec, TDataStream&& dataStream, std::string const& path) {
+        std::string resPath(path);
+        if (!_parsePath(resPath)) {
+            // log invalid path
+        }
+        _isValid = { true };
+        _codec = std::make_shared<TCodec>(std::move(codec));
+        _dataStream = std::make_shared<TDataStream>(std::move(dataStream));
+    };
+    ~File();
 
     // FileInterface
-    bool openCaptureStream(Duration const & bufferDuration, Buffer & buffer) final;
-    bool openRenderStream(Buffer const & buffer) final;
+    bool openCaptureStream(Duration const& bufferDuration, Buffer& buffer) final;
+    bool openRenderStream(Buffer const& buffer) final;
     void closeRenderStream() final;
     void closeCaptureStream() final;
-    BufferStatus read(Buffer & buffer) final;
-    bool write(Buffer const & buffer) final;
+    BufferStatus read(Buffer& buffer) final;
+    bool write(Buffer const& buffer) final;
     bool isAvailable() const final;
-    bool isInUsage() const final;
-    bool isValid() const final;
     std::string getName() const;
-    WaveProperties getStreamWaveProperties() const final;
 
-    // operators
     operator bool() const;
 
 private:
-    bool readHeader() final;
-    bool writeHeader() final;
-    bool finalize() final;
-    void setPath(std::string const & path) final;
     bool _isExist() const;
-    void _formatPath(std::string & path);
-    bool _parsePath(std::string const & path);
-    void _generateName();
+    bool _parsePath(std::string const& path);
 
-    std::string _path = "";
-    std::string _destination = "";
-    std::string _name = "";
-    std::string _extension = "";
-    bool _shouldForceWriting = false;
-
-    std::shared_ptr< FileInterface > _file;
+private:
+    std::string _path;
+    std::string _destination;
+    std::string _name;
+    std::string _extension;
+    std::shared_ptr<Codec::CodecInterface> _codec;
+    std::shared_ptr<DataStream::DataStreamInterface> _dataStream;
 };
 
 } // namespace CASM
-
-#endif //CASM_FILE_HPP

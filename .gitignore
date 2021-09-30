@@ -1,9 +1,21 @@
 ## IDE and build artifacts
-# Visual Studio
+# Visual Studio / MSBuild
+# extensions
+*.suo
+*.dll
+*.user
+*.pdb
+*.ilk
+# folders
 .idea/
 .vs/
 out/
 
 # Clion
+# folders
+*.tlog/
+*.dir/
+*.a
 cmake-build-release/
 cmake-build-debug/
+CMakeFiles/

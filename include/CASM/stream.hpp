@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <CASM/device.hpp>
-#include <CASM/file.hpp>
+#include "device.hpp"
+#include "file.hpp"
 #include <type_traits>
 #include <thread>
 #include <chrono>
@@ -21,7 +21,7 @@ public:
           "TEndPointIn is not derived from EndPointInterface");
         static_assert(std::is_base_of<EndPointInterface, TEndPointOut>::value,
           "TEndPointOut is not derived from EndPointInterface");
-        static_assert(!(std::is_same<File, TEndPointIn>::value && std::is_same<File, TEndPointOut>::value),
+        static_assert(!(std::is_same<TEndPointIn, File>::value && std::is_same<TEndPointOut, File>::value),
           "You cannot create stream between File and File");
 
         _endPointIn = std::make_unique<TEndPointIn>(endPointIn);
@@ -57,8 +57,8 @@ private:
     void _doStopCallbackThread(Duration delay);
 
 private:
-    std::unique_ptr<EndPointInterface> _endPointIn;
-    std::unique_ptr<EndPointInterface> _endPointOut;
+    std::unique_ptr<EndPointInterface> _endPointIn = nullptr;
+    std::unique_ptr<EndPointInterface> _endPointOut = nullptr;
     std::unique_ptr<Buffer> _buffer;
     Duration _requestedBufferDuration;
     std::chrono::steady_clock::time_point _startTime;
